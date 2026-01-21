@@ -48,7 +48,7 @@ const RotatingShape = ({ position, shape, color }) => {
   );
 };
 
-const FloatingFormula = ({ position, formula }) => {
+const FloatingFormula = ({ position, formula, color, outlineColor }) => {
   const textRef = useRef();
 
   useFrame((state) => {
@@ -66,37 +66,41 @@ const FloatingFormula = ({ position, formula }) => {
       ref={textRef}
       position={position}
       fontSize={0.3}
-      color="#ffffff"
+      color={color}
       anchorX="center"
       anchorY="middle"
       outlineWidth={0.02}
-      outlineColor="#000000"
+      outlineColor={outlineColor}
     >
       {formula}
     </Text>
   );
 };
 
-export default function MathScene() {
+export default function MathScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#1565C0';
+  const accentColor = colors.accent || '#4FC3F7';
+  const outlineColor = colors.bg === '#FFFFFF' || colors.bg === '#ffffff' ? '#000000' : '#FFFFFF';
+
   return (
     <>
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color={primaryColor} />
 
-      <RotatingShape position={[-2, 0, 0]} shape="box" color="#ffffff" />
-      <RotatingShape position={[0, 1, -1]} shape="torus" color="#ffffff" />
-      <RotatingShape position={[2, -1, 0]} shape="sphere" color="#ffffff" />
-      <RotatingShape position={[-1, -1.5, 1]} shape="box" color="#ffffff" />
+      <RotatingShape position={[-2, 0, 0]} shape="box" color={accentColor} />
+      <RotatingShape position={[0, 1, -1]} shape="torus" color={primaryColor} />
+      <RotatingShape position={[2, -1, 0]} shape="sphere" color={accentColor} />
+      <RotatingShape position={[-1, -1.5, 1]} shape="box" color={primaryColor} />
       <RotatingShape
         position={[1.5, 1.5, -0.5]}
         shape="torus"
-        color="#ffffff"
+        color={accentColor}
       />
 
-      <FloatingFormula position={[-1, 2, 0]} formula="∫" />
-      <FloatingFormula position={[1, -2, 0]} formula="∑" />
-      <FloatingFormula position={[0, 0, 2]} formula="π" />
+      <FloatingFormula position={[-1, 2, 0]} formula="∫" color={primaryColor} outlineColor={outlineColor} />
+      <FloatingFormula position={[1, -2, 0]} formula="∑" color={accentColor} outlineColor={outlineColor} />
+      <FloatingFormula position={[0, 0, 2]} formula="π" color={primaryColor} outlineColor={outlineColor} />
     </>
   );
 }

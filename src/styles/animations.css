@@ -4,6 +4,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -15,6 +16,7 @@
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -22,9 +24,12 @@
 
 /* Glow pulse animation */
 @keyframes glowPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px var(--glow);
   }
+
   50% {
     box-shadow: 0 0 40px var(--glow), 0 0 60px var(--glow);
   }
@@ -36,6 +41,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -48,6 +54,7 @@
     transform: translateX(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -60,6 +67,7 @@
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -72,6 +80,7 @@
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -83,6 +92,7 @@
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -101,6 +111,34 @@
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
+}
+
+/* Kid-friendly theme button styles */
+body[data-theme="kid-friendly"] .button-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border: 2px solid transparent;
+  color: white;
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 4px 16px var(--shadow-soft);
+}
+
+body[data-theme="kid-friendly"] .button-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+body[data-theme="kid-friendly"] .button-primary:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .button-primary::before {
@@ -123,6 +161,12 @@
   color: var(--bg-primary);
   box-shadow: 0 0 20px var(--glow);
   transform: translateY(calc(-1 * var(--spacing-sm)));
+}
+
+body[data-theme="kid-friendly"] .button-primary:hover {
+  color: white;
+  box-shadow: 0 8px 24px var(--shadow-medium);
+  transform: translateY(calc(-1 * var(--spacing-sm))) scale(1.02);
 }
 
 .button-primary:active {
@@ -167,12 +211,12 @@
 }
 
 .button-primary.loading::after {
-  border-color: var(--bg-primary);
+  border-color: white;
   border-top-color: transparent;
 }
 
 .button-secondary.loading::after {
-  border-color: var(--text-primary);
+  border-color: var(--accent);
   border-top-color: transparent;
 }
 
@@ -194,10 +238,28 @@
   font-size: var(--font-size-sm);
 }
 
+/* Kid-friendly theme button styles */
+body[data-theme="kid-friendly"] .button-secondary {
+  background: white;
+  border: 2px solid var(--accent);
+  color: var(--accent-dark);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 4px 16px var(--shadow-soft);
+}
+
 .button-secondary:hover {
   border-color: var(--border-hover);
   box-shadow: 0 0 15px var(--glow);
   transform: translateY(calc(-1 * var(--spacing-sm)));
+}
+
+body[data-theme="kid-friendly"] .button-secondary:hover {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: white;
+  border-color: var(--accent-dark);
+  box-shadow: 0 8px 24px var(--shadow-medium);
+  transform: translateY(calc(-1 * var(--spacing-sm))) scale(1.02);
 }
 
 .button-secondary:active {
@@ -216,10 +278,25 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* Kid-friendly theme button styles */
+body[data-theme="kid-friendly"] .button-danger {
+  background: white;
+  border: 2px solid var(--error);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 4px 16px rgba(239, 83, 80, 0.15);
+}
+
 .button-danger:hover {
   background: var(--error);
   color: var(--bg-primary);
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+body[data-theme="kid-friendly"] .button-danger:hover {
+  color: white;
+  box-shadow: 0 8px 24px rgba(239, 83, 80, 0.35);
+  transform: translateY(calc(-1 * var(--spacing-sm))) scale(1.02);
 }
 
 /* Card interactive variant */
@@ -248,9 +325,12 @@
 
 /* Pulse animation */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -262,9 +342,12 @@
 
 /* Bounce animation */
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -280,6 +363,7 @@
     transform: translateX(400px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -287,8 +371,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .notification-enter {
@@ -297,9 +386,12 @@
 
 /* Timer countdown animation */
 @keyframes timerPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -314,4 +406,3 @@
   animation: timerPulse 0.5s ease-in-out infinite;
   color: var(--error);
 }
-

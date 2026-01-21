@@ -182,42 +182,59 @@ const Settings = () => {
             <p className="section-description">Choose your preferred theme</p>
             
             <div className="theme-selector">
-              {availableThemes.map((theme) => (
-                <button
-                  key={theme}
-                  className={`theme-option ${currentTheme === theme ? 'active' : ''}`}
-                  onClick={() => handleThemeChange(theme)}
-                >
-                  <div className="theme-preview">
-                    <div
-                      className="theme-preview-bg"
-                      style={{
-                        background:
-                          theme === 'custom'
-                            ? `linear-gradient(135deg, ${localCustomTheme.bgPrimary} 0%, ${localCustomTheme.bgSecondary} 100%)`
-                            : theme === 'dark'
-                            ? 'linear-gradient(135deg, #000000 0%, #0a0a0a 100%)'
-                            : 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
-                      }}
-                    >
+              {availableThemes.map((theme) => {
+                // Get theme preview colors
+                let bgGradient, textColor, displayName;
+                
+                if (theme === 'custom') {
+                  bgGradient = `linear-gradient(135deg, ${localCustomTheme.bgPrimary} 0%, ${localCustomTheme.bgSecondary} 100%)`;
+                  textColor = localCustomTheme.textPrimary;
+                  displayName = 'Custom';
+                } else if (theme === 'kid-friendly') {
+                  bgGradient = 'linear-gradient(135deg, #FFFFFF 0%, #E3F2FD 100%)';
+                  textColor = '#1565C0';
+                  displayName = 'Kid-Friendly';
+                } else if (theme === 'system') {
+                  // Show system theme based on current OS preference
+                  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  bgGradient = isDark 
+                    ? 'linear-gradient(135deg, #000000 0%, #0a0a0a 100%)'
+                    : 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)';
+                  textColor = isDark ? '#ffffff' : '#000000';
+                  displayName = 'System';
+                } else {
+                  bgGradient = 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)';
+                  textColor = '#000000';
+                  displayName = theme.charAt(0).toUpperCase() + theme.slice(1);
+                }
+
+                return (
+                  <button
+                    key={theme}
+                    className={`theme-option ${currentTheme === theme ? 'active' : ''}`}
+                    onClick={() => handleThemeChange(theme)}
+                  >
+                    <div className="theme-preview">
                       <div
-                        className="theme-preview-text"
+                        className="theme-preview-bg"
                         style={{
-                          color:
-                            theme === 'custom'
-                              ? localCustomTheme.textPrimary
-                              : theme === 'dark'
-                              ? '#ffffff'
-                              : '#000000',
+                          background: bgGradient,
                         }}
                       >
-                        Aa
+                        <div
+                          className="theme-preview-text"
+                          style={{
+                            color: textColor,
+                          }}
+                        >
+                          Aa
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <span className="theme-name">{theme.charAt(0).toUpperCase() + theme.slice(1)}</span>
-                </button>
-              ))}
+                    <span className="theme-name">{displayName}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

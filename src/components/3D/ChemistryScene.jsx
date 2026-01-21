@@ -99,22 +99,25 @@ const co2Structure = [
   { position: [0.6, 0, 0], size: 0.15 },
 ];
 
-export default function ChemistryScene() {
+export default function ChemistryScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#1565C0';
+  const accentColor = colors.accent || '#4FC3F7';
+
   return (
     <>
       <ambientLight intensity={0.5} />
       <pointLight position={[5, 5, 5]} intensity={1} />
-      <pointLight position={[-5, -5, -5]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[-5, -5, -5]} intensity={0.5} color={primaryColor} />
 
       <Molecule
         position={[-1.5, 0, 0]}
         structure={waterStructure}
-        color="#ffffff"
+        color={accentColor}
       />
       <Molecule
         position={[1.5, 0, 0]}
         structure={co2Structure}
-        color="#a0a0a0"
+        color={primaryColor}
       />
     </>
   );

@@ -78,14 +78,56 @@
 .auth-submit {
   margin-top: 8px;
   width: 100%;
-  padding: 14px;
+  padding: 16px 24px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-submit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.auth-submit:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.auth-submit:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(79, 195, 247, 0.4);
+}
+
+.auth-submit:active {
+  transform: translateY(0) scale(1);
 }
 
 .auth-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+}
+
+.auth-submit:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.3);
 }
 
 .auth-switch {

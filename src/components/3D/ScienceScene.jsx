@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Sphere, Torus } from "@react-three/drei";
 import * as THREE from "three";
 
-const DNAHelix = ({ position }) => {
+const DNAHelix = ({ position, primaryColor, accentColor }) => {
   const groupRef = useRef();
   const segments = 20;
 
@@ -30,23 +30,23 @@ const DNAHelix = ({ position }) => {
           <group key={i}>
             <Sphere args={[0.08, 16, 16]} position={[x1, y, z1]}>
               <meshStandardMaterial
-                color="#ffffff"
-                emissive="#ffffff"
+                color={primaryColor}
+                emissive={primaryColor}
                 emissiveIntensity={0.4}
               />
             </Sphere>
             <Sphere args={[0.08, 16, 16]} position={[x2, y, z2]}>
               <meshStandardMaterial
-                color="#a0a0a0"
-                emissive="#a0a0a0"
+                color={accentColor}
+                emissive={accentColor}
                 emissiveIntensity={0.4}
               />
             </Sphere>
             {i < segments - 1 && (
               <>
-                <Bond from={[x1, y, z1]} to={[x1, y + 2 / segments, z1]} />
-                <Bond from={[x2, y, z2]} to={[x2, y + 2 / segments, z2]} />
-                <Bond from={[x1, y, z1]} to={[x2, y, z2]} />
+                <Bond from={[x1, y, z1]} to={[x1, y + 2 / segments, z1]} color={primaryColor} />
+                <Bond from={[x2, y, z2]} to={[x2, y + 2 / segments, z2]} color={accentColor} />
+                <Bond from={[x1, y, z1]} to={[x2, y, z2]} color={primaryColor} />
               </>
             )}
           </group>
@@ -56,7 +56,7 @@ const DNAHelix = ({ position }) => {
   );
 };
 
-const Bond = ({ from, to }) => {
+const Bond = ({ from, to, color }) => {
   const direction = new THREE.Vector3().subVectors(
     new THREE.Vector3(...to),
     new THREE.Vector3(...from)
@@ -78,8 +78,8 @@ const Bond = ({ from, to }) => {
     >
       <cylinderGeometry args={[0.015, 0.015, 1, 8]} />
       <meshStandardMaterial
-        color="#ffffff"
-        emissive="#ffffff"
+        color={color}
+        emissive={color}
         emissiveIntensity={0.2}
       />
     </mesh>
@@ -109,27 +109,30 @@ const Planet = ({ position, size, color, speed }) => {
   );
 };
 
-export default function ScienceScene() {
+export default function ScienceScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#1565C0';
+  const accentColor = colors.accent || '#4FC3F7';
+
   return (
     <>
       <ambientLight intensity={0.5} />
       <pointLight position={[5, 5, 5]} intensity={1} />
-      <pointLight position={[-5, -5, -5]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[-5, -5, -5]} intensity={0.5} color={primaryColor} />
 
-      <DNAHelix position={[-1.5, 0, 0]} />
-      <DNAHelix position={[1.5, 0, 0]} />
+      <DNAHelix position={[-1.5, 0, 0]} primaryColor={primaryColor} accentColor={accentColor} />
+      <DNAHelix position={[1.5, 0, 0]} primaryColor={accentColor} accentColor={primaryColor} />
 
-      <Planet position={[0, 1.5, -1]} size={0.2} color="#ffffff" speed={0.01} />
+      <Planet position={[0, 1.5, -1]} size={0.2} color={accentColor} speed={0.01} />
       <Planet
         position={[-2, -1, 1]}
         size={0.15}
-        color="#a0a0a0"
+        color={primaryColor}
         speed={0.015}
       />
       <Planet
         position={[2, -1.5, 0.5]}
         size={0.12}
-        color="#ffffff"
+        color={accentColor}
         speed={0.008}
       />
     </>

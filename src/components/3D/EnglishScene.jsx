@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
-const FloatingLetter = ({ letter, position, color }) => {
+const FloatingLetter = ({ letter, position, color, outlineColor }) => {
   const textRef = useRef();
 
   useFrame((state) => {
@@ -27,14 +27,14 @@ const FloatingLetter = ({ letter, position, color }) => {
       anchorX="center"
       anchorY="middle"
       outlineWidth={0.02}
-      outlineColor="#000000"
+      outlineColor={outlineColor}
     >
       {letter}
     </Text>
   );
 };
 
-const FloatingWord = ({ word, position, color }) => {
+const FloatingWord = ({ word, position, color, outlineColor }) => {
   const groupRef = useRef();
 
   useFrame((state) => {
@@ -57,7 +57,7 @@ const FloatingWord = ({ word, position, color }) => {
           anchorX="center"
           anchorY="middle"
           outlineWidth={0.015}
-          outlineColor="#000000"
+          outlineColor={outlineColor}
         >
           {letter}
         </Text>
@@ -66,15 +66,18 @@ const FloatingWord = ({ word, position, color }) => {
   );
 };
 
-export default function EnglishScene() {
+export default function EnglishScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
   const letters = ["A", "B", "C", "D", "E"];
   const words = ["READ", "WRITE", "LEARN"];
+  const primaryColor = colors.primary || '#1565C0';
+  const accentColor = colors.accent || '#4FC3F7';
+  const outlineColor = colors.bg === '#FFFFFF' || colors.bg === '#ffffff' ? '#000000' : '#FFFFFF';
 
   return (
     <>
       <ambientLight intensity={0.6} />
       <pointLight position={[5, 5, 5]} intensity={1} />
-      <pointLight position={[-5, -5, -5]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[-5, -5, -5]} intensity={0.5} color={primaryColor} />
 
       {letters.map((letter, i) => (
         <FloatingLetter
@@ -85,7 +88,8 @@ export default function EnglishScene() {
             Math.sin(i) * 0.5,
             Math.cos(i) * 0.5,
           ]}
-          color={i % 2 === 0 ? "#ffffff" : "#a0a0a0"}
+          color={i % 2 === 0 ? primaryColor : accentColor}
+          outlineColor={outlineColor}
         />
       ))}
 
@@ -94,7 +98,8 @@ export default function EnglishScene() {
           key={i}
           word={word}
           position={[(i - words.length / 2) * 1.5, -1 + i * 0.5, -1]}
-          color="#ffffff"
+          color={i % 2 === 0 ? primaryColor : accentColor}
+          outlineColor={outlineColor}
         />
       ))}
     </>

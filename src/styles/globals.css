@@ -7,20 +7,29 @@
 }
 
 :root {
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #141414;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-tertiary: #666666;
-  --accent: #ffffff;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.3);
-  --glow: rgba(255, 255, 255, 0.3);
-  --glow-strong: rgba(255, 255, 255, 0.5);
-  --success: #00ff00;
-  --error: #ff0000;
-  --warning: #ffff00;
+  /* Default values - will be overridden by ThemeContext */
+  /* These are fallback values for kid-friendly theme */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F5F9FC;
+  --bg-tertiary: #E3F2FD;
+  --text-primary: #1565C0;
+  --text-secondary: #546E7A;
+  --text-tertiary: #90CAF9;
+  --accent: #4FC3F7;
+  --accent-dark: #29B6F6;
+  --accent-light: #81D4FA;
+  --secondary-yellow: #FFE082;
+  --accent-green: #81C784;
+  --border: rgba(79, 195, 247, 0.2);
+  --border-hover: rgba(79, 195, 247, 0.4);
+  --glow: rgba(79, 195, 247, 0.3);
+  --glow-strong: rgba(79, 195, 247, 0.5);
+  --success: #81C784;
+  --error: #EF5350;
+  --warning: #FFE082;
+  --shadow-soft: rgba(79, 195, 247, 0.15);
+  --shadow-medium: rgba(79, 195, 247, 0.25);
+  --shadow-strong: rgba(79, 195, 247, 0.35);
 }
 
 body {
@@ -31,6 +40,13 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Kid-friendly theme gradient (applied via class or data attribute) */
+body[data-theme="kid-friendly"] {
+  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-primary) 50%, var(--bg-primary) 100%);
+  background-attachment: fixed;
 }
 
 /* Smooth scrolling */
@@ -44,7 +60,7 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -59,7 +75,7 @@ html {
 /* Selection */
 ::selection {
   background: var(--accent);
-  color: var(--bg-primary);
+  color: white;
 }
 
 /* Links */
@@ -70,14 +86,14 @@ a {
 }
 
 a:hover {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--glow);
+  color: var(--accent-dark);
+  text-shadow: none;
 }
 
 /* Input styles */
 input, textarea, select {
   background: var(--bg-secondary);
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   color: var(--text-primary);
   padding: var(--spacing-md) var(--spacing-base);
   border-radius: var(--radius-md);

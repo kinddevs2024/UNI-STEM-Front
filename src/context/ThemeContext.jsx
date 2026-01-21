@@ -10,40 +10,69 @@ export const useTheme = () => {
   return context;
 };
 
+// System theme - follows OS preference (dark/light)
+const getSystemTheme = () => {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return "light";
+};
+
+const SYSTEM_DARK_THEME = {
+  name: "system",
+  bgPrimary: "#000000",
+  bgSecondary: "#0a0a0a",
+  bgTertiary: "#141414",
+  textPrimary: "#ffffff",
+  textSecondary: "#a0a0a0",
+  textTertiary: "#666666",
+  accent: "#ffffff",
+  border: "rgba(255, 255, 255, 0.1)",
+  borderHover: "rgba(255, 255, 255, 0.3)",
+  glow: "rgba(255, 255, 255, 0.3)",
+  glowStrong: "rgba(255, 255, 255, 0.5)",
+  success: "#00ff00",
+  error: "#ff0000",
+  warning: "#ffff00",
+};
+
+const SYSTEM_LIGHT_THEME = {
+  name: "system",
+  bgPrimary: "#ffffff",
+  bgSecondary: "#f5f5f5",
+  bgTertiary: "#e8e8e8",
+  textPrimary: "#000000",
+  textSecondary: "#4a4a4a",
+  textTertiary: "#888888",
+  accent: "#000000",
+  border: "rgba(0, 0, 0, 0.1)",
+  borderHover: "rgba(0, 0, 0, 0.3)",
+  glow: "rgba(0, 0, 0, 0.1)",
+  glowStrong: "rgba(0, 0, 0, 0.2)",
+  success: "#00aa00",
+  error: "#cc0000",
+  warning: "#ccaa00",
+};
+
 const THEMES = {
-  dark: {
-    name: "dark",
-    bgPrimary: "#000000",
-    bgSecondary: "#0a0a0a",
-    bgTertiary: "#141414",
-    textPrimary: "#ffffff",
-    textSecondary: "#a0a0a0",
-    textTertiary: "#666666",
-    accent: "#ffffff",
-    border: "rgba(255, 255, 255, 0.1)",
-    borderHover: "rgba(255, 255, 255, 0.3)",
-    glow: "rgba(255, 255, 255, 0.3)",
-    glowStrong: "rgba(255, 255, 255, 0.5)",
-    success: "#00ff00",
-    error: "#ff0000",
-    warning: "#ffff00",
-  },
-  light: {
-    name: "light",
-    bgPrimary: "#ffffff",
-    bgSecondary: "#f5f5f5",
-    bgTertiary: "#e8e8e8",
-    textPrimary: "#000000",
-    textSecondary: "#4a4a4a",
-    textTertiary: "#888888",
-    accent: "#000000",
-    border: "rgba(0, 0, 0, 0.1)",
-    borderHover: "rgba(0, 0, 0, 0.3)",
-    glow: "rgba(0, 0, 0, 0.1)",
-    glowStrong: "rgba(0, 0, 0, 0.2)",
-    success: "#00aa00",
-    error: "#cc0000",
-    warning: "#ccaa00",
+  "kid-friendly": {
+    name: "kid-friendly",
+    bgPrimary: "#FFFFFF",
+    bgSecondary: "#F5F9FC",
+    bgTertiary: "#E3F2FD",
+    textPrimary: "#1565C0",
+    textSecondary: "#546E7A",
+    textTertiary: "#90CAF9",
+    accent: "#4FC3F7",
+    border: "rgba(79, 195, 247, 0.2)",
+    borderHover: "rgba(79, 195, 247, 0.4)",
+    glow: "rgba(79, 195, 247, 0.3)",
+    glowStrong: "rgba(79, 195, 247, 0.5)",
+    success: "#81C784",
+    error: "#EF5350",
+    warning: "#FFE082",
   },
 };
 
@@ -72,15 +101,47 @@ const STORAGE_KEYS = {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState("light");
+  const [currentTheme, setCurrentTheme] = useState("kid-friendly");
   const [customTheme, setCustomTheme] = useState(DEFAULT_CUSTOM_THEME);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [systemPreference, setSystemPreference] = useState(getSystemTheme());
+
+  // Listen to system theme changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const handleChange = (e) => {
+        setSystemPreference(e.matches ? "dark" : "light");
+      };
+
+      // Modern browsers
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+      }
+      // Legacy browsers
+      else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleChange);
+        return () => mediaQuery.removeListener(handleChange);
+      }
+    }
+  }, []);
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || "light";
+    const savedTheme =
+      localStorage.getItem(STORAGE_KEYS.theme) || "kid-friendly";
     const savedCustomTheme = localStorage.getItem(STORAGE_KEYS.customTheme);
     const savedItemsPerPage = localStorage.getItem(STORAGE_KEYS.itemsPerPage);
+
+    // Migrate old dark/light themes to system
+    if (savedTheme === "dark" || savedTheme === "light") {
+      localStorage.setItem(STORAGE_KEYS.theme, "system");
+      setCurrentTheme("system");
+    } else {
+      setCurrentTheme(savedTheme);
+    }
 
     if (savedCustomTheme) {
       try {
@@ -96,17 +157,27 @@ export const ThemeProvider = ({ children }) => {
         setItemsPerPage(parsed);
       }
     }
-
-    setCurrentTheme(savedTheme);
   }, []);
 
   // Apply theme to CSS variables
   useEffect(() => {
-    const theme =
-      currentTheme === "custom" ? customTheme : THEMES[currentTheme];
+    let theme;
+
+    if (currentTheme === "custom") {
+      theme = customTheme;
+    } else if (currentTheme === "system") {
+      // Use system preference for system theme
+      theme =
+        systemPreference === "dark" ? SYSTEM_DARK_THEME : SYSTEM_LIGHT_THEME;
+    } else {
+      theme = THEMES[currentTheme];
+    }
 
     if (theme) {
       const root = document.documentElement;
+      const body = document.body;
+
+      // Set CSS variables
       root.style.setProperty("--bg-primary", theme.bgPrimary);
       root.style.setProperty("--bg-secondary", theme.bgSecondary);
       root.style.setProperty("--bg-tertiary", theme.bgTertiary);
@@ -121,11 +192,20 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty("--success", theme.success);
       root.style.setProperty("--error", theme.error);
       root.style.setProperty("--warning", theme.warning);
+
+      // Set data-theme attribute for conditional styling
+      if (body) {
+        if (currentTheme === "kid-friendly") {
+          body.setAttribute("data-theme", "kid-friendly");
+        } else {
+          body.removeAttribute("data-theme");
+        }
+      }
     }
-  }, [currentTheme, customTheme]);
+  }, [currentTheme, customTheme, systemPreference]);
 
   const changeTheme = (themeName) => {
-    if (THEMES[themeName] || themeName === "custom") {
+    if (THEMES[themeName] || themeName === "custom" || themeName === "system") {
       setCurrentTheme(themeName);
       localStorage.setItem(STORAGE_KEYS.theme, themeName);
     }
@@ -169,7 +249,7 @@ export const ThemeProvider = ({ children }) => {
     updateCustomTheme,
     updateItemsPerPage,
     resetCustomTheme,
-    availableThemes: Object.keys(THEMES).concat("custom"),
+    availableThemes: Object.keys(THEMES).concat("system", "custom"),
   };
 
   return (

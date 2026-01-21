@@ -1,10 +1,25 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { useAuth } from "../../context/AuthContext";
 import Scene3D from "../../components/3D/Scene3D";
+import VirtualAssistant from "../../components/VirtualAssistant/VirtualAssistant";
 import "./Home.css";
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
+  
+  // Refs for GSAP animations
+  const heroContentRef = useRef(null);
+  const heroTitleRef = useRef(null);
+  const heroSubtitleRef = useRef(null);
+  const heroDescriptionRef = useRef(null);
+  const heroCtaRef = useRef(null);
+  const featureCardsRef = useRef(null);
+  const subjectCardsRef = useRef(null);
+  const stepsRef = useRef(null);
+  const ctaButtonsRef = useRef(null);
+  const floatingShapesRef = useRef(null);
 
   const sections = [
     {
@@ -33,7 +48,7 @@ const Home = () => {
       subject: "physics",
       content: (
         <>
-          <div className="features-grid">
+          <div className="features-grid" ref={featureCardsRef}>
             <div className="feature-card">
               <h3>🎯 Multiple Olympiad Types</h3>
               <p>
@@ -72,8 +87,8 @@ const Home = () => {
             <div className="feature-card">
               <h3>🎨 Modern UI</h3>
               <p>
-                Beautiful black & white design inspired by Nothing Phone with
-                smooth animations.
+                Beautiful, colorful design with smooth animations perfect for
+                young learners.
               </p>
             </div>
           </div>
@@ -86,7 +101,7 @@ const Home = () => {
       subject: "chemistry",
       content: (
         <>
-          <div className="subjects-grid">
+          <div className="subjects-grid" ref={subjectCardsRef}>
             <div className="subject-card">
               <h3>Mathematics</h3>
               <p>
@@ -131,7 +146,7 @@ const Home = () => {
       subject: "english",
       content: (
         <>
-          <div className="steps-container">
+          <div className="steps-container" ref={stepsRef}>
             <div className="step">
               <div className="step-number">1</div>
               <div className="step-content">
@@ -185,7 +200,7 @@ const Home = () => {
             Ready to test your knowledge and compete with students worldwide?
             Join Global Olympiads today and embark on your academic journey!
           </p>
-          <div className="cta-buttons">
+          <div className="cta-buttons" ref={ctaButtonsRef}>
             {!isAuthenticated ? (
               <>
                 <Link to="/auth" className="cta-button primary">
@@ -211,24 +226,273 @@ const Home = () => {
     },
   ];
 
+  // GSAP Animations on mount
+  useEffect(() => {
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) {
+      return; // Skip animations if user prefers reduced motion
+    }
+
+    // Create main timeline
+    const tl = gsap.timeline();
+
+    // Hero section animations - fade + slide up
+    if (heroContentRef.current) {
+      gsap.set(heroContentRef.current, { opacity: 0, y: 50 });
+      tl.to(heroContentRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+      });
+    }
+
+    // Stagger hero elements
+    if (heroTitleRef.current) {
+      gsap.set(heroTitleRef.current, { opacity: 0, y: 30 });
+      tl.to(
+        heroTitleRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      );
+    }
+
+    if (heroSubtitleRef.current) {
+      gsap.set(heroSubtitleRef.current, { opacity: 0, y: 20 });
+      tl.to(
+        heroSubtitleRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        "-=0.3"
+      );
+    }
+
+    if (heroDescriptionRef.current) {
+      gsap.set(heroDescriptionRef.current, { opacity: 0, y: 20 });
+      tl.to(
+        heroDescriptionRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        "-=0.2"
+      );
+    }
+
+    if (heroCtaRef.current) {
+      gsap.set(heroCtaRef.current, { opacity: 0, scale: 0.8 });
+      tl.to(
+        heroCtaRef.current,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        },
+        "-=0.2"
+      );
+    }
+
+    // Animate floating shapes
+    if (floatingShapesRef.current) {
+      const shapes = floatingShapesRef.current.children;
+      Array.from(shapes).forEach((shape, index) => {
+        gsap.to(shape, {
+          y: `+=${30 + index * 10}`,
+          x: `+=${20 + index * 5}`,
+          rotation: 360,
+          duration: 15 + index * 2,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+    }
+
+    // Intersection Observer for scroll-triggered animations
+    const observerOptions = {
+      threshold: 0.2,
+      rootMargin: "0px 0px -100px 0px",
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const target = entry.target;
+
+          // Feature cards stagger
+          if (target.classList.contains("features-grid")) {
+            const cards = target.children;
+            gsap.fromTo(
+              cards,
+              {
+                opacity: 0,
+                y: 40,
+                scale: 0.9,
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: "power2.out",
+              }
+            );
+          }
+
+          // Subject cards stagger
+          if (target.classList.contains("subjects-grid")) {
+            const cards = target.children;
+            gsap.fromTo(
+              cards,
+              {
+                opacity: 0,
+                y: 40,
+                scale: 0.9,
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: "power2.out",
+              }
+            );
+          }
+
+          // Steps stagger
+          if (target.classList.contains("steps-container")) {
+            const steps = target.children;
+            gsap.fromTo(
+              steps,
+              {
+                opacity: 0,
+                x: -40,
+              },
+              {
+                opacity: 1,
+                x: 0,
+                duration: 0.6,
+                stagger: 0.15,
+                ease: "power2.out",
+              }
+            );
+          }
+
+          // Section titles
+          if (target.classList.contains("section-title")) {
+            gsap.fromTo(
+              target,
+              {
+                opacity: 0,
+                y: 30,
+              },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                ease: "power2.out",
+              }
+            );
+          }
+
+          observer.unobserve(target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements for scroll animations
+    if (featureCardsRef.current) {
+      observer.observe(featureCardsRef.current);
+    }
+    if (subjectCardsRef.current) {
+      observer.observe(subjectCardsRef.current);
+    }
+    if (stepsRef.current) {
+      observer.observe(stepsRef.current);
+    }
+
+    // Observe all section titles
+    const sectionTitles = document.querySelectorAll(".section-title");
+    sectionTitles.forEach((title) => {
+      observer.observe(title);
+    });
+
+    // Button hover animations using GSAP
+    const setupButtonHovers = () => {
+      const buttons = document.querySelectorAll(".hero-cta, .cta-button");
+      buttons.forEach((button) => {
+        button.addEventListener("mouseenter", () => {
+          gsap.to(button, {
+            scale: 1.05,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        });
+
+        button.addEventListener("mouseleave", () => {
+          gsap.to(button, {
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        });
+      });
+    };
+
+    setupButtonHovers();
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div className="home-page">
+      {/* Floating Decorative Shapes */}
+      <div className="floating-shapes" ref={floatingShapesRef}>
+        <div className="floating-shape circle-1"></div>
+        <div className="floating-shape circle-2"></div>
+        <div className="floating-shape circle-3"></div>
+        <div className="floating-shape blob-1"></div>
+        <div className="floating-shape blob-2"></div>
+      </div>
+
+      {/* Virtual Assistant */}
+      <VirtualAssistant />
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-3d">
           <Scene3D subject="math" />
         </div>
-        <div className="hero-content">
-          <h1 className="hero-title">
+        <div className="hero-content" ref={heroContentRef}>
+          <h1 className="hero-title" ref={heroTitleRef}>
             <span className="text-glow">Global Olympiads</span>
           </h1>
-          <p className="hero-subtitle">Compete, Learn, Excel</p>
-          <p className="hero-description">
+          <p className="hero-subtitle" ref={heroSubtitleRef}>Compete, Learn, Excel</p>
+          <p className="hero-description" ref={heroDescriptionRef}>
             The premier online platform for academic competitions across
             Mathematics, Physics, Chemistry, English, and Science.
           </p>
           {!isAuthenticated && (
-            <Link to="/auth" className="hero-cta">
+            <Link to="/auth" className="hero-cta" ref={heroCtaRef}>
               Get Started
             </Link>
           )}

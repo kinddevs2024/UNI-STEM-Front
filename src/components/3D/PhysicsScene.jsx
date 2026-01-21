@@ -92,7 +92,11 @@ const Particle = ({ position, velocity, color }) => {
   );
 };
 
-export default function PhysicsScene() {
+export default function PhysicsScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#1565C0';
+  const accentColor = colors.accent || '#4FC3F7';
+  const secondaryColor = colors.secondary || '#546E7A';
+
   const particles = Array.from({ length: 10 }, (_, i) => ({
     position: [
       (Math.random() - 0.5) * 4,
@@ -104,18 +108,18 @@ export default function PhysicsScene() {
       (Math.random() - 0.5) * 0.02,
       (Math.random() - 0.5) * 0.02
     ),
-    color: i % 2 === 0 ? "#ffffff" : "#a0a0a0",
+    color: i % 2 === 0 ? primaryColor : accentColor,
   }));
 
   return (
     <>
       <ambientLight intensity={0.4} />
       <pointLight position={[5, 5, 5]} intensity={1} />
-      <pointLight position={[-5, -5, -5]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[-5, -5, -5]} intensity={0.5} color={primaryColor} />
 
-      <Atom position={[-1.5, 0, 0]} color="#ffffff" />
-      <Atom position={[1.5, 0, 0]} color="#ffffff" />
-      <Atom position={[0, 1.5, -1]} color="#a0a0a0" />
+      <Atom position={[-1.5, 0, 0]} color={accentColor} />
+      <Atom position={[1.5, 0, 0]} color={primaryColor} />
+      <Atom position={[0, 1.5, -1]} color={accentColor} />
 
       {particles.map((particle, i) => (
         <Particle key={i} {...particle} />

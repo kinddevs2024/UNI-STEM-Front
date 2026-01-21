@@ -9,6 +9,13 @@
   animation: fadeIn 0.5s ease;
 }
 
+/* Kid-friendly theme navbar */
+body[data-theme="kid-friendly"] .navbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow-soft);
+}
+
 .navbar-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -23,6 +30,16 @@
   font-weight: 700;
   letter-spacing: -0.5px;
   transition: all 0.3s ease;
+  color: var(--text-primary);
+}
+
+/* Kid-friendly theme logo */
+body[data-theme="kid-friendly"] .navbar-logo {
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .navbar-logo:hover {
@@ -37,11 +54,12 @@
 
 .navbar-link {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 12px;
   transition: all 0.3s ease;
   position: relative;
+  color: var(--text-primary);
 }
 
 .navbar-link::after {
@@ -56,6 +74,22 @@
   transform: translateX(-50%);
 }
 
+/* Kid-friendly theme link styles */
+body[data-theme="kid-friendly"] .navbar-link::after {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-green) 100%);
+  border-radius: 2px;
+}
+
+.navbar-link:hover {
+  color: var(--accent);
+}
+
+body[data-theme="kid-friendly"] .navbar-link:hover {
+  background: rgba(79, 195, 247, 0.1);
+  color: var(--accent-dark);
+}
+
 .navbar-link:hover::after {
   width: 80%;
 }
@@ -65,9 +99,19 @@
   font-weight: 600;
 }
 
+body[data-theme="kid-friendly"] .navbar-link.active {
+  color: var(--accent-dark);
+  font-weight: 700;
+  background: rgba(79, 195, 247, 0.15);
+}
+
 .navbar-link.active::after {
   width: 80%;
   background: var(--accent);
+}
+
+body[data-theme="kid-friendly"] .navbar-link.active::after {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-green) 100%);
 }
 
 .navbar-user {
@@ -77,6 +121,14 @@
   padding: 8px 16px;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
+}
+
+/* Kid-friendly theme user section */
+body[data-theme="kid-friendly"] .navbar-user {
+  border-left: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+  border-radius: 12px;
+  background: rgba(79, 195, 247, 0.05);
 }
 
 .navbar-username {
@@ -93,6 +145,94 @@
 .navbar-logout {
   padding: 8px 16px;
   font-size: 14px;
+}
+
+/* Kid-friendly theme logout button */
+body[data-theme="kid-friendly"] .navbar-logout {
+  padding: 10px 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="kid-friendly"] .navbar-logout::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+body[data-theme="kid-friendly"] .navbar-logout:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+body[data-theme="kid-friendly"] .navbar-logout:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(79, 195, 247, 0.4);
+}
+
+body[data-theme="kid-friendly"] .navbar-logout:active {
+  transform: translateY(0) scale(1.02);
+}
+
+.navbar-login {
+  padding: 8px 16px;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Kid-friendly theme login button */
+body[data-theme="kid-friendly"] .navbar-login {
+  padding: 10px 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 16px rgba(79, 195, 247, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-theme="kid-friendly"] .navbar-login::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+body[data-theme="kid-friendly"] .navbar-login:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+body[data-theme="kid-friendly"] .navbar-login:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(79, 195, 247, 0.4);
+  color: white;
+}
+
+body[data-theme="kid-friendly"] .navbar-login:active {
+  transform: translateY(0) scale(1.02);
 }
 
 @media (max-width: 768px) {
