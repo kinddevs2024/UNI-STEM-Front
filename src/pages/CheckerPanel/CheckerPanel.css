@@ -1,11 +1,11 @@
 .checker-panel-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
 .checker-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,4 +64,3 @@
   font-size: 16px;
   color: var(--text-secondary);
 }
-

@@ -1,5 +1,5 @@
 .profile-edit-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
@@ -181,4 +181,3 @@
     width: 100%;
   }
 }
-

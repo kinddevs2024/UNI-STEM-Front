@@ -1,13 +1,14 @@
 .test-olympiad-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 20px;
   background: var(--bg-primary);
-  padding-right: 240px; /* Space for monitor */
+  padding-right: 240px;
+  /* Space for monitor */
 }
 
 .olympiad-loading,
 .olympiad-submitted {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,10 +183,9 @@
   .test-olympiad-page {
     padding-right: 20px;
   }
-  
+
   .olympiad-header {
     flex-direction: column;
     align-items: stretch;
   }
 }
-

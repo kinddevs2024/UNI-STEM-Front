@@ -22,10 +22,10 @@
 /* Home Page Container */
 .home-page {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(180deg, var(--home-bg-gradient-start) 0%, var(--home-bg-white) 50%, var(--home-bg-white) 100%);
+  background: var(--bg-primary);
 }
 
 /* Floating Decorative Shapes */
@@ -58,9 +58,12 @@
 }
 
 @keyframes floatShape {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   50% {
     transform: translate(30px, -30px) scale(1.1);
   }
@@ -129,7 +132,7 @@
 /* Hero Section */
 .hero-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,7 +165,7 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 32px;
   box-shadow: 0 20px 60px var(--home-shadow-soft),
-              0 8px 24px rgba(0, 0, 0, 0.08);
+    0 8px 24px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(79, 195, 247, 0.2);
 }
@@ -172,10 +175,7 @@
   font-weight: 800;
   margin-bottom: 24px;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--home-primary-blue-dark) 0%, var(--home-primary-blue) 50%, var(--home-accent-green) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
@@ -274,11 +274,7 @@
   font-weight: 800;
   margin-bottom: 48px;
   text-align: center;
-  color: var(--home-text-dark);
-  background: linear-gradient(135deg, var(--home-primary-blue-dark) 0%, var(--home-primary-blue) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .section-body {
@@ -585,12 +581,13 @@
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
+
   .floating-shape,
   .home-page::before,
   .home-page::after {
     animation: none;
   }
-  
+
   .hero-cta,
   .cta-button,
   .feature-card,

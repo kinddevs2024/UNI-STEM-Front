@@ -143,80 +143,32 @@ const ProfileEdit = () => {
         return;
       }
 
-      const updateData = new FormData();
+      // Prepare JSON data for update
+      const jsonData = {
+        name: fullName,
+        email: formData.email,
+        firstName: formData.firstName || "",
+        secondName: formData.secondName || "",
+        gmail: formData.gmail || "",
+        tel: formData.tel || "",
+        phone: formData.phone || null,
+        address: formData.address || "",
+        gender: formData.gender || "",
+        dateBorn: formData.dateBorn
+          ? new Date(formData.dateBorn + "T00:00:00").toISOString()
+          : "",
+      };
 
-      // Always append required fields
-      updateData.append("name", fullName);
-      updateData.append("email", formData.email);
-      updateData.append("firstName", formData.firstName || "");
-      updateData.append("secondName", formData.secondName || "");
-
-      // Append optional fields - always append them even if empty
-      // The backend should handle empty strings vs null
-      updateData.append("gmail", formData.gmail || "");
-      updateData.append("tel", formData.tel || "");
-      updateData.append("phone", formData.phone || null);
-      updateData.append("address", formData.address || "");
-
-      // Date of birth - convert to ISO string if present
-      if (formData.dateBorn) {
-        // Ensure date is in correct format
-        const dateValue = formData.dateBorn.includes("T")
-          ? formData.dateBorn
-          : `${formData.dateBorn}T00:00:00`;
-        updateData.append("dateBorn", new Date(dateValue).toISOString());
-      } else {
-        updateData.append("dateBorn", "");
-      }
-
-      // Gender
-      updateData.append("gender", formData.gender || "");
-
-      // Only append school fields if user is a student
       if (user.role === USER_ROLES.STUDENT) {
-        updateData.append("schoolName", formData.schoolName || "");
-        updateData.append("schoolId", formData.schoolId || "");
+        jsonData.schoolName = formData.schoolName || "";
+        jsonData.schoolId = formData.schoolId || "";
       }
 
-      // Append logo URL if we have one
       if (logoUrl) {
-        updateData.append("userLogo", logoUrl);
+        jsonData.userLogo = logoUrl;
       }
 
-
-      // If no new logo is being uploaded, try sending as JSON instead
-      // This might work better if backend has issues parsing FormData
-      let response;
-      if (!formData.userLogo) {
-        // No file upload, send as JSON
-        const jsonData = {
-          name: fullName,
-          email: formData.email,
-          firstName: formData.firstName || "",
-          secondName: formData.secondName || "",
-          gmail: formData.gmail || "",
-          tel: formData.tel || "",
-          phone: formData.phone || null,
-          address: formData.address || "",
-          gender: formData.gender || "",
-          dateBorn: formData.dateBorn
-            ? new Date(formData.dateBorn + "T00:00:00").toISOString()
-            : "",
-        };
-
-        if (user.role === USER_ROLES.STUDENT) {
-          jsonData.schoolName = formData.schoolName || "";
-          jsonData.schoolId = formData.schoolId || "";
-        }
-
-        if (logoUrl) {
-          jsonData.userLogo = logoUrl;
-        }
-
-        response = await authAPI.updateProfile(jsonData);
-      } else {
-        response = await authAPI.updateProfile(updateData);
-      }
+      const response = await authAPI.updateProfile(jsonData);
 
       // Fetch updated user data with devices from /me endpoint
       try {

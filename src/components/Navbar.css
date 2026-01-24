@@ -26,20 +26,20 @@ body[data-theme="kid-friendly"] .navbar {
 }
 
 .navbar-logo {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
   transition: all 0.3s ease;
-  color: var(--text-primary);
+}
+
+.navbar-logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Kid-friendly theme logo */
 body[data-theme="kid-friendly"] .navbar-logo {
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* Removed text gradient styles as we use image now */
 }
 
 .navbar-logo:hover {

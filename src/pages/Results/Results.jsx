@@ -203,10 +203,12 @@ const Results = () => {
         if (!data.success || !data.userResult) {
           // Try to check if there's a submission that isn't checked yet
           try {
-            const submissionsResponse = await adminAPI.getSubmissions(id, null);
+            const submissionsResponse = await olympiadAPI.getResults(id, user._id);
             const submissionsData = submissionsResponse?.data;
             let submissions = [];
-            if (Array.isArray(submissionsData)) {
+            if (submissionsData?.results && Array.isArray(submissionsData.results)) {
+              submissions = submissionsData.results;
+            } else if (Array.isArray(submissionsData)) {
               submissions = submissionsData;
             } else if (submissionsData && typeof submissionsData === "object") {
               submissions =
@@ -307,10 +309,12 @@ const Results = () => {
         // Try to check if user has a pending submission
         if (id && !canViewAllResults && user?._id) {
           try {
-            const submissionsResponse = await adminAPI.getSubmissions(id, null);
+            const submissionsResponse = await olympiadAPI.getResults(id, user._id);
             const submissionsData = submissionsResponse?.data;
             let submissions = [];
-            if (Array.isArray(submissionsData)) {
+            if (submissionsData?.results && Array.isArray(submissionsData.results)) {
+              submissions = submissionsData.results;
+            } else if (Array.isArray(submissionsData)) {
               submissions = submissionsData;
             } else if (submissionsData && typeof submissionsData === "object") {
               submissions =
@@ -431,10 +435,12 @@ const Results = () => {
           setLoading(false);
           return;
         }
-        const response = await adminAPI.getSubmissions(null, user._id);
+        const response = await olympiadAPI.getResults(null, user._id);
         const submissionsData = response?.data;
         // Ensure submissions is always an array
-        if (Array.isArray(submissionsData)) {
+        if (submissionsData?.results && Array.isArray(submissionsData.results)) {
+          submissions = submissionsData.results;
+        } else if (Array.isArray(submissionsData)) {
           submissions = submissionsData;
         } else if (submissionsData && typeof submissionsData === "object") {
           // If it's an object, try to extract an array from it

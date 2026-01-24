@@ -93,6 +93,7 @@
 .button-small.button-secondary:hover {
   background: var(--bg-tertiary);
   border-color: var(--accent);
+  color: var(--accent);
   transform: translateY(calc(-1 * var(--spacing-xs)));
 }
 

@@ -1,5 +1,5 @@
 .resolter-panel-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
   width: 100%;
@@ -16,7 +16,7 @@
 }
 
 .resolter-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -566,6 +566,7 @@
 }
 
 @media (max-width: 768px) {
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr;
@@ -589,10 +590,9 @@
   .resolter-panel-page .container {
     max-width: 95%;
   }
-  
+
   .table-header,
   .table-row {
     grid-template-columns: 2fr 2fr 2fr 120px 180px 180px 140px 180px 1fr;
   }
 }
-

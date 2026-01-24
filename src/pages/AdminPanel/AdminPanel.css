@@ -1,11 +1,11 @@
 .admin-panel-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
 .admin-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,7 +25,7 @@
     grid-template-columns: 1fr;
     align-items: flex-start;
   }
-  
+
   .admin-header-actions {
     width: 100%;
     justify-content: flex-start;
@@ -195,7 +195,8 @@
 
 .olympiad-info {
   flex: 1;
-  min-width: 0; /* Allow text to wrap */
+  min-width: 0;
+  /* Allow text to wrap */
 }
 
 .olympiad-info h3 {
@@ -256,42 +257,42 @@
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .admin-title {
     font-size: 32px;
   }
-  
+
   .admin-header-actions {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
   }
-  
+
   .status-filter {
     font-size: 13px;
     padding: 8px 12px;
   }
-  
+
   .admin-olympiads {
     grid-template-columns: 1fr;
   }
-  
+
   .admin-olympiad-card {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .olympiad-logo-container {
     width: 60px;
     height: 60px;
   }
-  
+
   .olympiad-actions {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .olympiad-actions button {
     width: 100%;
   }
@@ -552,25 +553,25 @@
   .step-indicator {
     padding: 0 10px;
   }
-  
+
   .step-label {
     font-size: 10px;
   }
-  
+
   .step-number {
     width: 32px;
     height: 32px;
     font-size: 14px;
   }
-  
+
   .type-selection {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .form-actions button {
     width: 100%;
   }
@@ -673,9 +674,9 @@
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
   }
 }
-

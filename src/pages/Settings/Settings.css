@@ -1,5 +1,5 @@
 .settings-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
@@ -278,12 +278,12 @@
   transition: all 0.3s ease;
 }
 
-.toggle-input:checked + .toggle-slider {
+.toggle-input:checked+.toggle-slider {
   background: var(--accent);
   border-color: var(--accent);
 }
 
-.toggle-input:checked + .toggle-slider::before {
+.toggle-input:checked+.toggle-slider::before {
   transform: translateX(24px);
   background: var(--bg-primary);
 }
@@ -369,4 +369,3 @@
     flex-direction: column;
   }
 }
-

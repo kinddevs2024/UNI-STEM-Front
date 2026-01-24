@@ -1,5 +1,5 @@
 .essay-olympiad-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 20px;
   background: var(--bg-primary);
   padding-right: 240px;
@@ -109,4 +109,3 @@
     padding-right: 20px;
   }
 }
-

@@ -1,11 +1,11 @@
 .leaderboard-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
 .leaderboard-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -119,12 +119,15 @@
   overflow-y: hidden;
   padding: 12px 0;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
 }
 
 .filters-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 .filter-button {
@@ -370,24 +373,25 @@
 }
 
 @media (max-width: 768px) {
+
   .table-header,
   .table-row {
     grid-template-columns: 60px 1fr 120px;
     gap: 12px;
     padding: 16px;
   }
-  
+
   .leaderboard-table.has-olympiad-column .table-header,
   .leaderboard-table.has-olympiad-column .table-row {
     grid-template-columns: 1fr 60px 1fr 120px;
   }
-  
+
   .email-cell,
   .time-cell,
   .olympiad-cell {
     display: none;
   }
-  
+
   .leaderboard-title {
     font-size: 36px;
   }
@@ -405,4 +409,3 @@
     font-size: 13px;
   }
 }
-

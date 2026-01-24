@@ -1,6 +1,6 @@
 .services-page {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   position: relative;
   overflow-x: hidden;
 }
@@ -8,7 +8,7 @@
 /* Hero Section */
 .hero-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,4 +298,3 @@
 .text-glow {
   text-shadow: 0 0 20px var(--glow), 0 0 40px var(--glow);
 }
-

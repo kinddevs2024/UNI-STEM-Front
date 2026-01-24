@@ -159,28 +159,18 @@ export function useAntiCheat(olympiadId, attemptId, enabled = true) {
     if (!enabled) return;
 
     const handleContextMenu = (e) => {
+      e.preventDefault(); // Block context menu
+      
+      // Show alert to user
+      alert('⚠️ Security Warning: Right-click menu is disabled during the exam.');
+      
       reportViolation('CONTEXT_MENU', {
         target: e.target?.tagName || 'unknown'
       });
-      // Don't prevent context menu, just log it
     };
 
     document.addEventListener('contextmenu', handleContextMenu);
     return () => document.removeEventListener('contextmenu', handleContextMenu);
-  }, [enabled, reportViolation]);
-
-  // Page unload (beforeunload)
-  useEffect(() => {
-    if (!enabled) return;
-
-    const handleBeforeUnload = () => {
-      reportViolation('PAGE_UNLOAD', {
-        url: window.location.href
-      });
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [enabled, reportViolation]);
 
   // Keyboard shortcuts detection (Ctrl+Shift+I, F12, etc.)
@@ -188,12 +178,18 @@ export function useAntiCheat(olympiadId, attemptId, enabled = true) {
     if (!enabled) return;
 
     const handleKeyDown = (e) => {
-      // Detect common devtools shortcuts
+      // Detect and block common devtools shortcuts
       if (
         (e.key === 'F12') ||
         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
         (e.ctrlKey && e.key === 'U') // View source
       ) {
+        e.preventDefault(); // Block the shortcut
+        e.stopPropagation();
+        
+        // Show alert to user
+        alert('⚠️ Security Warning: Developer tools are disabled during the exam.');
+        
         reportViolation('SUSPICIOUS_KEYBOARD_SHORTCUT', {
           key: e.key,
           ctrlKey: e.ctrlKey,

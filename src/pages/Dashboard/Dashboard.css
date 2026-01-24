@@ -1,10 +1,5 @@
-.dashboard-page {
-  /* Styles inherited from globals.css .dashboard-page */
-}
-
-
 .dashboard-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

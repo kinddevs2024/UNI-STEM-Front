@@ -7,7 +7,7 @@
 
 .portfolio-view-loading,
 .portfolio-view-error {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,6 +74,7 @@
 
 /* iPad and Tablet (768px - 1024px) */
 @media (max-width: 1024px) and (min-width: 769px) {
+
   .portfolio-view-loading,
   .portfolio-view-error {
     padding: var(--spacing-base) var(--spacing-lg);
@@ -90,6 +91,7 @@
 
 /* Mobile Phones (up to 768px) */
 @media (max-width: 768px) {
+
   .portfolio-view-loading,
   .portfolio-view-error {
     padding: var(--spacing-lg) var(--spacing-base);
@@ -132,6 +134,7 @@
 
 /* Small Mobile Phones (up to 480px) */
 @media (max-width: 480px) {
+
   .portfolio-view-loading,
   .portfolio-view-error {
     padding: var(--spacing-base) var(--spacing-md);
@@ -163,7 +166,7 @@
 /* Editor Mode Styles */
 .portfolio-view-container {
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .portfolio-view-container.editor-open .portfolio-content-wrapper {
@@ -179,4 +182,3 @@
     margin-right: 0;
   }
 }
-

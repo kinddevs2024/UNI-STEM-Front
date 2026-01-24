@@ -144,11 +144,13 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         keepalive: true // Critical: ensures request completes during page unload
       }).then((response) => {
         if (!response.ok) {
-          console.error('Failed to send exit screenshot:', response.statusText);
-        } else {
+          // Ignore 404 errors as the endpoint might not be implemented yet
+          if (response.status !== 404) {
+            console.warn('Failed to send exit screenshot:', response.statusText);
+          }
         }
-      }).catch((error) => {
-        console.error('Error sending exit screenshot:', error);
+      }).catch(() => {
+        // Silently ignore network errors during unload as they are expected
         // Reset flag on error so it can be retried if page doesn't unload
         exitScreenshotSentRef.current = false;
       });
@@ -279,6 +281,23 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
             setScreenActive(false);
             // Show alert to user
             alert('⚠️ Full screen sharing required!\n\nPlease stop sharing and select "Entire Screen" (monitor) instead of a window, tab, or browser.');
+            
+            // Re-request full screen mode if it was lost
+            try {
+              if (document.fullscreenElement === null) {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                  await elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                  await elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                  await elem.msRequestFullscreen();
+                }
+              }
+            } catch (fsErr) {
+              console.warn("Failed to restore full screen:", fsErr);
+            }
+            
             return;
           }
           
@@ -310,6 +329,19 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
                   setScreenActive(false);
                   // Show alert to user
                   alert('⚠️ Full screen sharing required!\n\nPlease stop sharing and select "Entire Screen" instead of a window or tab.');
+                  
+                  // Re-request full screen mode if it was lost
+                  try {
+                    if (document.fullscreenElement === null) {
+                      const elem = document.documentElement;
+                      if (elem.requestFullscreen) {
+                        elem.requestFullscreen().catch(e => console.warn(e));
+                      }
+                    }
+                  } catch (fsErr) {
+                    console.warn("Failed to restore full screen:", fsErr);
+                  }
+                  
                   resolve();
                   return;
                 }
@@ -326,6 +358,18 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
                     screenShareActive: true,
                     displaySurface: displaySurface || 'monitor' // Use detected displaySurface
                   });
+                }
+                
+                // Re-request full screen mode if it was lost during permission dialog
+                try {
+                  if (document.fullscreenElement === null) {
+                    const elem = document.documentElement;
+                    if (elem.requestFullscreen) {
+                      elem.requestFullscreen().catch(e => console.warn(e));
+                    }
+                  }
+                } catch (fsErr) {
+                  console.warn("Failed to restore full screen:", fsErr);
                 }
                 
                 resolve();

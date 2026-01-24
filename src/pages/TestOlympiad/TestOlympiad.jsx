@@ -53,7 +53,9 @@ const TestOlympiad = () => {
   );
 
   // Anti-cheat monitoring
-  useAntiCheat(id, attemptId, isActive && !submitted);
+  // Only enable if attempt is active and not submitted
+  const shouldEnableAntiCheat = Boolean(isActive && !submitted && attemptId);
+  useAntiCheat(id, attemptId, shouldEnableAntiCheat);
 
   // Update timeRemaining from server timer
   useEffect(() => {
@@ -139,6 +141,32 @@ const TestOlympiad = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [id, attemptId, currentQuestionIndex, submitted]);
+
+  // Load current question from server if not in questions array
+  useEffect(() => {
+    const loadCurrentQuestion = async () => {
+      if (attemptId && currentQuestionIndex >= 0 && questions.length > 0) {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (!currentQuestion) {
+          try {
+            const response = await olympiadAPI.getQuestion(id, currentQuestionIndex);
+            if (response.data.success && response.data.question) {
+              setQuestions(prev => {
+                const exists = prev.find(q => q._id === response.data.question._id);
+                if (!exists) {
+                  return [...prev, response.data.question];
+                }
+                return prev;
+              });
+            }
+          } catch (error) {
+            console.error('Error loading current question:', error);
+          }
+        }
+      }
+    };
+    loadCurrentQuestion();
+  }, [id, attemptId, currentQuestionIndex, questions]);
 
   const fetchOlympiad = async () => {
     try {
@@ -287,32 +315,6 @@ const TestOlympiad = () => {
       </div>
     );
   }
-
-  // Load current question from server if not in questions array
-  useEffect(() => {
-    const loadCurrentQuestion = async () => {
-      if (attemptId && currentQuestionIndex >= 0 && questions.length > 0) {
-        const currentQuestion = questions[currentQuestionIndex];
-        if (!currentQuestion) {
-          try {
-            const response = await olympiadAPI.getQuestion(id, currentQuestionIndex);
-            if (response.data.success && response.data.question) {
-              setQuestions(prev => {
-                const exists = prev.find(q => q._id === response.data.question._id);
-                if (!exists) {
-                  return [...prev, response.data.question];
-                }
-                return prev;
-              });
-            }
-          } catch (error) {
-            console.error('Error loading current question:', error);
-          }
-        }
-      }
-    };
-    loadCurrentQuestion();
-  }, [id, attemptId, currentQuestionIndex, questions]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = Object.keys(answers).length;

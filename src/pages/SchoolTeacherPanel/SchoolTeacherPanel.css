@@ -1,11 +1,11 @@
 .school-teacher-panel-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
 .teacher-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,15 +300,19 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
 @media (max-width: 768px) {
+
   .table-header,
   .table-row {
     grid-template-columns: 1fr;
@@ -327,4 +331,3 @@
     grid-template-columns: 1fr;
   }
 }
-

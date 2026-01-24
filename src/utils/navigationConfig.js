@@ -12,7 +12,7 @@ export const ROLE_NAVIGATION_CONFIG = {
   // 🟢 STUDENT
   [USER_ROLES.STUDENT]: [
     { label: "Dashboard", path: "/dashboard" },
-    { label: "Portfolio", path: "/dashboard/portfolio" },
+    { label: "Portfolio (Beta)", path: "/dashboard/portfolio" },
     { label: "Results", path: "/results" },
     { label: "Profile", path: "/profile" },
   ],

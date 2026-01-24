@@ -1,11 +1,11 @@
 .start-olympiad-page {
-  min-height: 100vh;
+  min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
 .start-olympiad-loading {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,7 +274,7 @@
   line-height: 1.6;
 }
 
-.consent-checkbox input[type="checkbox"]:checked + .consent-text {
+.consent-checkbox input[type="checkbox"]:checked+.consent-text {
   color: var(--text-primary);
   font-weight: 500;
 }
@@ -339,24 +339,24 @@
   .start-title {
     font-size: 28px;
   }
-  
+
   .olympiad-info-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .time-info {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .start-button {
     width: 100%;
   }
-  
+
   .instructions-section,
   .proctoring-notice,
   .rules-section,
@@ -364,4 +364,3 @@
     padding: 24px;
   }
 }
-

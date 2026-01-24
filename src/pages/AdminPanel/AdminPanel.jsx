@@ -642,6 +642,75 @@ const AdminPanel = () => {
     }
   }, [fetchOlympiads]);
 
+  // Duplicate olympiad
+  const handleDuplicate = useCallback(async (olympiad) => {
+    if (!window.confirm(`Are you sure you want to duplicate "${olympiad.title}"?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Get full olympiad details
+      const response = await adminAPI.getOlympiadById(olympiad._id);
+      const originalOlympiad = response.data.data || response.data;
+
+      // 2. Get questions
+      const questionsResponse = await adminAPI.getQuestions(olympiad._id);
+      const originalQuestions = questionsResponse.data || [];
+
+      // 3. Create new olympiad
+      const newOlympiadData = {
+        title: `${originalOlympiad.title} (Copy)`,
+        description: originalOlympiad.description,
+        type: originalOlympiad.type,
+        subject: originalOlympiad.subject,
+        startTime: new Date().toISOString(), // Reset start time
+        endTime: new Date(Date.now() + 3600000).toISOString(), // Reset end time (1 hour from now)
+        duration: originalOlympiad.duration,
+        status: "draft", // Always draft
+      };
+
+      const createResponse = await adminAPI.createOlympiad(newOlympiadData);
+      const newOlympiadId =
+        createResponse.data?._id ||
+        createResponse.data?.olympiad?._id ||
+        createResponse.data?.id ||
+        createResponse.data?.olympiad?.id;
+
+      if (!newOlympiadId) {
+        throw new Error("Failed to get new olympiad ID");
+      }
+
+      // 4. Add questions to new olympiad
+      // We use a loop to add questions sequentially to preserve order
+      for (const question of originalQuestions) {
+        await adminAPI.addQuestion({
+          olympiadId: newOlympiadId,
+          question: question.question,
+          type: question.type,
+          options: question.options,
+          correctAnswer: question.correctAnswer,
+          points: question.points,
+          order: question.order,
+        });
+      }
+
+      setNotification({
+        message: "Olympiad duplicated successfully!",
+        type: "success",
+      });
+      fetchOlympiads();
+    } catch (error) {
+      console.error("Duplicate error:", error);
+      setNotification({
+        message: "Failed to duplicate olympiad",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchOlympiads]);
+
   if (loading) {
     return (
       <div className="admin-loading">
@@ -1148,6 +1217,13 @@ const AdminPanel = () => {
                     onClick={() => handleManageQuestions(olympiad)}
                   >
                     Questions
+                  </button>
+                  <button
+                    className="button-secondary"
+                    onClick={() => handleDuplicate(olympiad)}
+                    title="Duplicate Olympiad"
+                  >
+                    Duplicate
                   </button>
                   <button
                     className="button-danger"
