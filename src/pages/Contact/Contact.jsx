@@ -65,7 +65,7 @@ const Contact = () => {
                 <div className="contact-details">
                   <div className="contact-item">
                     <h3>Email</h3>
-                    <p>support@globalolympiads.com</p>
+                    <p>support@unistem.com</p>
                   </div>
                   <div className="contact-item">
                     <h3>Response Time</h3>
@@ -160,7 +160,7 @@ const Contact = () => {
               <h2 className="section-title">Ready to Get Started?</h2>
               <div className="section-body">
                 <p className="get-started-text">
-                  Join thousands of students competing in Global Olympiads today!
+                  Join thousands of students competing in UNI STEM today!
                 </p>
                 <div className="cta-buttons">
                   <Link to="/auth" className="cta-button primary">
@@ -179,7 +179,7 @@ const Contact = () => {
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 Global Olympiads. All rights reserved.</p>
+          <p>&copy; 2024 UNI STEM. All rights reserved.</p>
         </div>
       </footer>
     </div>

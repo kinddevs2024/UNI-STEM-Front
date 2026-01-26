@@ -15,7 +15,7 @@ const About = () => {
         </div>
         <div className="hero-content">
           <h1 className="hero-title">
-            <span className="text-glow">About Global Olympiads</span>
+            <span className="text-glow">About UNI STEM</span>
           </h1>
           <p className="hero-subtitle">Empowering Students Worldwide</p>
         </div>
@@ -31,7 +31,7 @@ const About = () => {
             <h2 className="section-title">Our Mission</h2>
             <div className="section-body">
               <p>
-                Global Olympiads is dedicated to providing a world-class platform
+                UNI STEM is dedicated to providing a world-class platform
                 for academic excellence and competition. We believe that every
                 student deserves the opportunity to showcase their knowledge,
                 challenge themselves, and compete on a global stage.
@@ -126,7 +126,7 @@ const About = () => {
               <h2 className="section-title">Join Us Today</h2>
               <div className="section-body">
                 <p className="get-started-text">
-                  Ready to be part of the Global Olympiads community? Sign up now
+                  Ready to be part of the UNI STEM community? Sign up now
                   and start your journey towards academic excellence!
                 </p>
                 <div className="cta-buttons">
@@ -146,7 +146,7 @@ const About = () => {
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 Global Olympiads. All rights reserved.</p>
+          <p>&copy; 2024 UNI STEM. All rights reserved.</p>
         </div>
       </footer>
     </div>

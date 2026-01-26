@@ -434,7 +434,7 @@ const PortfolioRenderer = ({ portfolio, sectionId = null, isOwner = false }) => 
             <p className="portfolio-footer-text">
               This portfolio was created by{" "}
               <a href="/" className="portfolio-footer-link" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-                GlobalOlimpiads
+                UNI STEM
                 {/* Portfolio verification status badge */}
                 {displayPortfolio?.verificationStatus && (
                   <PortfolioStatusBadge status={displayPortfolio.verificationStatus} size="small" />

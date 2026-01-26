@@ -24,12 +24,12 @@ const Home = () => {
   const sections = [
     {
       id: "about",
-      title: "About Global Olympiads",
+      title: "About UNI STEM",
       subject: "math",
       content: (
         <>
           <p>
-            Welcome to Global Olympiads, the premier online platform for
+            Welcome to UNI STEM, the premier online platform for
             academic competitions across multiple subjects. Our platform brings
             together students from around the world to compete, learn, and excel
             in their chosen fields.
@@ -198,7 +198,7 @@ const Home = () => {
         <>
           <p className="get-started-text">
             Ready to test your knowledge and compete with students worldwide?
-            Join Global Olympiads today and embark on your academic journey!
+            Join UNI STEM today and embark on your academic journey!
           </p>
           <div className="cta-buttons" ref={ctaButtonsRef}>
             {!isAuthenticated ? (
@@ -484,7 +484,7 @@ const Home = () => {
         </div>
         <div className="hero-content" ref={heroContentRef}>
           <h1 className="hero-title" ref={heroTitleRef}>
-            <span className="text-glow">Global Olympiads</span>
+            <span className="text-glow">UNI STEM</span>
           </h1>
           <p className="hero-subtitle" ref={heroSubtitleRef}>Compete, Learn, Excel</p>
           <p className="hero-description" ref={heroDescriptionRef}>
@@ -520,7 +520,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 Global Olympiads. All rights reserved.</p>
+          <p>&copy; 2024 UNI STEM. All rights reserved.</p>
         </div>
       </footer>
     </div>

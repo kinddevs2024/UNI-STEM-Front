@@ -1,6 +1,6 @@
 # Environment Variables Reference
 
-Complete documentation of all environment variables used in the Global Olimpiad platform.
+Complete documentation of all environment variables used in the UNI STEM platform.
 
 ---
 
@@ -78,7 +78,7 @@ These variables have defaults but can be overridden.
 **Example**: 
 ```
 http://localhost:5173
-https://olympiad.example.com
+https://unistem.example.com
 ```
 **Default**: `http://localhost:5173`  
 **Location**: Used in `server.js`, `middleware/cors.js`, `lib/api-helpers.js`, `next.config.js`  
@@ -173,7 +173,7 @@ All frontend environment variables are **optional** and have defaults. They must
 **Example**: 
 ```
 http://localhost:3000/api
-https://api.olympiad.example.com/api
+https://api.unistem.example.com/api
 /api
 ```
 **Default**: 
@@ -196,7 +196,7 @@ https://api.olympiad.example.com/api
 **Example**: 
 ```
 http://localhost:3000
-https://api.olympiad.example.com
+https://api.unistem.example.com
 ```
 **Default**: `http://localhost:3000`  
 **Location**: Used in `src/utils/constants.js`, `src/services/socket.js`  
@@ -220,7 +220,7 @@ https://api.olympiad.example.com
 
 ### Backend `.env` File
 
-Create this file in `kinddevs2024-GlobalOlimpiad-v2.2_backend/`:
+Create this file in `UNI-STEM-beckend/`:
 
 ```env
 # Required
@@ -230,7 +230,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-min-32-characters-long-random-s
 # Optional (with defaults)
 PORT=3000
 NODE_ENV=production
-FRONTEND_URL=https://olympiad.example.com
+FRONTEND_URL=https://unistem.example.com
 HOST=0.0.0.0
 UPLOAD_PATH=./uploads
 MAX_FILE_SIZE=104857600
@@ -244,12 +244,12 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxxxxxxxxxxxxx
 
 ### Frontend `.env` File
 
-Create this file in `GlobalOlimpiad-v2.2/`:
+Create this file in `UNI-STEM-Front/`:
 
 ```env
 # Optional (with defaults)
-VITE_API_URL=https://api.olympiad.example.com/api
-VITE_SOCKET_URL=https://api.olympiad.example.com
+VITE_API_URL=https://api.unistem.example.com/api
+VITE_SOCKET_URL=https://api.unistem.example.com
 VITE_GOOGLE_CLIENT_ID=780692716304-xxxxxxxxxxxxx.apps.googleusercontent.com
 ```
 
@@ -361,7 +361,7 @@ grep -r "VITE_API_URL" dist/
 
 - [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Deployment instructions
 - [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) - Production readiness overview
-- [BACKEND_GOOGLE_SETUP.md](./GlobalOlimpiad-v2.2/docs/BACKEND_GOOGLE_SETUP.md) - Google OAuth setup
+- [BACKEND_GOOGLE_SETUP.md](./UNI-STEM-Front/docs/BACKEND_GOOGLE_SETUP.md) - Google OAuth setup
 
 ---
 

@@ -13,7 +13,7 @@ const VirtualAssistant = () => {
 
   // Predefined messages for kids
   const assistantMessages = [
-    "Hi! Welcome to Global Olympiads! 🌟",
+    "Hi! Welcome to UNI STEM! 🌟",
     "This is a fun place where you can test your knowledge!",
     "You can compete in Math, Science, English, and more!",
     "Click 'Get Started' to begin your adventure!",
@@ -21,13 +21,13 @@ const VirtualAssistant = () => {
 
   useEffect(() => {
     // Check if this is the first visit
-    const hasVisited = localStorage.getItem("global-olympiad-visited");
+    const hasVisited = localStorage.getItem("unistem-visited");
     
     if (!hasVisited) {
       // Show assistant after a short delay
       const timer = setTimeout(() => {
         setIsVisible(true);
-        localStorage.setItem("global-olympiad-visited", "true");
+        localStorage.setItem("unistem-visited", "true");
       }, 2000);
 
       return () => clearTimeout(timer);

@@ -1,6 +1,6 @@
-# Global Olympiad Platform - Pages and Features Guide
+# UNI STEM - Pages and Features Guide
 
-This document provides a comprehensive overview of all pages available in the Global Olympiad Platform and what you can do on each page.
+This document provides a comprehensive overview of all pages available in the UNI STEM platform and what you can do on each page.
 
 ## Table of Contents
 
@@ -42,7 +42,7 @@ This document provides a comprehensive overview of all pages available in the Gl
 
 **What you can do:**
 
-- Learn more about Global Olympiads platform
+- Learn more about UNI STEM platform
 - Understand the mission and vision
 - Read about platform benefits
 - _Note: Redirects to dashboard if authenticated_
@@ -556,5 +556,5 @@ The navigation bar provides quick access to:
 
 ---
 
-**Last Updated**: Based on GlobalOlimpiad-v2.2 codebase
+**Last Updated**: Based on UNI STEM codebase
 

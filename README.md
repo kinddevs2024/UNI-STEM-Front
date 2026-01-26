@@ -1,6 +1,6 @@
-# Online Olympiad Platform
+# UNI STEM (Frontend)
 
-A professional online olympiad platform with advanced proctoring features including screen and camera monitoring.
+A professional frontend for the UNI STEM platform—online academic olympiads with advanced proctoring features including screen and camera monitoring.
 
 ## Features
 
