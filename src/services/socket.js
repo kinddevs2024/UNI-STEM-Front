@@ -8,9 +8,14 @@ export const connectSocket = () => {
   if (!socket) {
     socket = io(SOCKET_URL, {
       auth: {
-        token: getToken()
+        token: getToken(),
       },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 30000,
+      randomizationFactor: 0.5,
     });
   }
   return socket;

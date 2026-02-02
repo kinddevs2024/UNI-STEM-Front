@@ -98,22 +98,18 @@ export function useAntiCheat(olympiadId, attemptId, enabled = true) {
     };
   }, [enabled, reportViolation]);
 
-  // DevTools detection (using debugger statement timing)
+  // DevTools detection (skip in production - debugger causes false positives)
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || import.meta.env?.PROD) return;
 
     const detectDevTools = () => {
       const start = performance.now();
       debugger; // eslint-disable-line no-debugger
       const end = performance.now();
-      
-      // If devtools is open, debugger statement takes longer
       if (end - start > 100) {
         if (!devToolsOpenRef.current) {
           devToolsOpenRef.current = true;
-          reportViolation('DEVTOOLS_OPEN', {
-            detectionMethod: 'debugger_timing'
-          });
+          reportViolation('DEVTOOLS_OPEN', { detectionMethod: 'debugger_timing' });
         }
       } else {
         devToolsOpenRef.current = false;

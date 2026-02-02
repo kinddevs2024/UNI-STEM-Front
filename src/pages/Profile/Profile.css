@@ -181,6 +181,28 @@
   color: #00ff00;
 }
 
+.profile-coins-row .detail-value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.profile-balance {
+  font-weight: 600;
+}
+
+.profile-get-more {
+  font-size: var(--font-size-sm);
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.profile-get-more:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;

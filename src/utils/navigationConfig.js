@@ -48,6 +48,7 @@ export const ROLE_NAVIGATION_CONFIG = {
   [USER_ROLES.UNIVERSITY]: [
     { label: "Dashboard (University)", path: "/university" },
     { label: "Students Portfolios", path: "/university-panel" },
+    { label: "Buy Coins", path: "/buy-coins" },
     { label: "Profile", path: "/profile" },
   ],
 

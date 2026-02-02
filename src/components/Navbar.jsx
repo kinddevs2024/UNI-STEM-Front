@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
+import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -72,10 +73,21 @@ const Navbar = () => {
                 </Link>
               ))}
 
-              <div className="navbar-user">
-                <span className="navbar-username">{user?.email}</span>
-                <span className="navbar-role">({user?.role})</span>
-              </div>
+              <BalanceDisplay />
+
+              <Link to="/profile" className="navbar-user">
+                {user?.userLogo ? (
+                  <img
+                    src={user.userLogo}
+                    alt="Profile"
+                    className="navbar-user-avatar"
+                  />
+                ) : (
+                  <div className="navbar-user-avatar-placeholder">
+                    {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                )}
+              </Link>
 
               <button
                 onClick={handleLogout}

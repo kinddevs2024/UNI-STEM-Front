@@ -17,19 +17,21 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import Navbar from "./components/Navbar";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import TestOlympiad from "./pages/TestOlympiad";
 import EssayOlympiad from "./pages/EssayOlympiad";
 import StartOlympiad from "./pages/StartOlympiad";
 import Leaderboard from "./pages/Leaderboard";
+const PortfolioConstructor = lazy(() => import("./pages/PortfolioConstructor"));
 import Results from "./pages/Results";
 import AdminPanel from "./pages/AdminPanel";
 import OwnerPanel from "./pages/OwnerPanel";
@@ -47,9 +49,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
 import PortfolioView from "./pages/PortfolioView";
-import PortfolioConstructor from "./pages/PortfolioConstructor";
 import Universities from "./pages/Universities";
 import Schools from "./pages/Schools";
+import BuyCoins from "./pages/BuyCoins";
 import { USER_ROLES, GOOGLE_CLIENT_ID } from "./utils/constants";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TranslationProvider } from "./context/TranslationContext";
@@ -113,7 +115,9 @@ const AppRoutes = () => {
         path="/olympiad/:id"
         element={
           <ProtectedRoute>
-            <TestOlympiad />
+            <ErrorBoundary>
+              <TestOlympiad />
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       />
@@ -131,7 +135,9 @@ const AppRoutes = () => {
         path="/olympiad/:id/leaderboard"
         element={
           <ProtectedRoute>
-            <Leaderboard />
+            <ErrorBoundary>
+              <Leaderboard />
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       />
@@ -292,10 +298,23 @@ const AppRoutes = () => {
       />
 
       <Route
+        path="/buy-coins"
+        element={
+          <ProtectedRoute>
+            <BuyCoins />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/dashboard/portfolio"
         element={
           <ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
-            <PortfolioConstructor />
+            <ErrorBoundary>
+              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+                <PortfolioConstructor />
+              </Suspense>
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       />

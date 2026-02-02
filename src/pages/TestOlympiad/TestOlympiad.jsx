@@ -19,7 +19,7 @@ const TestOlympiad = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { on } = useSocket();
+  const { emit } = useSocket();
   
   const [olympiad, setOlympiad] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -27,6 +27,7 @@ const TestOlympiad = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -74,11 +75,11 @@ const TestOlympiad = () => {
       setAttemptId(storedAttemptId);
     }
 
-    // Join WebSocket room for attempt
-    if (on && (attemptId || storedAttemptId)) {
-      on('join-olympiad', { olympiadId: id, attemptId: attemptId || storedAttemptId });
+    // Join WebSocket room for attempt (emit sends to server; on registers listener)
+    if (emit && (attemptId || storedAttemptId)) {
+      emit('join-olympiad', { olympiadId: id, attemptId: attemptId || storedAttemptId });
     }
-  }, [id, on, attemptId]);
+  }, [id, emit, attemptId]);
 
   // Load saved draft from server on mount
   useEffect(() => {
@@ -270,6 +271,7 @@ const TestOlympiad = () => {
   const handleSubmit = async () => {
     if (window.confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
       try {
+        setSubmitting(true);
         await olympiadAPI.submit(id, { answers });
         setSubmitted(true);
         // Clear saved answers and draft after successful submission
@@ -286,6 +288,8 @@ const TestOlympiad = () => {
           message: error.response?.data?.message || 'Submission failed', 
           type: 'error' 
         });
+      } finally {
+        setSubmitting(false);
       }
     }
   };
@@ -477,7 +481,7 @@ const TestOlympiad = () => {
             <button 
               className="button-primary" 
               onClick={handleSubmit}
-              disabled={!isRecording || submitted}
+              disabled={!isRecording || submitted || submitting}
             >
               Submit Answers
             </button>

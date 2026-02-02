@@ -65,6 +65,7 @@ export const authAPI = {
   login: (data) => api.post("/auth/login", data),
   loginWithGoogle: (data) => api.post("/auth/google", data),
   getMe: () => api.get("/auth/me"),
+  getBalance: () => api.get("/auth/balance"),
   updateProfile: (data) => {
     // Interceptor will handle FormData Content-Type automatically
     return api.put("/auth/profile", data);
@@ -81,6 +82,12 @@ export const authAPI = {
   updateCookieConsent: (data) => {
     return api.post("/auth/cookie-consent", data);
   },
+};
+
+// Payment endpoints
+export const paymentAPI = {
+  createPayme: (data) => api.post("/payment/create-payme", data),
+  createClick: (data) => api.post("/payment/create-click", data),
 };
 
 // Olympiad endpoints

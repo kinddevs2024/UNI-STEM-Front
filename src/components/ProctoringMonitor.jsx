@@ -674,7 +674,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       } catch (error) {
         console.error('Error uploading videos:', error);
         setUploadStatus('Upload failed');
-        alert('Failed to upload videos. Please check your connection and try again.');
+        alert('Connection failed. Please try again.');
       } finally {
         setTimeout(() => {
           setIsUploading(false);

@@ -282,7 +282,7 @@ const StartOlympiad = () => {
       setNotification({
         message: errorMessage 
           ? `Unable to start olympiad: ${errorMessage}` 
-          : "Unable to start olympiad. Please check your connection and try again.",
+          : "Connection failed. Please try again.",
         type: "error",
       });
       setStarting(false);

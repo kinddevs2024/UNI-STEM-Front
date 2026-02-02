@@ -34,7 +34,7 @@ const Contact = () => {
   return (
     <div className="contact-page">
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section h-svh ">
         <div className="hero-3d">
           <Scene3D subject="math" />
         </div>

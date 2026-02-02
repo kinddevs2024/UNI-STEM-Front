@@ -12,8 +12,10 @@ import QuestionFormStep from "../../components/QuestionFormStep/QuestionFormStep
 import "../AdminPanel/AdminPanel.css"; // Import for form styles (step-indicator, type-selection, etc.)
 import "./UniversityDashboard.css";
 
+const COINS_PER_UNLOCK = 10;
+
 const UniversityDashboard = () => {
-  const { user } = useAuth();
+  const { user, balance, refreshBalance } = useAuth();
   const { itemsPerPage } = useTheme();
   const [activeTab, setActiveTab] = useState("portfolios"); // "portfolios" or "olympiads"
 
@@ -181,37 +183,53 @@ const UniversityDashboard = () => {
     if (!selectedPortfolio) return;
 
     try {
-      await universityAPI.unlockContacts(selectedPortfolio._id);
+      const res = await universityAPI.unlockContacts(selectedPortfolio._id);
       setContactsUnlocked((prev) => ({
         ...prev,
         [selectedPortfolio._id]: true,
       }));
 
+      await refreshBalance();
+
       // Fetch contact info
-      const response = await universityAPI.getStudentContacts(
-        selectedPortfolio._id
-      );
-      if (response.data) {
-        setPortfolios((prev) =>
-          (prev || []).map((p) =>
-            p._id === selectedPortfolio._id ? { ...p, ...response.data } : p
-          )
+      try {
+        const response = await universityAPI.getStudentContacts(
+          selectedPortfolio._id
         );
+        if (response.data) {
+          setPortfolios((prev) =>
+            (prev || []).map((p) =>
+              p._id === selectedPortfolio._id ? { ...p, ...response.data } : p
+            )
+          );
+        }
+      } catch (fetchErr) {
+        console.warn("Fetch contacts after unlock:", fetchErr);
       }
 
+      const coinsDeducted = res.data?.data?.coinsDeducted;
       setNotification({
-        message: "Contacts unlocked successfully",
+        message: coinsDeducted
+          ? `Contacts unlocked. ${coinsDeducted} coins deducted.`
+          : "Contacts unlocked successfully",
         type: "success",
       });
       setShowUnlockModal(false);
       setSelectedPortfolio(null);
     } catch (error) {
-      console.error("Error unlocking contacts:", error);
-      console.error("Error unlocking contacts:", error);
-      setNotification({
-        message: "Failed to unlock contacts. Please try again.",
-        type: "error",
-      });
+      const status = error.response?.status;
+      const data = error.response?.data;
+      if (status === 402 || data?.code === "INSUFFICIENT_BALANCE") {
+        setNotification({
+          message: data?.message || "Insufficient balance. You need more coins to unlock contacts.",
+          type: "error",
+        });
+      } else {
+        setNotification({
+          message: data?.message || "Failed to unlock contacts. Please try again.",
+          type: "error",
+        });
+      }
     }
   };
 
@@ -967,6 +985,8 @@ const UniversityDashboard = () => {
         {showUnlockModal && selectedPortfolio && (
           <UnlockContactsModal
             portfolio={selectedPortfolio}
+            balance={balance}
+            coinsRequired={COINS_PER_UNLOCK}
             onConfirm={handleUnlockConfirm}
             onClose={() => {
               setShowUnlockModal(false);

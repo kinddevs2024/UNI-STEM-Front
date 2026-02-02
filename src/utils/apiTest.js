@@ -18,9 +18,7 @@ export const testAPIConnection = async () => {
     return {
       success: false,
       error: error.message,
-      message: import.meta.env.DEV
-        ? "Cannot connect to backend server. Make sure it is running on http://localhost:3000"
-        : "Cannot connect to backend server",
+      message: "Connection failed",
     };
   }
 };

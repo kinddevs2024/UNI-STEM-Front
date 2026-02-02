@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.message ||
         (error.code === "ERR_NETWORK"
-          ? "Cannot connect to server. Make sure backend is running."
+          ? "Connection failed. Please try again."
           : "Login failed");
       return {
         success: false,
@@ -175,7 +175,7 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.message ||
         (error.code === "ERR_NETWORK"
-          ? "Cannot connect to server. Make sure backend is running."
+          ? "Connection failed. Please try again."
           : "Registration failed");
       return {
         success: false,
@@ -236,7 +236,7 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.message ||
         (error.code === "ERR_NETWORK"
-          ? "Cannot connect to server. Make sure backend is running."
+          ? "Connection failed. Please try again."
           : "Google login failed");
       return {
         success: false,
@@ -255,6 +255,27 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (userData) => {
     setUserState(userData);
     setUser(userData);
+  };
+
+  // Balance/coins: derive from user, refresh from API
+  const balance = typeof user?.coins === "number" ? user.coins : 0;
+
+  const refreshBalance = async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await authAPI.getBalance();
+      if (res.data?.success && typeof res.data.coins === "number") {
+        setUserState((prev) => {
+          const updated = prev ? { ...prev, coins: res.data.coins } : null;
+          if (updated) setUser(updated);
+          return updated;
+        });
+        return res.data.coins;
+      }
+    } catch (err) {
+      console.warn("Refresh balance failed:", err);
+    }
+    return null;
   };
 
   const handleCookieConsent = async (consent) => {
@@ -310,6 +331,8 @@ export const AuthProvider = ({ children }) => {
     setUser: updateUser,
     showCookieConsent,
     handleCookieConsent,
+    balance,
+    refreshBalance,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

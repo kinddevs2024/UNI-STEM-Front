@@ -6,7 +6,7 @@ import { USER_ROLES } from "../../utils/constants";
 import "./Profile.css";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, balance } = useAuth();
   const [loading, setLoading] = useState(false);
 
   if (!user) {
@@ -156,6 +156,15 @@ const Profile = () => {
                       }`}
                     >
                       {user.userBan ? "Banned" : "Active"}
+                    </span>
+                  </div>
+                  <div className="detail-item full-width profile-coins-row">
+                    <span className="detail-label">Coins</span>
+                    <span className="detail-value">
+                      <span className="profile-balance">💰 {balance ?? 0} coins</span>
+                      <Link to="/buy-coins" className="profile-get-more">
+                        Get more
+                      </Link>
                     </span>
                   </div>
                 </div>

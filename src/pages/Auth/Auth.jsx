@@ -32,8 +32,7 @@ const Auth = () => {
       const result = await testAPIConnection();
       if (!result.success) {
         setNotification({
-          message:
-            "Cannot connect to backend server. Make sure it is running on http://localhost:3000",
+          message: "Connection failed. Please try again.",
           type: "error",
         });
       }

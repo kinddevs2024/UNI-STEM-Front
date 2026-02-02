@@ -234,7 +234,7 @@ const PortfolioView = () => {
       console.error("Error fetching portfolio:", err);
       // Handle network errors vs API errors
       if (err.code === "ERR_NETWORK" || err.message?.includes("Network")) {
-        setError("Cannot connect to server. Please make sure the backend is running.");
+        setError("Connection failed. Please try again.");
       } else {
         // Backend handles privacy - if portfolio is private, backend will return error message
         // Check for common private portfolio messages

@@ -75,7 +75,7 @@ const ImageUpload = ({
             certError.message || 
             logoError.response?.data?.message || 
             logoError.message || 
-            'Upload failed. Please check your connection and try again.';
+            'Connection failed. Please try again.';
           setError(errorMessage);
           setUploading(false);
           return;
