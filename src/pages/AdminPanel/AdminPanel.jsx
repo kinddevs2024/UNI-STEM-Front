@@ -661,14 +661,20 @@ const AdminPanel = () => {
         : (questionsResponse.data || []);
 
       // 3. Create new olympiad
+      const normalizedTitle = (originalOlympiad?.title || 'Olympiad').trim();
+      const normalizedDescription = (originalOlympiad?.description || normalizedTitle).trim();
+      const normalizedType = originalOlympiad?.type || 'test';
+      const normalizedSubject = originalOlympiad?.subject || 'Mathematics';
+      const normalizedDuration = Number(originalOlympiad?.duration) || 3600;
+
       const newOlympiadData = {
-        title: `${originalOlympiad.title} (Copy)`,
-        description: originalOlympiad.description,
-        type: originalOlympiad.type,
-        subject: originalOlympiad.subject,
+        title: `${normalizedTitle} (Copy)`,
+        description: normalizedDescription,
+        type: normalizedType,
+        subject: normalizedSubject,
         startTime: new Date().toISOString(), // Reset start time
         endTime: new Date(Date.now() + 3600000).toISOString(), // Reset end time (1 hour from now)
-        duration: originalOlympiad.duration,
+        duration: normalizedDuration,
         status: "draft", // Always draft
       };
 
