@@ -24,6 +24,8 @@ const EssayOlympiad = () => {
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(false);
+  const [faceCheckReady, setFaceCheckReady] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const draftSaveTimeoutRef = useRef(null);
 
@@ -226,6 +228,8 @@ const EssayOlympiad = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const currentAnswer = answers[currentQuestion._id] || '';
   const wordCount = getWordCount(currentAnswer);
+  const faceAllowed = faceCheckReady && faceDetected;
+  const canProceed = isRecording && faceAllowed;
 
   return (
     <div className="essay-olympiad-page">
@@ -234,6 +238,10 @@ const EssayOlympiad = () => {
         userId={user?._id}
         olympiadTitle={olympiad?.title}
         onRecordingStatusChange={setIsRecording}
+        onFaceStatusChange={({ detected, ready }) => {
+          setFaceDetected(detected);
+          setFaceCheckReady(ready);
+        }}
       />
       
       <div className="olympiad-container">
@@ -245,6 +253,17 @@ const EssayOlympiad = () => {
               <p>Please wait for camera and screen recording to start.</p>
               <p className="blocking-hint">
                 You cannot answer questions until recording is active.
+              </p>
+            </div>
+          </div>
+        )}
+        {isRecording && !faceAllowed && (
+          <div className="recording-block-overlay">
+            <div className="blocking-message card">
+              <h2>⚠️ Face Not Detected</h2>
+              <p>Please keep your face visible in the camera.</p>
+              <p className="blocking-hint">
+                The olympiad will resume once your face is detected.
               </p>
             </div>
           </div>
@@ -277,7 +296,7 @@ const EssayOlympiad = () => {
               key={index}
               className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${answers[questions[index]._id] ? 'answered' : ''}`}
               onClick={() => setCurrentQuestionIndex(index)}
-              disabled={!isRecording || submitted}
+              disabled={!canProceed || submitted}
             >
               {index + 1}
             </button>
@@ -303,7 +322,7 @@ const EssayOlympiad = () => {
                 value={currentAnswer}
                 onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
                 placeholder="Write your essay here..."
-                disabled={!isRecording || submitted}
+                disabled={!canProceed || submitted}
                 rows={20}
               />
               <div className="essay-stats">
@@ -318,7 +337,7 @@ const EssayOlympiad = () => {
           <button
             className="button-secondary"
             onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-            disabled={!isRecording || currentQuestionIndex === 0 || submitted}
+            disabled={!canProceed || currentQuestionIndex === 0 || submitted}
           >
             ← Previous
           </button>
@@ -327,7 +346,7 @@ const EssayOlympiad = () => {
             <button 
               className="button-primary" 
               onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
-              disabled={!isRecording || submitted}
+              disabled={!canProceed || submitted}
             >
               Next →
             </button>
@@ -335,7 +354,7 @@ const EssayOlympiad = () => {
             <button 
               className="button-primary" 
               onClick={handleSubmit}
-              disabled={!isRecording || submitted}
+              disabled={!canProceed || submitted}
             >
               Submit Essay
             </button>
@@ -355,4 +374,5 @@ const EssayOlympiad = () => {
 };
 
 export default EssayOlympiad;
+
 

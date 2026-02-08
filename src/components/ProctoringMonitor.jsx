@@ -4,7 +4,7 @@ import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
 import './ProctoringMonitor.css';
 
-const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange }) => {
+const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {
   const cameraVideoRef = useRef(null);
   const screenVideoRef = useRef(null);
   
@@ -13,6 +13,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   const [cameraError, setCameraError] = useState(null);
   const [screenError, setScreenError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(false);
+  const [faceCheckReady, setFaceCheckReady] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ camera: 0, screen: 0 });
   const [uploadStatus, setUploadStatus] = useState('');
@@ -28,6 +30,11 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   const canvasRef = useRef(null);
   const realTimeCaptureIntervalRef = useRef(null);
   const captureCanvasRef = useRef(null);
+  const faceMeshRef = useRef(null);
+  const faceDetectionRafRef = useRef(null);
+  const faceMissingSinceRef = useRef(null);
+
+  const FACE_MISSING_GRACE_MS = 2000;
 
   // Function to capture last frame from video element synchronously
   const captureLastFrameSync = (videoElement, type) => {
@@ -755,6 +762,103 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       })();
     };
   }, [consentGiven, olympiadId, userId]);
+
+  useEffect(() => {
+    if (!consentGiven) return;
+
+    let cancelled = false;
+
+    const setupFaceMesh = async () => {
+      if (!window.FaceMesh) {
+        console.warn('FaceMesh not available. Face detection disabled.');
+        setFaceCheckReady(true);
+        setFaceDetected(false);
+        return;
+      }
+      if (!cameraVideoRef.current) {
+        return;
+      }
+
+      const faceMesh = new window.FaceMesh({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+      });
+
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+
+      faceMesh.onResults((results) => {
+        if (cancelled) return;
+        setFaceCheckReady(true);
+
+        const hasFace = Boolean(results?.multiFaceLandmarks?.length);
+        if (hasFace) {
+          faceMissingSinceRef.current = null;
+          setFaceDetected(true);
+          return;
+        }
+
+        if (!faceMissingSinceRef.current) {
+          faceMissingSinceRef.current = Date.now();
+        }
+        if (Date.now() - faceMissingSinceRef.current >= FACE_MISSING_GRACE_MS) {
+          setFaceDetected(false);
+        }
+      });
+
+      faceMeshRef.current = faceMesh;
+
+      const processFrame = async () => {
+        if (cancelled) return;
+        const video = cameraVideoRef.current;
+        if (video && video.readyState >= 2) {
+          try {
+            await faceMesh.send({ image: video });
+          } catch (err) {
+            console.warn('FaceMesh processing error:', err);
+          }
+        }
+        faceDetectionRafRef.current = requestAnimationFrame(processFrame);
+      };
+
+      processFrame();
+    };
+
+    const waitForVideo = () => {
+      if (cancelled) return;
+      const video = cameraVideoRef.current;
+      if (!video || video.readyState < 2) {
+        setTimeout(waitForVideo, 200);
+        return;
+      }
+      setupFaceMesh();
+    };
+
+    waitForVideo();
+
+    return () => {
+      cancelled = true;
+      if (faceDetectionRafRef.current) {
+        cancelAnimationFrame(faceDetectionRafRef.current);
+        faceDetectionRafRef.current = null;
+      }
+      if (faceMeshRef.current) {
+        faceMeshRef.current.close();
+        faceMeshRef.current = null;
+      }
+      faceMissingSinceRef.current = null;
+      setFaceCheckReady(false);
+      setFaceDetected(false);
+    };
+  }, [consentGiven]);
+
+  useEffect(() => {
+    if (!onFaceStatusChange) return;
+    onFaceStatusChange({ detected: faceDetected, ready: faceCheckReady });
+  }, [faceDetected, faceCheckReady, onFaceStatusChange]);
 
   if (!consentGiven) {
     return (
