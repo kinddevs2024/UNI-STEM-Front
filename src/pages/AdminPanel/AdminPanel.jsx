@@ -656,7 +656,9 @@ const AdminPanel = () => {
 
       // 2. Get questions
       const questionsResponse = await adminAPI.getQuestions(olympiad._id);
-      const originalQuestions = questionsResponse.data || [];
+      const originalQuestions = Array.isArray(questionsResponse.data?.data)
+        ? questionsResponse.data.data
+        : (questionsResponse.data || []);
 
       // 3. Create new olympiad
       const newOlympiadData = {
@@ -684,14 +686,37 @@ const AdminPanel = () => {
       // 4. Add questions to new olympiad
       // We use a loop to add questions sequentially to preserve order
       for (const question of originalQuestions) {
+        const normalizedQuestion = question?.question || question?.questionText || '';
+        const normalizedType = question?.type || originalOlympiad?.type || 'essay';
+        const normalizedPoints = Number(question?.points) || 10;
+        const normalizedOptions = Array.isArray(question?.options)
+          ? question.options.filter((opt) => opt && String(opt).trim() !== '')
+          : [];
+        let normalizedCorrectAnswer = question?.correctAnswer;
+
+        if (normalizedType === 'multiple-choice') {
+          if (!normalizedOptions.length) {
+            // Skip invalid MCQ instead of crashing the whole duplication
+            // Backend requires options + correctAnswer
+            continue;
+          }
+          if (!normalizedCorrectAnswer || !normalizedOptions.includes(normalizedCorrectAnswer)) {
+            normalizedCorrectAnswer = normalizedOptions[0];
+          }
+        }
+
+        if (!normalizedQuestion || !normalizedType || !normalizedPoints) {
+          continue;
+        }
+
         await adminAPI.addQuestion({
           olympiadId: newOlympiadId,
-          question: question.question,
-          type: question.type,
-          options: question.options,
-          correctAnswer: question.correctAnswer,
-          points: question.points,
-          order: question.order,
+          question: normalizedQuestion,
+          type: normalizedType,
+          options: normalizedOptions,
+          correctAnswer: normalizedType === 'multiple-choice' ? normalizedCorrectAnswer : undefined,
+          points: normalizedPoints,
+          order: question?.order,
         });
       }
 
