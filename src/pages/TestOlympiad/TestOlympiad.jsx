@@ -5,7 +5,6 @@ import { useSocket } from '../../context/SocketContext';
 import Timer from '../../components/Timer';
 import QuestionCard from '../../components/QuestionCard';
 import ProctoringMonitor from '../../components/ProctoringMonitor';
-import AttemptRecovery from '../../components/AttemptRecovery';
 import NotificationToast from '../../components/NotificationToast';
 import { useAuth } from '../../context/AuthContext';
 import { useServerTimer } from '../../hooks/useServerTimer';
@@ -383,17 +382,6 @@ const TestOlympiad = () => {
 
   return (
     <div className="test-olympiad-page">
-      <AttemptRecovery 
-        olympiadId={id}
-        attemptId={attemptId}
-        onReconnected={() => {
-          // Reload attempt session
-        }}
-        onSyncComplete={() => {
-          // Answers synced successfully
-        }}
-      />
-      
       <ProctoringMonitor 
         olympiadId={id} 
         userId={user?._id}
@@ -501,4 +489,3 @@ const TestOlympiad = () => {
 };
 
 export default TestOlympiad;
-
