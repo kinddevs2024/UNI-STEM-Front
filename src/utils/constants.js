@@ -2,9 +2,29 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.DEV ? "/api" : "https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app/api");
-export const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  (import.meta.env.DEV ? "http://localhost:3000" : "https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app");
+
+const resolveSocketUrl = () => {
+  const envSocketUrl = import.meta.env.VITE_SOCKET_URL;
+  if (envSocketUrl) return envSocketUrl;
+  if (import.meta.env.DEV) return "http://localhost:3000";
+
+  const envApiUrl = import.meta.env.VITE_API_URL;
+  if (envApiUrl) {
+    try {
+      return new URL(envApiUrl).origin;
+    } catch {
+      // Ignore invalid URL and fall back to current origin.
+    }
+  }
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return "";
+};
+
+export const SOCKET_URL = resolveSocketUrl();
 
 export const USER_ROLES = {
   STUDENT: "student",
