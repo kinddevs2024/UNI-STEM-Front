@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/api";
 import { USER_ROLES } from "../../utils/constants";
+import { getImageUrl } from "../../utils/helpers";
 import NotificationToast from "../../components/NotificationToast";
 import "./ProfileEdit.css";
 
@@ -267,7 +268,7 @@ const ProfileEdit = () => {
               {!formData.userLogo && user.userLogo && (
                 <div className="file-preview">
                   <img
-                    src={user.userLogo}
+                    src={getImageUrl(user.userLogo)}
                     alt="Current"
                     className="preview-image"
                   />

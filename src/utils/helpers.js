@@ -1,3 +1,20 @@
+// Helper to get full image URL (handle relative paths from API)
+export const getImageUrl = (url) => {
+  if (!url) return '';
+  // If it's already a full URL, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  // If it starts with /, construct full URL using the API base domain
+  if (url.startsWith('/')) {
+    // In production, use the Vercel backend domain
+    const backendDomain = 'https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app';
+    return `${backendDomain}${url}`;
+  }
+  // Otherwise return as-is (might be a relative path)
+  return url;
+};
+
 export const formatTime = (seconds) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);

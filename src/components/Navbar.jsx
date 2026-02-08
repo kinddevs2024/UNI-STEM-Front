@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
+import { getImageUrl } from "../utils/helpers";
 import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
 
@@ -78,7 +79,7 @@ const Navbar = () => {
               <Link to="/profile" className="navbar-user">
                 {user?.userLogo ? (
                   <img
-                    src={user.userLogo}
+                    src={getImageUrl(user.userLogo)}
                     alt="Profile"
                     className="navbar-user-avatar"
                   />

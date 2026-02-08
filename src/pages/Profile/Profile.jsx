@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { formatDate } from "../../utils/helpers";
+import { formatDate, getImageUrl } from "../../utils/helpers";
 import { USER_ROLES } from "../../utils/constants";
 import "./Profile.css";
 
@@ -41,7 +41,7 @@ const Profile = () => {
             <div className="profile-avatar-section">
               {user.userLogo ? (
                 <img
-                  src={user.userLogo}
+                  src={getImageUrl(user.userLogo)}
                   alt="Profile"
                   className="profile-avatar"
                 />
