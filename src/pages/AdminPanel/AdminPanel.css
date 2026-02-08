@@ -13,7 +13,7 @@
 
 .admin-header {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
   align-items: center;
   margin-bottom: 40px;
   animation: fadeIn 0.5s ease;
@@ -36,8 +36,10 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   white-space: nowrap;
+  justify-content: flex-end;
+  max-width: 100%;
 }
 
 .status-filter {
@@ -78,6 +80,8 @@
   color: var(--text-primary);
   transition: all 0.3s ease;
   border-radius: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-header-actions .button-primary:hover,
