@@ -45,16 +45,6 @@ const QuestionManager = ({ olympiad, onClose }) => {
     });
   };
 
-  const resetQuestionForm = () => {
-    setQuestionForm({
-      question: "",
-      type: olympiad.type === "test" ? "multiple-choice" : "essay",
-      options: ["", "", "", ""],
-      correctAnswer: "",
-      points: 10,
-    });
-  };
-
   const handleAddQuestion = async (e) => {
     e.preventDefault();
 
