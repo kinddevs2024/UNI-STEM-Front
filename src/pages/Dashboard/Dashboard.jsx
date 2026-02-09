@@ -624,7 +624,7 @@ const Dashboard = () => {
                       className="button-secondary"
                       onClick={() => {
                         handleCloseModal();
-                        navigate("/admin");
+                        navigate(`/admin?edit=${selectedOlympiad._id}`);
                         // Note: AdminPanel will need to handle opening edit form for this olympiad
                       }}
                     >

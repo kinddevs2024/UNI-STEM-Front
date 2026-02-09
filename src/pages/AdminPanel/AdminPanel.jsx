@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { adminAPI } from "../../services/api";
 import NotificationToast from "../../components/NotificationToast";
 import { formatDate } from "../../utils/helpers";
@@ -196,6 +197,8 @@ const QuestionFormStep = ({
 };
 
 const AdminPanel = () => {
+  const location = useLocation();
+  const handledEditIdRef = useRef(null);
   const [olympiads, setOlympiads] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedOlympiad, setSelectedOlympiad] = useState(null);
@@ -477,6 +480,16 @@ const AdminPanel = () => {
       setNotification({ message: "Failed to load olympiad", type: "error" });
     }
   }, []);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const editId = searchParams.get("edit");
+    if (!editId) return;
+    if (handledEditIdRef.current === editId) return;
+
+    handledEditIdRef.current = editId;
+    handleEdit({ _id: editId });
+  }, [location.search, handleEdit]);
 
   // Update olympiad
   const handleUpdateOlympiad = useCallback(async (e) => {

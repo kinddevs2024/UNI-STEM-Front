@@ -166,8 +166,13 @@ const QuestionManager = ({ olympiad, onClose }) => {
               {olympiad.type === "test" && (
                 <div className="form-group">
                   <label>Options</label>
-                  {(Array.isArray(questionForm.options) ? questionForm.options : []).map((option, index) => (
-                    <div key={index} className="option-input-row">
+                  {(Array.isArray(questionForm.options) ? questionForm.options : []).map((option, index) => {
+                    const isSelected = questionForm.correctAnswer === option && option.trim() !== "";
+                    return (
+                      <div
+                        key={index}
+                        className={`option-input-row ${isSelected ? "is-selected" : ""}`}
+                      >
                       <span className="option-label">
                         {String.fromCharCode(65 + index)}.
                       </span>
@@ -196,8 +201,10 @@ const QuestionManager = ({ olympiad, onClose }) => {
                         disabled={!option.trim()}
                       />
                       <label className="radio-label">Correct</label>
+                      {isSelected && <span className="selected-badge">Selected</span>}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
