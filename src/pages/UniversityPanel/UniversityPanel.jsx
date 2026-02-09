@@ -580,7 +580,11 @@ const UniversityPanel = () => {
       const response = await universityAPI.getOlympiadById(olympiad._id);
       const olympiadData = normalizeOlympiadData(response?.data);
 
-      if (olympiadData) {
+      const hasValidData =
+        olympiadData &&
+        (olympiadData._id || olympiadData.id || olympiadData.title);
+
+      if (hasValidData) {
         setFormData(buildFormData(olympiadData));
       }
     } catch (error) {
