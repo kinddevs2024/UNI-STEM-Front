@@ -537,10 +537,16 @@ const UniversityPanel = () => {
 
   // Load olympiad for editing
   const handleEdit = async (olympiad) => {
-    try {
-      const response = await universityAPI.getOlympiadById(olympiad._id);
-      const olympiadData = response.data.data || response.data;
+    const normalizeOlympiadData = (payload) => {
+      if (!payload) return null;
+      const data = payload.data ?? payload;
+      if (data?.olympiad) return data.olympiad;
+      if (data?.data?.olympiad) return data.data.olympiad;
+      if (data?.data) return data.data;
+      return data;
+    };
 
+    try {
       // Convert ISO dates to datetime-local format
       const formatToLocalDateTime = (isoString) => {
         if (!isoString) return "";
@@ -553,21 +559,30 @@ const UniversityPanel = () => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
       };
 
-      setEditingOlympiad(olympiad._id);
-      setFormData({
-        title: olympiadData.title || "",
-        description: olympiadData.description || "",
-        subject: olympiadData.subject || "Mathematics",
-        type: olympiadData.type || "test",
-        startTime: formatToLocalDateTime(olympiadData.startTime),
-        endTime: formatToLocalDateTime(olympiadData.endTime),
-        duration: Math.floor((Number(olympiadData.duration) || 3600) / 60), // Convert seconds to minutes
-        status: olympiadData.status || "draft",
-        olympiadLogo: null, // Logo will be loaded from backend URL if exists
-        universityName: olympiadData.universityName || "",
+      const buildFormData = (data) => ({
+        title: data?.title || "",
+        description: data?.description || "",
+        subject: data?.subject || "Mathematics",
+        type: data?.type || "test",
+        startTime: formatToLocalDateTime(data?.startTime),
+        endTime: formatToLocalDateTime(data?.endTime),
+        duration: Math.floor((Number(data?.duration) || 3600) / 60),
+        status: data?.status || "draft",
+        olympiadLogo: null,
+        universityName: data?.universityName || "",
       });
+
+      setEditingOlympiad(olympiad._id);
       setShowCreateForm(true);
       setCurrentStep(2); // Skip type selection for editing
+      setFormData(buildFormData(olympiad));
+
+      const response = await universityAPI.getOlympiadById(olympiad._id);
+      const olympiadData = normalizeOlympiadData(response?.data);
+
+      if (olympiadData) {
+        setFormData(buildFormData(olympiadData));
+      }
     } catch (error) {
       setNotification({ message: "Failed to load olympiad", type: "error" });
     }
