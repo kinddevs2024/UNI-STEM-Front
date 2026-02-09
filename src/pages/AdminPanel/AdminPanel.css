@@ -447,6 +447,30 @@
   margin-top: 32px;
 }
 
+.question-form textarea,
+.question-form input[type="text"],
+.question-form input[type="number"] {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 12px 14px;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question-form textarea::placeholder,
+.question-form input[type="text"]::placeholder {
+  color: var(--text-secondary);
+}
+
+.question-form textarea:focus,
+.question-form input[type="text"]:focus,
+.question-form input[type="number"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
 .questions-list {
   margin-bottom: 32px;
 }
@@ -517,6 +541,16 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.option-input-row.is-selected {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .option-label {
@@ -528,6 +562,20 @@
 .option-input {
   flex: 1;
   margin: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+}
+
+.option-input:focus {
+  outline: none;
+}
+
+.option-input-row input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .radio-label {
@@ -535,6 +583,15 @@
   color: var(--text-secondary);
   cursor: pointer;
   margin: 0;
+}
+
+.selected-badge {
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
 }
 
 .button-success {
