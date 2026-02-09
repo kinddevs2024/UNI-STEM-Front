@@ -11,6 +11,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionForm, setQuestionForm] = useState({
     question: "",
     type: olympiad.type === "test" ? "multiple-choice" : "essay",
@@ -34,8 +35,21 @@ const QuestionManager = ({ olympiad, onClose }) => {
     }
   };
 
+  const resetQuestionForm = () => {
+    setQuestionForm({
+      question: "",
+      type: olympiad.type === "test" ? "multiple-choice" : "essay",
+      options: ["", "", "", ""],
+      correctAnswer: "",
+      points: 10,
+    });
+  };
+
   const handleAddQuestion = async (e) => {
     e.preventDefault();
+
+    const isEditing = Boolean(editingQuestionId);
+    const normalizedCorrectAnswer = questionForm.correctAnswer;
 
     try {
       if (olympiad.type === "test") {
@@ -57,15 +71,23 @@ const QuestionManager = ({ olympiad, onClose }) => {
           return;
         }
 
-        await universityAPI.addQuestion({
-          olympiadId: olympiad._id,
+        const payload = {
           question: questionForm.question,
           type: "multiple-choice",
           options: validOptions,
-          correctAnswer: questionForm.correctAnswer,
+          correctAnswer: normalizedCorrectAnswer,
           points: Number(questionForm.points) || 10,
-          order: questions.length + 1,
-        });
+        };
+
+        if (isEditing) {
+          await universityAPI.updateQuestion(editingQuestionId, payload);
+        } else {
+          await universityAPI.addQuestion({
+            olympiadId: olympiad._id,
+            ...payload,
+            order: questions.length + 1,
+          });
+        }
       } else {
         if (!questionForm.question) {
           setNotification({
@@ -75,31 +97,74 @@ const QuestionManager = ({ olympiad, onClose }) => {
           return;
         }
 
-        await universityAPI.addQuestion({
-          olympiadId: olympiad._id,
+        const payload = {
           question: questionForm.question,
           type: "essay",
           points: Number(questionForm.points) || 10,
-          order: questions.length + 1,
-        });
+        };
+
+        if (isEditing) {
+          await universityAPI.updateQuestion(editingQuestionId, payload);
+        } else {
+          await universityAPI.addQuestion({
+            olympiadId: olympiad._id,
+            ...payload,
+            order: questions.length + 1,
+          });
+        }
       }
 
       setNotification({
-        message: "Question added successfully",
+        message: isEditing ? "Question updated successfully" : "Question added successfully",
         type: "success",
       });
-      setQuestionForm({
-        question: "",
-        type: olympiad.type === "test" ? "multiple-choice" : "essay",
-        options: ["", "", "", ""],
-        correctAnswer: "",
-        points: 10,
-      });
+      resetQuestionForm();
+      setEditingQuestionId(null);
       setShowAddForm(false);
       fetchQuestions();
     } catch (error) {
       setNotification({
-        message: error.response?.data?.message || "Failed to add question",
+        message: error.response?.data?.message || "Failed to save question",
+        type: "error",
+      });
+    }
+  };
+
+  const handleEditQuestion = (question) => {
+    const normalizedOptions = Array.isArray(question?.options)
+      ? question.options
+      : [];
+    const paddedOptions = [...normalizedOptions];
+    while (paddedOptions.length < 4) {
+      paddedOptions.push("");
+    }
+
+    setQuestionForm({
+      question: question?.question || "",
+      type: question?.type === "multiple-choice" ? "multiple-choice" : "essay",
+      options: paddedOptions,
+      correctAnswer: question?.correctAnswer || "",
+      points: Number(question?.points) || 10,
+    });
+    setEditingQuestionId(question?._id || null);
+    setShowAddForm(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestionId(null);
+    resetQuestionForm();
+    setShowAddForm(false);
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm("Delete this question?")) return;
+    try {
+      await universityAPI.deleteQuestion(questionId);
+      setNotification({ message: "Question deleted", type: "success" });
+      fetchQuestions();
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to delete question",
         type: "error",
       });
     }
@@ -139,7 +204,13 @@ const QuestionManager = ({ olympiad, onClose }) => {
             <h3>Questions ({questions.length})</h3>
             <button
               className="button-primary"
-              onClick={() => setShowAddForm(!showAddForm)}
+              onClick={() => {
+                if (showAddForm) {
+                  handleCancelEdit();
+                } else {
+                  setShowAddForm(true);
+                }
+              }}
             >
               {showAddForm ? "Cancel" : "+ Add Question"}
             </button>
@@ -227,7 +298,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
               </div>
 
               <button type="submit" className="button-primary">
-                Add Question
+                {editingQuestionId ? "Update Question" : "Add Question"}
               </button>
             </form>
           )}
@@ -259,6 +330,22 @@ const QuestionManager = ({ olympiad, onClose }) => {
                       ))}
                     </div>
                   )}
+                  <div className="form-actions" style={{ justifyContent: "flex-end" }}>
+                    <button
+                      type="button"
+                      className="button-secondary"
+                      onClick={() => handleEditQuestion(q)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="button-danger"
+                      onClick={() => handleDeleteQuestion(q?._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))
             )}

@@ -224,6 +224,8 @@ export const adminAPI = {
     return api.get(url);
   },
   addQuestion: (data) => api.post("/admin/questions", data),
+  updateQuestion: (id, data) => api.put(`/admin/questions/${id}`, data),
+  deleteQuestion: (id) => api.delete(`/admin/questions/${id}`),
 
   // User management
   getUsers: () => api.get("/admin/users"),
@@ -426,6 +428,8 @@ export const universityAPI = {
     return api.get(url);
   },
   addQuestion: (data) => api.post("/university/questions", data),
+  updateQuestion: (id, data) => api.put(`/university/questions/${id}`, data),
+  deleteQuestion: (id) => api.delete(`/university/questions/${id}`),
 
   // Get results for university's olympiads
   getOlympiadResults: (olympiadId) =>
