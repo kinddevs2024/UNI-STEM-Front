@@ -34,6 +34,16 @@ const QuestionManager = ({ olympiad, onClose }) => {
       setLoading(false);
     }
   };
+  
+  const resetQuestionForm = () => {
+    setQuestionForm({
+      question: "",
+      type: olympiad.type === "test" ? "multiple-choice" : "essay",
+      options: ["", "", "", ""],
+      correctAnswer: "",
+      points: 10,
+    });
+  };
 
   const resetQuestionForm = () => {
     setQuestionForm({
@@ -571,6 +581,40 @@ const UniversityPanel = () => {
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to add question",
+        type: "error",
+      });
+    }
+  };
+
+  const handleUpdateQuestion = async (questionId, questionData) => {
+    try {
+      const response = await universityAPI.updateQuestion(questionId, questionData);
+      const updatedQuestion = response.data;
+      setQuestions((prev) =>
+        (Array.isArray(prev) ? prev : []).map((q) =>
+          q?._id === questionId ? { ...q, ...updatedQuestion } : q
+        )
+      );
+      setNotification({ message: "Question updated", type: "success" });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to update question",
+        type: "error",
+      });
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm("Delete this question?")) return;
+    try {
+      await universityAPI.deleteQuestion(questionId);
+      setQuestions((prev) =>
+        (Array.isArray(prev) ? prev : []).filter((q) => q?._id !== questionId)
+      );
+      setNotification({ message: "Question deleted", type: "success" });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to delete question",
         type: "error",
       });
     }
@@ -1269,6 +1313,8 @@ const UniversityPanel = () => {
                 olympiadType={formData.type}
                 questions={questions}
                 onAddQuestion={handleAddQuestion}
+                onUpdateQuestion={handleUpdateQuestion}
+                onDeleteQuestion={handleDeleteQuestion}
                 onFinish={handleFinish}
                 onBack={() => setCurrentStep(2)}
               />

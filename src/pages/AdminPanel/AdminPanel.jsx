@@ -400,6 +400,40 @@ const AdminPanel = () => {
     }
   }, [createdOlympiadId, questions]);
 
+  const handleUpdateQuestion = useCallback(async (questionId, questionData) => {
+    try {
+      const response = await adminAPI.updateQuestion(questionId, questionData);
+      const updatedQuestion = response.data;
+      setQuestions((prev) =>
+        (Array.isArray(prev) ? prev : []).map((q) =>
+          q?._id === questionId ? { ...q, ...updatedQuestion } : q
+        )
+      );
+      setNotification({ message: "Question updated", type: "success" });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to update question",
+        type: "error",
+      });
+    }
+  }, []);
+
+  const handleDeleteQuestion = useCallback(async (questionId) => {
+    if (!window.confirm("Delete this question?")) return;
+    try {
+      await adminAPI.deleteQuestion(questionId);
+      setQuestions((prev) =>
+        (Array.isArray(prev) ? prev : []).filter((q) => q?._id !== questionId)
+      );
+      setNotification({ message: "Question deleted", type: "success" });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to delete question",
+        type: "error",
+      });
+    }
+  }, []);
+
   // Finish and close
   const handleFinish = useCallback(() => {
     setShowCreateForm(false);
@@ -1177,6 +1211,8 @@ const AdminPanel = () => {
                 olympiadType={formData.type}
                 questions={questions}
                 onAddQuestion={handleAddQuestion}
+                onUpdateQuestion={handleUpdateQuestion}
+                onDeleteQuestion={handleDeleteQuestion}
                 onFinish={handleFinish}
                 onBack={() => setCurrentStep(2)}
               />

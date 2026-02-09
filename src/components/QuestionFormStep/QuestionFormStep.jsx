@@ -7,6 +7,8 @@ const QuestionFormStep = ({
   olympiadType,
   questions,
   onAddQuestion,
+  onUpdateQuestion,
+  onDeleteQuestion,
   onFinish,
   onBack,
 }) => {
@@ -17,9 +19,11 @@ const QuestionFormStep = ({
     correctAnswer: "",
     points: 10,
   });
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   const handleAddQuestion = (e) => {
     e.preventDefault();
+    const isEditing = Boolean(editingQuestionId);
 
     if (olympiadType === "test") {
       // Validate multiple choice question
@@ -33,24 +37,36 @@ const QuestionFormStep = ({
         return;
       }
 
-      onAddQuestion({
+      const payload = {
         question: questionForm.question,
         type: "multiple-choice",
         options: validOptions,
         correctAnswer: questionForm.correctAnswer,
         points: questionForm.points,
-      });
+      };
+
+      if (isEditing && onUpdateQuestion) {
+        onUpdateQuestion(editingQuestionId, payload);
+      } else {
+        onAddQuestion(payload);
+      }
     } else {
       // Essay question
       if (!questionForm.question) {
         return;
       }
 
-      onAddQuestion({
+      const payload = {
         question: questionForm.question,
         type: "essay",
         points: questionForm.points,
-      });
+      };
+
+      if (isEditing && onUpdateQuestion) {
+        onUpdateQuestion(editingQuestionId, payload);
+      } else {
+        onAddQuestion(payload);
+      }
     }
 
     // Reset form
@@ -61,6 +77,41 @@ const QuestionFormStep = ({
       correctAnswer: "",
       points: 10,
     });
+    setEditingQuestionId(null);
+  };
+
+  const handleEditQuestion = (question) => {
+    const normalizedOptions = Array.isArray(question?.options)
+      ? question.options
+      : [];
+    const paddedOptions = [...normalizedOptions];
+    while (paddedOptions.length < 4) {
+      paddedOptions.push("");
+    }
+
+    setQuestionForm({
+      question: question?.question || "",
+      type: question?.type === "multiple-choice" ? "multiple-choice" : "essay",
+      options: paddedOptions,
+      correctAnswer: question?.correctAnswer || "",
+      points: Number(question?.points) || 10,
+    });
+    setEditingQuestionId(question?._id || null);
+  };
+
+  const handleDeleteQuestion = (questionId) => {
+    if (!onDeleteQuestion) return;
+    onDeleteQuestion(questionId);
+    if (editingQuestionId === questionId) {
+      setEditingQuestionId(null);
+      setQuestionForm({
+        question: "",
+        type: olympiadType === "test" ? "multiple-choice" : "essay",
+        options: ["", "", "", ""],
+        correctAnswer: "",
+        points: 10,
+      });
+    }
   };
 
   const handleOptionChange = (index, value) => {
@@ -102,6 +153,22 @@ const QuestionFormStep = ({
                   ))}
                 </div>
               )}
+              <div className="form-actions" style={{ justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => handleEditQuestion(q)}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="button-danger"
+                  onClick={() => handleDeleteQuestion(q?._id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -185,7 +252,7 @@ const QuestionFormStep = ({
             Back
           </button>
           <button type="submit" className="button-primary">
-            Add Question
+            {editingQuestionId ? "Update Question" : "Add Question"}
           </button>
           <button type="button" className="button-success" onClick={onFinish}>
             Finish
