@@ -258,8 +258,20 @@ export const adminAPI = {
   },
 
   // Camera captures
-  getCameraCaptures: (olympiadId) =>
-    api.get(`/admin/camera-captures/${olympiadId}`),
+  getCameraCaptures: (olympiadId, params = {}) => {
+    const query = new URLSearchParams();
+    if (params.userId) query.append("userId", params.userId);
+    if (params.captureType) query.append("captureType", params.captureType);
+    if (params.fileType) query.append("fileType", params.fileType);
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+    const queryString = query.toString();
+    return api.get(
+      `/admin/camera-captures/${olympiadId}${
+        queryString ? `?${queryString}` : ""
+      }`
+    );
+  },
 };
 
 // Owner endpoints
@@ -377,6 +389,20 @@ export const resolterAPI = {
   // Toggle result visibility
   toggleResultVisibility: (resultId, visible) => {
     return api.put(`/resolter/results/${resultId}/visibility`, { visible });
+  },
+  getCameraCaptures: (olympiadId, params = {}) => {
+    const query = new URLSearchParams();
+    if (params.userId) query.append("userId", params.userId);
+    if (params.captureType) query.append("captureType", params.captureType);
+    if (params.fileType) query.append("fileType", params.fileType);
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+    const queryString = query.toString();
+    return api.get(
+      `/admin/camera-captures/${olympiadId}${
+        queryString ? `?${queryString}` : ""
+      }`
+    );
   },
 
   // Make all results visible for an olympiad

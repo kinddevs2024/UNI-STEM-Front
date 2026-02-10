@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { resolterAPI, olympiadAPI, adminAPI } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { formatDate, getImageUrl } from '../../utils/helpers';
 import NotificationToast from '../../components/NotificationToast';
 import './ResolterPanel.css';
 
@@ -13,10 +13,13 @@ const ResolterPanel = () => {
   const [olympiads, setOlympiads] = useState([]);
   const [selectedOlympiad, setSelectedOlympiad] = useState(null);
   const [filter, setFilter] = useState('all'); // all, olympiad
+  const [statusFilter, setStatusFilter] = useState('queue');
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [editForm, setEditForm] = useState({ score: '', comment: '' });
   const [viewingSubmission, setViewingSubmission] = useState(null);
   const [submissionDetails, setSubmissionDetails] = useState(null);
+  const [captures, setCaptures] = useState([]);
+  const [capturesLoading, setCapturesLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -240,6 +243,12 @@ const ResolterPanel = () => {
 
   const openViewModal = async (submission) => {
     setViewingSubmission(submission);
+    setCaptures([]);
+    const submissionUserId = submission.user?._id || submission.userId;
+    const submissionOlympiadId = submission.olympiadId || submission.olympiad?._id;
+    if (submissionUserId && submissionOlympiadId) {
+      await fetchCaptures(submissionOlympiadId, submissionUserId);
+    }
     await fetchSubmissionDetails(submission._id);
   };
 
@@ -255,6 +264,105 @@ const ResolterPanel = () => {
     setEditingSubmission(null);
     setEditForm({ score: '', comment: '' });
   };
+
+  const fetchCaptures = async (olympiadId, userId) => {
+    try {
+      setCapturesLoading(true);
+      const response = await resolterAPI.getCameraCaptures(olympiadId, {
+        userId,
+        fileType: 'video',
+        limit: 50,
+      });
+      const data = response.data;
+      const captureList = data?.captures || data?.data || data || [];
+      setCaptures(Array.isArray(captureList) ? captureList : []);
+    } catch (error) {
+      console.error('Error fetching captures:', error);
+      setCaptures([]);
+    } finally {
+      setCapturesLoading(false);
+    }
+  };
+
+  const isVideoCapture = (capture) => {
+    if (capture.fileType === 'video') return true;
+    const path = capture.imagePath || capture.imageUrl || '';
+    return /\.(mp4|webm|mov|avi)$/i.test(path);
+  };
+
+  const groupCaptures = (captureList) => {
+    const groups = {
+      screen: [],
+      camera: [],
+      front: [],
+      back: [],
+      both: [],
+      other: [],
+    };
+
+    captureList.forEach((capture) => {
+      const type = (capture.captureType || '').toLowerCase();
+      if (type.includes('screen')) groups.screen.push(capture);
+      else if (type.includes('front')) groups.front.push(capture);
+      else if (type.includes('back')) groups.back.push(capture);
+      else if (type.includes('camera')) groups.camera.push(capture);
+      else if (type.includes('both')) groups.both.push(capture);
+      else groups.other.push(capture);
+    });
+
+    return groups;
+  };
+
+  const renderVideoList = (list) => {
+    if (capturesLoading) {
+      return <div className="video-empty">Loading videos...</div>;
+    }
+    if (!list || list.length === 0) {
+      return <div className="video-empty">No video available</div>;
+    }
+
+    return list.map((capture) => {
+      const videoUrl = getImageUrl(capture.imageUrl || `/api/uploads/${capture.imagePath}`);
+      return (
+        <div key={capture._id} className="video-card">
+          <video className="review-video-player" controls preload="metadata">
+            <source src={videoUrl} />
+          </video>
+          <div className="video-meta">
+            <span>{capture.captureType || 'video'}</span>
+            <span>{capture.timestamp ? formatDate(capture.timestamp) : '-'}</span>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const getDisplaySubmissions = (submissionList) => {
+    if (!Array.isArray(submissionList)) return [];
+    const essaySubmissions = submissionList.filter((submission) =>
+      typeof submission.answer === 'string' && submission.answer.trim().length > 50
+    );
+    return essaySubmissions.length > 0 ? essaySubmissions : submissionList;
+  };
+
+  const getFilteredResults = () => {
+    const statusFiltered = results.filter((result) => {
+      const status = result.status || 'active';
+      const isVisible = result.visible !== false;
+      const isQueued = status === 'pending' || status === 'under-review' || (!isVisible && status === 'active');
+      const isPublished = isVisible && (status === 'checked' || status === 'active');
+
+      if (statusFilter === 'queue') return isQueued;
+      if (statusFilter === 'checked') return status === 'checked';
+      if (statusFilter === 'published') return isPublished;
+      if (statusFilter === 'blocked') return status === 'blocked';
+      return true;
+    });
+
+    return statusFiltered;
+  };
+
+  const filteredResults = getFilteredResults();
 
 
   const handleChangeStatus = async (resultId, status) => {
@@ -381,6 +489,39 @@ const ResolterPanel = () => {
           </div>
         </div>
 
+        <div className="resolter-status-filters">
+          <button
+            className={`filter-button ${statusFilter === 'queue' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('queue')}
+          >
+            Queue
+          </button>
+          <button
+            className={`filter-button ${statusFilter === 'checked' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('checked')}
+          >
+            Checked
+          </button>
+          <button
+            className={`filter-button ${statusFilter === 'published' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('published')}
+          >
+            Published
+          </button>
+          <button
+            className={`filter-button ${statusFilter === 'blocked' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('blocked')}
+          >
+            Blocked
+          </button>
+          <button
+            className={`filter-button ${statusFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('all')}
+          >
+            All
+          </button>
+        </div>
+
         {/* Results Table */}
         <div className="resolter-results card">
           <div className="results-header">
@@ -400,7 +541,7 @@ const ResolterPanel = () => {
             </button>
           </div>
 
-          {results.length === 0 ? (
+          {filteredResults.length === 0 ? (
             <div className="empty-results">
               <p>No results found</p>
             </div>
@@ -418,7 +559,7 @@ const ResolterPanel = () => {
                 <div className="table-cell">Actions</div>
               </div>
               <div className="table-body">
-                {results.map((result, index) => (
+                {filteredResults.map((result, index) => (
                   <div key={result._id || index} className="table-row">
                     <div className="table-cell">
                       {result.user?.name || 'Anonymous'}
@@ -524,123 +665,156 @@ const ResolterPanel = () => {
                 </button>
               </div>
               <div className="modal-body">
-                <div className="form-group">
-                  <label>User: {viewingSubmission.user?.name || 'Anonymous'}</label>
-                </div>
-                <div className="form-group">
-                  <label>Email: {viewingSubmission.user?.email || '-'}</label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Olympiad: {viewingSubmission.olympiadTitle || viewingSubmission.olympiad?.title || '-'}
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Score: {viewingSubmission.totalScore || viewingSubmission.score || 0}
-                    {viewingSubmission.totalPoints && ` / ${viewingSubmission.totalPoints}`}
-                    {viewingSubmission.percentage !== undefined && ` (${viewingSubmission.percentage}%)`}
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Submitted: {viewingSubmission.submittedAt || viewingSubmission.completedAt
-                      ? formatDate(viewingSubmission.submittedAt || viewingSubmission.completedAt)
-                      : '-'}
-                  </label>
-                </div>
-                {viewingSubmission.gradedAt && (
-                  <div className="form-group">
-                    <label>
-                      Graded: {formatDate(viewingSubmission.gradedAt)}
-                      {viewingSubmission.gradedBy && ` by ${viewingSubmission.gradedBy.name || viewingSubmission.gradedBy.email || 'Unknown'}`}
-                    </label>
-                  </div>
-                )}
-                {viewingSubmission.submissions && Array.isArray(viewingSubmission.submissions) && viewingSubmission.submissions.length > 0 && (
-                  <div className="form-group">
-                    <label>Submissions:</label>
-                    <div className="submission-answers">
-                      {viewingSubmission.submissions.map((submission, idx) => (
-                        <div key={submission.submissionId || submission._id || idx} className="answer-item">
-                          <div className="answer-label">
-                            Question {submission.questionId || idx + 1}:
-                            {submission.score !== undefined && (
-                              <span className="submission-score"> ({submission.score} points)</span>
-                            )}
-                            {submission.isCorrect !== undefined && (
-                              <span className={`submission-correct ${submission.isCorrect ? 'correct' : 'incorrect'}`}>
-                                {submission.isCorrect ? ' ✓ Correct' : ' ✗ Incorrect'}
-                              </span>
-                            )}
-                          </div>
-                          <div className="answer-content">
-                            {typeof submission.answer === 'string' ? submission.answer : JSON.stringify(submission.answer)}
-                          </div>
+                    <div className="review-layout">
+                      <div className="review-left">
+                        <div className="form-group">
+                          <label>User: {viewingSubmission.user?.name || 'Anonymous'}</label>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {submissionDetails && submissionDetails.answers && (
-                  <div className="form-group">
-                    <label>Answers:</label>
-                    <div className="submission-answers">
-                      {Object.entries(submissionDetails.answers).map(([questionId, answer]) => (
-                        <div key={questionId} className="answer-item">
-                          <div className="answer-label">Question {questionId}:</div>
-                          <div className="answer-content">{typeof answer === 'string' ? answer : JSON.stringify(answer)}</div>
+                        <div className="form-group">
+                          <label>Email: {viewingSubmission.user?.email || '-'}</label>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {viewingSubmission.comment && (
-                  <div className="form-group">
-                    <label>Comment:</label>
-                    <div className="comment-display">{viewingSubmission.comment}</div>
-                  </div>
-                )}
-                {viewingSubmission.submissions && Array.isArray(viewingSubmission.submissions) && viewingSubmission.submissions.length > 0 && (
-                  <div className="form-group">
-                    <label>AI Detection Status:</label>
-                    {viewingSubmission.submissions.map((submission, idx) => {
-                      if (submission.isAI !== undefined) {
-                        return (
-                          <div key={idx} className={submission.isAI ? 'ai-warning' : 'ai-success'}>
-                            {submission.isAI ? (
-                              <>
-                                <strong>⚠️ AI Detected</strong>
-                                <p>Probability: {((submission.aiProbability || 0) * 100).toFixed(1)}%</p>
-                                {submission.aiCheckedAt && (
-                                  <p className="ai-checked-info">
-                                    Checked: {formatDate(submission.aiCheckedAt)}
-                                    {submission.aiCheckedBy && typeof submission.aiCheckedBy === 'object' && (
-                                      ` by ${submission.aiCheckedBy.name || submission.aiCheckedBy.email || 'Unknown'}`
-                                    )}
-                                  </p>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <strong>✓ No AI Detected</strong>
-                                {submission.aiCheckedAt && (
-                                  <p className="ai-checked-info">
-                                    Checked: {formatDate(submission.aiCheckedAt)}
-                                    {submission.aiCheckedBy && typeof submission.aiCheckedBy === 'object' && (
-                                      ` by ${submission.aiCheckedBy.name || submission.aiCheckedBy.email || 'Unknown'}`
-                                    )}
-                                  </p>
-                                )}
-                              </>
-                            )}
+                        <div className="form-group">
+                          <label>
+                            Olympiad: {viewingSubmission.olympiadTitle || viewingSubmission.olympiad?.title || '-'}
+                          </label>
+                        </div>
+                        <div className="form-group">
+                          <label>
+                            Score: {viewingSubmission.totalScore || viewingSubmission.score || 0}
+                            {viewingSubmission.totalPoints && ` / ${viewingSubmission.totalPoints}`}
+                            {viewingSubmission.percentage !== undefined && ` (${viewingSubmission.percentage}%)`}
+                          </label>
+                        </div>
+                        <div className="form-group">
+                          <label>
+                            Submitted: {viewingSubmission.submittedAt || viewingSubmission.completedAt
+                              ? formatDate(viewingSubmission.submittedAt || viewingSubmission.completedAt)
+                              : '-'}
+                          </label>
+                        </div>
+                        {viewingSubmission.gradedAt && (
+                          <div className="form-group">
+                            <label>
+                              Graded: {formatDate(viewingSubmission.gradedAt)}
+                              {viewingSubmission.gradedBy && ` by ${viewingSubmission.gradedBy.name || viewingSubmission.gradedBy.email || 'Unknown'}`}
+                            </label>
                           </div>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
-                )}
+                        )}
+                        {viewingSubmission.submissions && Array.isArray(viewingSubmission.submissions) && viewingSubmission.submissions.length > 0 && (
+                          <div className="form-group">
+                            <label>Essay Answers:</label>
+                            <div className="submission-answers">
+                              {getDisplaySubmissions(viewingSubmission.submissions).map((submission, idx) => (
+                                <div key={submission.submissionId || submission._id || idx} className="answer-item">
+                                  <div className="answer-label">
+                                    Question {submission.questionId || idx + 1}:
+                                    {submission.score !== undefined && (
+                                      <span className="submission-score"> ({submission.score} points)</span>
+                                    )}
+                                    {submission.isCorrect !== undefined && (
+                                      <span className={`submission-correct ${submission.isCorrect ? 'correct' : 'incorrect'}`}>
+                                        {submission.isCorrect ? ' ✓ Correct' : ' ✗ Incorrect'}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="answer-content">
+                                    {typeof submission.answer === 'string' ? submission.answer : JSON.stringify(submission.answer)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {submissionDetails && submissionDetails.answers && (
+                          <div className="form-group">
+                            <label>All Answers:</label>
+                            <div className="submission-answers">
+                              {Object.entries(submissionDetails.answers).map(([questionId, answer]) => (
+                                <div key={questionId} className="answer-item">
+                                  <div className="answer-label">Question {questionId}:</div>
+                                  <div className="answer-content">{typeof answer === 'string' ? answer : JSON.stringify(answer)}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {viewingSubmission.comment && (
+                          <div className="form-group">
+                            <label>Comment:</label>
+                            <div className="comment-display">{viewingSubmission.comment}</div>
+                          </div>
+                        )}
+                        {viewingSubmission.submissions && Array.isArray(viewingSubmission.submissions) && viewingSubmission.submissions.length > 0 && (
+                          <div className="form-group">
+                            <label>AI Detection Status:</label>
+                            {viewingSubmission.submissions.map((submission, idx) => {
+                              if (submission.isAI !== undefined) {
+                                return (
+                                  <div key={idx} className={submission.isAI ? 'ai-warning' : 'ai-success'}>
+                                    {submission.isAI ? (
+                                      <>
+                                        <strong>⚠️ AI Detected</strong>
+                                        <p>Probability: {((submission.aiProbability || 0) * 100).toFixed(1)}%</p>
+                                        {submission.aiCheckedAt && (
+                                          <p className="ai-checked-info">
+                                            Checked: {formatDate(submission.aiCheckedAt)}
+                                            {submission.aiCheckedBy && typeof submission.aiCheckedBy === 'object' && (
+                                              ` by ${submission.aiCheckedBy.name || submission.aiCheckedBy.email || 'Unknown'}`
+                                            )}
+                                          </p>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <>
+                                        <strong>✓ No AI Detected</strong>
+                                        {submission.aiCheckedAt && (
+                                          <p className="ai-checked-info">
+                                            Checked: {formatDate(submission.aiCheckedAt)}
+                                            {submission.aiCheckedBy && typeof submission.aiCheckedBy === 'object' && (
+                                              ` by ${submission.aiCheckedBy.name || submission.aiCheckedBy.email || 'Unknown'}`
+                                            )}
+                                          </p>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      <div className="review-right">
+                        <div className="video-panel">
+                          <h4>Proctoring Videos</h4>
+                          {(() => {
+                            const videoCaptures = captures.filter(isVideoCapture);
+                            const groups = groupCaptures(videoCaptures);
+                            return (
+                              <>
+                                <div className="video-section">
+                                  <div className="video-section-title">Screen</div>
+                                  {renderVideoList(groups.screen)}
+                                </div>
+                                <div className="video-section">
+                                  <div className="video-section-title">Camera</div>
+                                  {renderVideoList(groups.camera)}
+                                </div>
+                                <div className="video-section">
+                                  <div className="video-section-title">Front Camera</div>
+                                  {renderVideoList(groups.front)}
+                                </div>
+                                <div className="video-section">
+                                  <div className="video-section-title">Back Camera</div>
+                                  {renderVideoList(groups.back)}
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
               </div>
               <div className="modal-actions">
                 <button

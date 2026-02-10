@@ -46,6 +46,35 @@
   width: 100%;
 }
 
+.resolter-status-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.resolter-status-filters .filter-button {
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resolter-status-filters .filter-button.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+}
+
+.resolter-status-filters .filter-button:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .filter-group {
   display: flex;
   align-items: center;
@@ -457,6 +486,76 @@
   overflow-y: auto;
 }
 
+.review-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.review-left,
+.review-right {
+  min-width: 0;
+}
+
+.video-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: sticky;
+  top: 12px;
+}
+
+.video-panel h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.video-section {
+  margin-bottom: 16px;
+}
+
+.video-section:last-child {
+  margin-bottom: 0;
+}
+
+.video-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.video-card {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.review-video-player {
+  width: 100%;
+  border-radius: 6px;
+  background: #000;
+}
+
+.video-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.video-empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
 .modal-body .form-group {
   display: flex;
   flex-direction: column;
@@ -566,6 +665,14 @@
 }
 
 @media (max-width: 768px) {
+
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .video-panel {
+    position: static;
+  }
 
   .table-header,
   .table-row {
