@@ -265,6 +265,7 @@ const TestOlympiad = () => {
     }
   };
 
+  const currentQuestion = questions[currentQuestionIndex];
 
   // Submit current answer and move to next question
   const handleNext = async () => {
@@ -273,115 +274,115 @@ const TestOlympiad = () => {
     setNextSubmitting(true);
 
     try {
-
-    // Submit current answer if provided
-    const currentAnswer = answers[currentQuestion._id];
-    if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
-      try {
-        let nonce = null;
+      // Submit current answer if provided
+      const currentAnswer = answers[currentQuestion._id];
+      if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
         try {
-          const nonceResponse = await olympiadAPI.getQuestion(id, currentQuestionIndex);
-          if (nonceResponse.data.success && nonceResponse.data.question?.nonce) {
-            nonce = nonceResponse.data.question.nonce;
-            const fetchedQuestion = nonceResponse.data.question;
-            setQuestions(prev => {
-              const next = [...prev];
-              next[currentQuestionIndex] = {
-                ...(next[currentQuestionIndex] || {}),
-                ...fetchedQuestion
-              };
-              return next;
-            });
+          let nonce = null;
+          try {
+            const nonceResponse = await olympiadAPI.getQuestion(id, currentQuestionIndex);
+            if (nonceResponse.data.success && nonceResponse.data.question?.nonce) {
+              nonce = nonceResponse.data.question.nonce;
+              const fetchedQuestion = nonceResponse.data.question;
+              setQuestions(prev => {
+                const next = [...prev];
+                next[currentQuestionIndex] = {
+                  ...(next[currentQuestionIndex] || {}),
+                  ...fetchedQuestion
+                };
+                return next;
+              });
+            }
+          } catch (nonceError) {
+            // If nonce refresh fails, fall back to existing nonce if any
+            nonce = currentQuestion?.nonce || null;
           }
-        } catch (nonceError) {
-          // If nonce refresh fails, fall back to existing nonce if any
-          nonce = currentQuestion?.nonce || null;
-        }
 
-        if (!nonce) {
+          if (!nonce) {
+            setNotification({
+              message: 'Failed to load question nonce. Please retry.',
+              type: 'error'
+            });
+            return;
+          }
+          const submitResponse = await olympiadAPI.submitAnswer(id, {
+            questionIndex: currentQuestionIndex,
+            answer: currentAnswer,
+            nonce,
+            deviceFingerprint
+          });
+
+          const nextIndexFromServer = submitResponse.data?.nextQuestionIndex;
+          const isLastQuestion = submitResponse.data?.isLastQuestion;
+          if (typeof nextIndexFromServer === 'number') {
+            nextIndexOverride = nextIndexFromServer;
+            setCurrentQuestionIndex(nextIndexFromServer);
+          }
+
+          if (isLastQuestion) {
+            return;
+          }
+        } catch (error) {
+          const responseData = error.response?.data;
+          const serverIndex = responseData?.currentQuestionIndex;
+          const code = responseData?.code;
+
+          if (
+            (code === 'INVALID_QUESTION_INDEX' || code === 'INVALID_QUESTION_ACCESS') &&
+            typeof serverIndex === 'number'
+          ) {
+            setCurrentQuestionIndex(serverIndex);
+            try {
+              await olympiadAPI.getQuestion(id, serverIndex);
+            } catch (syncError) {
+              console.error('Error syncing question after index mismatch:', syncError);
+            }
+          }
+
           setNotification({
-            message: 'Failed to load question nonce. Please retry.',
+            message: responseData?.message || 'Failed to submit answer',
             type: 'error'
           });
-          return;
+          return; // Don't advance if submission failed
         }
-        const submitResponse = await olympiadAPI.submitAnswer(id, {
-          questionIndex: currentQuestionIndex,
-          answer: currentAnswer,
-          nonce,
-          deviceFingerprint
-        });
-
-        const nextIndexFromServer = submitResponse.data?.nextQuestionIndex;
-        const isLastQuestion = submitResponse.data?.isLastQuestion;
-        if (typeof nextIndexFromServer === 'number') {
-          nextIndexOverride = nextIndexFromServer;
-          setCurrentQuestionIndex(nextIndexFromServer);
-        }
-
-        if (isLastQuestion) {
-          return;
-        }
-      } catch (error) {
-        const responseData = error.response?.data;
-        const serverIndex = responseData?.currentQuestionIndex;
-        const code = responseData?.code;
-
-        if (
-          (code === 'INVALID_QUESTION_INDEX' || code === 'INVALID_QUESTION_ACCESS') &&
-          typeof serverIndex === 'number'
-        ) {
-          setCurrentQuestionIndex(serverIndex);
-          try {
-            await olympiadAPI.getQuestion(id, serverIndex);
-          } catch (syncError) {
-            console.error('Error syncing question after index mismatch:', syncError);
-          }
-        }
-
-        setNotification({
-          message: responseData?.message || 'Failed to submit answer',
-          type: 'error'
-        });
-        return; // Don't advance if submission failed
       }
-    }
 
-    // Move to next question if not last
-    const nextIndex = typeof nextIndexOverride === 'number'
-      ? nextIndexOverride
-      : currentQuestionIndex + 1;
+      // Move to next question if not last
+      const nextIndex = typeof nextIndexOverride === 'number'
+        ? nextIndexOverride
+        : currentQuestionIndex + 1;
 
-    if (nextIndex < questions.length) {
-      try {
-        const response = await olympiadAPI.getQuestion(id, nextIndex);
-        
-        if (response.data.success) {
-          // Update current question index from server response
-          setCurrentQuestionIndex(response.data.currentQuestionIndex);
-          
-          // Add question to questions array if not already there
-          if (response.data.question && !questions.find(q => q._id === response.data.question._id)) {
-            setQuestions(prev => [...prev, response.data.question]);
+      if (nextIndex < questions.length) {
+        try {
+          const response = await olympiadAPI.getQuestion(id, nextIndex);
+
+          if (response.data.success) {
+            // Update current question index from server response
+            setCurrentQuestionIndex(response.data.currentQuestionIndex);
+
+            // Add question to questions array if not already there
+            if (response.data.question && !questions.find(q => q._id === response.data.question._id)) {
+              setQuestions(prev => [...prev, response.data.question]);
+            }
           }
-        }
-      } catch (error) {
-        const responseData = error.response?.data;
-        const serverIndex = responseData?.currentQuestionIndex;
-        const code = responseData?.code;
+        } catch (error) {
+          const responseData = error.response?.data;
+          const serverIndex = responseData?.currentQuestionIndex;
+          const code = responseData?.code;
 
-        if (code === 'INVALID_QUESTION_ACCESS' && typeof serverIndex === 'number') {
-          setCurrentQuestionIndex(serverIndex);
-        }
+          if (code === 'INVALID_QUESTION_ACCESS' && typeof serverIndex === 'number') {
+            setCurrentQuestionIndex(serverIndex);
+          }
 
-        setNotification({
-          message: responseData?.message || 'Failed to load next question',
-          type: 'error'
-        });
+          setNotification({
+            message: responseData?.message || 'Failed to load next question',
+            type: 'error'
+          });
+        }
       }
+    } finally {
+      setNextSubmitting(false);
     }
-  } finally {
-    setNextSubmitting(false);
   };
 
   // Forward-only navigation - no previous button allowed
@@ -444,7 +445,6 @@ const TestOlympiad = () => {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = Object.keys(answers).length;
   const faceAllowed = faceCheckReady && faceDetected;
   const canProceed = isRecording && faceAllowed;
@@ -574,7 +574,7 @@ const TestOlympiad = () => {
               key={index}
               className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${answers[questions[index]._id] ? 'answered' : ''}`}
               onClick={() => setCurrentQuestionIndex(index)}
-            disabled={!canProceed || submitted}
+              disabled={!canProceed || submitted}
             >
               {index + 1}
             </button>
