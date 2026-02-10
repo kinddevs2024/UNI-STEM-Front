@@ -38,6 +38,7 @@ const TestOlympiad = () => {
   const draftSaveTimeoutRef = useRef(null);
   const [attemptId, setAttemptId] = useState(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState(null);
+  const attemptIndexSyncedRef = useRef(false);
 
   // Load attempt session
   const { attempt, loading: attemptLoading, error: attemptError, isActive, isExpired, isCompleted } = useAttemptSession(id);
@@ -46,7 +47,10 @@ const TestOlympiad = () => {
   useEffect(() => {
     if (attempt?._id) {
       setAttemptId(attempt._id);
-      setCurrentQuestionIndex(attempt.currentQuestionIndex || 0);
+      if (!attemptIndexSyncedRef.current && typeof attempt.currentQuestionIndex === 'number') {
+        setCurrentQuestionIndex(attempt.currentQuestionIndex);
+        attemptIndexSyncedRef.current = true;
+      }
     }
   }, [attempt]);
 
@@ -181,7 +185,7 @@ const TestOlympiad = () => {
           ? attempt.currentQuestionIndex
           : currentQuestionIndex;
 
-      if (currentQuestionIndex > authoritativeIndex) {
+      if (authoritativeIndex > currentQuestionIndex) {
         setCurrentQuestionIndex(authoritativeIndex);
       }
 
