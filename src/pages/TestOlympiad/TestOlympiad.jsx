@@ -172,31 +172,47 @@ const TestOlympiad = () => {
   // Load current question from server if missing or missing nonce
   useEffect(() => {
     const loadCurrentQuestion = async () => {
-      if (attemptId && currentQuestionIndex >= 0 && questions.length > 0) {
-        const currentQuestion = questions[currentQuestionIndex];
-        if (!currentQuestion || !currentQuestion.nonce) {
-          try {
-            const response = await olympiadAPI.getQuestion(id, currentQuestionIndex);
-            if (response.data.success && response.data.question) {
-              const fetchedQuestion = response.data.question;
-              setQuestions(prev => {
-                const next = [...prev];
-                const targetIndex = response.data.questionIndex ?? currentQuestionIndex;
-                next[targetIndex] = {
-                  ...(next[targetIndex] || {}),
-                  ...fetchedQuestion
-                };
-                return next;
-              });
-            }
-          } catch (error) {
+      if (!attempt || attemptLoading) return;
+      if (!attemptId || questions.length === 0) return;
+
+      const authoritativeIndex =
+        typeof attempt.currentQuestionIndex === 'number'
+          ? attempt.currentQuestionIndex
+          : currentQuestionIndex;
+
+      if (authoritativeIndex !== currentQuestionIndex) {
+        setCurrentQuestionIndex(authoritativeIndex);
+      }
+
+      const currentQuestion = questions[authoritativeIndex];
+      if (!currentQuestion || !currentQuestion.nonce) {
+        try {
+          const response = await olympiadAPI.getQuestion(id, authoritativeIndex);
+          if (response.data.success && response.data.question) {
+            const fetchedQuestion = response.data.question;
+            setQuestions(prev => {
+              const next = [...prev];
+              const targetIndex = response.data.questionIndex ?? authoritativeIndex;
+              next[targetIndex] = {
+                ...(next[targetIndex] || {}),
+                ...fetchedQuestion
+              };
+              return next;
+            });
+          }
+        } catch (error) {
+          const serverIndex = error.response?.data?.currentQuestionIndex;
+          const code = error.response?.data?.code;
+          if (code === 'INVALID_QUESTION_ACCESS' && typeof serverIndex === 'number') {
+            setCurrentQuestionIndex(serverIndex);
+          } else {
             console.error('Error loading current question:', error);
           }
         }
       }
     };
     loadCurrentQuestion();
-  }, [id, attemptId, currentQuestionIndex, questions]);
+  }, [id, attemptId, attempt, attemptLoading, currentQuestionIndex, questions]);
 
   const fetchOlympiad = async () => {
     try {
@@ -303,8 +319,24 @@ const TestOlympiad = () => {
           return;
         }
       } catch (error) {
+        const responseData = error.response?.data;
+        const serverIndex = responseData?.currentQuestionIndex;
+        const code = responseData?.code;
+
+        if (
+          (code === 'INVALID_QUESTION_INDEX' || code === 'INVALID_QUESTION_ACCESS') &&
+          typeof serverIndex === 'number'
+        ) {
+          setCurrentQuestionIndex(serverIndex);
+          try {
+            await olympiadAPI.getQuestion(id, serverIndex);
+          } catch (syncError) {
+            console.error('Error syncing question after index mismatch:', syncError);
+          }
+        }
+
         setNotification({
-          message: error.response?.data?.message || 'Failed to submit answer',
+          message: responseData?.message || 'Failed to submit answer',
           type: 'error'
         });
         return; // Don't advance if submission failed
@@ -330,8 +362,16 @@ const TestOlympiad = () => {
           }
         }
       } catch (error) {
+        const responseData = error.response?.data;
+        const serverIndex = responseData?.currentQuestionIndex;
+        const code = responseData?.code;
+
+        if (code === 'INVALID_QUESTION_ACCESS' && typeof serverIndex === 'number') {
+          setCurrentQuestionIndex(serverIndex);
+        }
+
         setNotification({
-          message: error.response?.data?.message || 'Failed to load next question',
+          message: responseData?.message || 'Failed to load next question',
           type: 'error'
         });
       }
@@ -523,7 +563,7 @@ const TestOlympiad = () => {
               key={index}
               className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${answers[questions[index]._id] ? 'answered' : ''}`}
               onClick={() => setCurrentQuestionIndex(index)}
-            disabled={!canProceed || submitted}
+            disabled={!canProceed || submitted || index < currentQuestionIndex}
             >
               {index + 1}
             </button>
