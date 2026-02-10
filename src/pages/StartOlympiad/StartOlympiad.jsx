@@ -45,12 +45,27 @@ const StartOlympiad = () => {
       }
     }
 
-    // Generate device fingerprint
-    generateDeviceFingerprint().then(fp => {
-      setDeviceFingerprint(fp);
-    }).catch(err => {
-      console.error('Error generating device fingerprint:', err);
-    });
+    // Load or generate device fingerprint (persisted per olympiad)
+    const storedFingerprint = localStorage.getItem(`olympiad_${id}_deviceFingerprint`);
+    if (storedFingerprint) {
+      try {
+        setDeviceFingerprint(JSON.parse(storedFingerprint));
+      } catch (err) {
+        console.error('Error parsing stored device fingerprint:', err);
+        localStorage.removeItem(`olympiad_${id}_deviceFingerprint`);
+      }
+    }
+
+    if (!storedFingerprint) {
+      generateDeviceFingerprint()
+        .then(fp => {
+          setDeviceFingerprint(fp);
+          localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
+        })
+        .catch(err => {
+          console.error('Error generating device fingerprint:', err);
+        });
+    }
   }, [id, user]);
 
   useEffect(() => {
@@ -241,6 +256,7 @@ const StartOlympiad = () => {
       if (!fingerprint) {
         fingerprint = await generateDeviceFingerprint();
         setDeviceFingerprint(fingerprint);
+        localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fingerprint));
       }
 
       // Start attempt via API (creates attempt record with server-authoritative timer)

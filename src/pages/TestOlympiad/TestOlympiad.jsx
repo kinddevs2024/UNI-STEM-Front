@@ -12,6 +12,7 @@ import { useAttemptSession } from '../../hooks/useAttemptSession';
 import { useAntiCheat } from '../../hooks/useAntiCheat';
 import { saveAnswers, getSavedAnswers, deleteSavedAnswers } from '../../utils/indexeddb';
 import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
+import { generateDeviceFingerprint } from '../../utils/device-fingerprint';
 import './TestOlympiad.css';
 
 const TestOlympiad = () => {
@@ -35,6 +36,7 @@ const TestOlympiad = () => {
   const [savingDraft, setSavingDraft] = useState(false);
   const draftSaveTimeoutRef = useRef(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [deviceFingerprint, setDeviceFingerprint] = useState(null);
 
   // Load attempt session
   const { attempt, loading: attemptLoading, error: attemptError, isActive, isExpired, isCompleted } = useAttemptSession(id);
@@ -81,6 +83,29 @@ const TestOlympiad = () => {
       emit('join-olympiad', { olympiadId: id, attemptId: attemptId || storedAttemptId });
     }
   }, [id, emit, attemptId]);
+
+  useEffect(() => {
+    // Load or generate device fingerprint (persisted per olympiad)
+    const storedFingerprint = localStorage.getItem(`olympiad_${id}_deviceFingerprint`);
+    if (storedFingerprint) {
+      try {
+        setDeviceFingerprint(JSON.parse(storedFingerprint));
+        return;
+      } catch (err) {
+        console.error('Error parsing stored device fingerprint:', err);
+        localStorage.removeItem(`olympiad_${id}_deviceFingerprint`);
+      }
+    }
+
+    generateDeviceFingerprint()
+      .then(fp => {
+        setDeviceFingerprint(fp);
+        localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
+      })
+      .catch(err => {
+        console.error('Error generating device fingerprint:', err);
+      });
+  }, [id]);
 
   // Load saved draft from server on mount
   useEffect(() => {
@@ -131,7 +156,7 @@ const TestOlympiad = () => {
           // Use sendBeacon for reliable delivery during page unload
           // Note: sendBeacon doesn't support custom headers, so we'll rely on API endpoint
           // In production, you might want to use a different approach or store skip request in IndexedDB
-          olympiadAPI.skipQuestion(id, { reason: 'tab_close' }).catch(() => {
+          olympiadAPI.skipQuestion(id, { reason: 'tab_close', deviceFingerprint }).catch(() => {
             // Ignore errors during unload
           });
         } catch (error) {
@@ -142,7 +167,7 @@ const TestOlympiad = () => {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [id, attemptId, currentQuestionIndex, submitted]);
+  }, [id, attemptId, currentQuestionIndex, submitted, deviceFingerprint]);
 
   // Load current question from server if missing or missing nonce
   useEffect(() => {
@@ -227,6 +252,7 @@ const TestOlympiad = () => {
   // Submit current answer and move to next question
   const handleNext = async () => {
     if (!attemptId || !currentQuestion) return;
+    let nextIndexOverride = null;
 
     // Submit current answer if provided
     const currentAnswer = answers[currentQuestion._id];
@@ -248,11 +274,23 @@ const TestOlympiad = () => {
             });
           }
         }
-        await olympiadAPI.submitAnswer(id, {
+        const submitResponse = await olympiadAPI.submitAnswer(id, {
           questionIndex: currentQuestionIndex,
           answer: currentAnswer,
-          nonce
+          nonce,
+          deviceFingerprint
         });
+
+        const nextIndexFromServer = submitResponse.data?.nextQuestionIndex;
+        const isLastQuestion = submitResponse.data?.isLastQuestion;
+        if (typeof nextIndexFromServer === 'number') {
+          nextIndexOverride = nextIndexFromServer;
+          setCurrentQuestionIndex(nextIndexFromServer);
+        }
+
+        if (isLastQuestion) {
+          return;
+        }
       } catch (error) {
         setNotification({
           message: error.response?.data?.message || 'Failed to submit answer',
@@ -263,8 +301,11 @@ const TestOlympiad = () => {
     }
 
     // Move to next question if not last
-    if (currentQuestionIndex < questions.length - 1) {
-      const nextIndex = currentQuestionIndex + 1;
+    const nextIndex = typeof nextIndexOverride === 'number'
+      ? nextIndexOverride
+      : currentQuestionIndex + 1;
+
+    if (nextIndex < questions.length) {
       try {
         const response = await olympiadAPI.getQuestion(id, nextIndex);
         
