@@ -28,6 +28,7 @@ const TestOlympiad = () => {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [nextSubmitting, setNextSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -267,8 +268,9 @@ const TestOlympiad = () => {
 
   // Submit current answer and move to next question
   const handleNext = async () => {
-    if (!attemptId || !currentQuestion) return;
+    if (!attemptId || !currentQuestion || nextSubmitting) return;
     let nextIndexOverride = null;
+    setNextSubmitting(true);
 
     // Submit current answer if provided
     const currentAnswer = answers[currentQuestion._id];
@@ -376,6 +378,8 @@ const TestOlympiad = () => {
         });
       }
     }
+  } finally {
+    setNextSubmitting(false);
   };
 
   // Forward-only navigation - no previous button allowed
@@ -597,7 +601,7 @@ const TestOlympiad = () => {
             <button 
               className="button-primary" 
               onClick={handleNext}
-              disabled={!canProceed || submitted}
+              disabled={!canProceed || submitted || nextSubmitting}
             >
               Next →
             </button>
