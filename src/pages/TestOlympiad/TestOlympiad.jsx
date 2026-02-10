@@ -144,21 +144,24 @@ const TestOlympiad = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [id, attemptId, currentQuestionIndex, submitted]);
 
-  // Load current question from server if not in questions array
+  // Load current question from server if missing or missing nonce
   useEffect(() => {
     const loadCurrentQuestion = async () => {
       if (attemptId && currentQuestionIndex >= 0 && questions.length > 0) {
         const currentQuestion = questions[currentQuestionIndex];
-        if (!currentQuestion) {
+        if (!currentQuestion || !currentQuestion.nonce) {
           try {
             const response = await olympiadAPI.getQuestion(id, currentQuestionIndex);
             if (response.data.success && response.data.question) {
+              const fetchedQuestion = response.data.question;
               setQuestions(prev => {
-                const exists = prev.find(q => q._id === response.data.question._id);
-                if (!exists) {
-                  return [...prev, response.data.question];
-                }
-                return prev;
+                const next = [...prev];
+                const targetIndex = response.data.questionIndex ?? currentQuestionIndex;
+                next[targetIndex] = {
+                  ...(next[targetIndex] || {}),
+                  ...fetchedQuestion
+                };
+                return next;
               });
             }
           } catch (error) {
@@ -229,9 +232,26 @@ const TestOlympiad = () => {
     const currentAnswer = answers[currentQuestion._id];
     if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
       try {
+        let nonce = currentQuestion.nonce;
+        if (!nonce) {
+          const nonceResponse = await olympiadAPI.getQuestion(id, currentQuestionIndex);
+          if (nonceResponse.data.success && nonceResponse.data.question?.nonce) {
+            nonce = nonceResponse.data.question.nonce;
+            const fetchedQuestion = nonceResponse.data.question;
+            setQuestions(prev => {
+              const next = [...prev];
+              next[currentQuestionIndex] = {
+                ...(next[currentQuestionIndex] || {}),
+                ...fetchedQuestion
+              };
+              return next;
+            });
+          }
+        }
         await olympiadAPI.submitAnswer(id, {
           questionIndex: currentQuestionIndex,
-          answer: currentAnswer
+          answer: currentAnswer,
+          nonce
         });
       } catch (error) {
         setNotification({
