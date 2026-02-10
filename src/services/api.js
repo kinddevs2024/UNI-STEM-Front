@@ -103,15 +103,12 @@ export const olympiadAPI = {
   skipQuestion: (id, data) => api.post(`/olympiads/${id}/skip`, data),
   reportViolation: (id, data) => api.post(`/olympiads/${id}/violation`, data),
   getResults: (olympiadId, userId = null) => {
-    // If olympiadId is provided, use the scoped endpoint: /api/olympiads/:id/results
-    // Otherwise, fall back to /api/olympiads/results for all-results queries
+    // Backend expects /api/olympiads/results?olympiadId=...
     const params = new URLSearchParams();
-    if (!olympiadId && userId) params.append("userId", userId);
+    if (olympiadId) params.append("olympiadId", olympiadId);
+    if (userId) params.append("userId", userId);
     const query = params.toString();
 
-    if (olympiadId) {
-      return api.get(`/olympiads/${olympiadId}/results${query ? `?${query}` : ""}`);
-    }
     return api.get(`/olympiads/results${query ? `?${query}` : ""}`);
   },
   uploadCameraCapture: (formData) => {
