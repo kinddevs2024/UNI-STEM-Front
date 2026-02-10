@@ -121,6 +121,104 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
     }
   };
 
+  // Helper function to convert data URL to blob
+  const dataURLtoBlob = (dataURL) => {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  const sendRealTimeCapture = async () => {
+    if (!cameraVideoRef.current || !screenVideoRef.current) return;
+    if (!isRecording) return;
+
+    try {
+      if (!captureCanvasRef.current) {
+        captureCanvasRef.current = document.createElement('canvas');
+        captureCanvasRef.current.width = VIDEO_WIDTH;
+        captureCanvasRef.current.height = VIDEO_HEIGHT;
+      }
+
+      const canvas = captureCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      // Capture camera frame
+      let cameraDataURL = null;
+      if (cameraVideoRef.current && cameraVideoRef.current.readyState >= 2) {
+        ctx.drawImage(cameraVideoRef.current, 0, 0, canvas.width, canvas.height);
+        cameraDataURL = canvas.toDataURL('image/jpeg', 0.7);
+      }
+
+      // Capture screen frame
+      let screenDataURL = null;
+      if (screenVideoRef.current && screenVideoRef.current.readyState >= 2) {
+        ctx.drawImage(screenVideoRef.current, 0, 0, canvas.width, canvas.height);
+        screenDataURL = canvas.toDataURL('image/jpeg', 0.7);
+      }
+
+      if (!cameraDataURL && !screenDataURL) return;
+
+      // Convert data URLs to blobs
+      const formData = new FormData();
+      formData.append('olympiadId', olympiadId);
+      formData.append('timestamp', new Date().toISOString());
+
+      if (cameraDataURL) {
+        const cameraBlob = dataURLtoBlob(cameraDataURL);
+        formData.append('cameraImage', cameraBlob, 'camera.jpg');
+      }
+
+      if (screenDataURL) {
+        const screenBlob = dataURLtoBlob(screenDataURL);
+        formData.append('screenImage', screenBlob, 'screen.jpg');
+      }
+
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Send to backend (fire and forget - don't wait for response)
+      fetch(`${API_BASE_URL}/olympiads/real-time-capture`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        keepalive: true
+      }).catch(error => {
+        console.error('Error sending real-time capture:', error);
+      });
+
+    } catch (error) {
+      console.error('Error in sendRealTimeCapture:', error);
+    }
+  };
+
+  // Send real-time captures to backend
+  const startRealTimeCaptureSending = () => {
+    // Clear any existing interval
+    if (realTimeCaptureIntervalRef.current) {
+      clearInterval(realTimeCaptureIntervalRef.current);
+    }
+
+    // Create canvas for captures if not exists
+    if (!captureCanvasRef.current) {
+      captureCanvasRef.current = document.createElement('canvas');
+      captureCanvasRef.current.width = VIDEO_WIDTH;
+      captureCanvasRef.current.height = VIDEO_HEIGHT;
+    }
+
+    // Send captures periodically
+    realTimeCaptureIntervalRef.current = setInterval(() => {
+      sendRealTimeCapture();
+    }, CAMERA_CAPTURE_INTERVAL || 1000); // Send every 1 second
+  };
+
   const startMonitoring = async (isUserGesture = false) => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -637,98 +735,6 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       } catch (error) {
         console.error('Error starting screen MediaRecorder:', error);
       }
-    };
-
-    // Send real-time captures to backend
-    const startRealTimeCaptureSending = () => {
-      // Clear any existing interval
-      if (realTimeCaptureIntervalRef.current) {
-        clearInterval(realTimeCaptureIntervalRef.current);
-      }
-
-      // Create canvas for captures if not exists
-      if (!captureCanvasRef.current) {
-        captureCanvasRef.current = document.createElement('canvas');
-        captureCanvasRef.current.width = VIDEO_WIDTH;
-        captureCanvasRef.current.height = VIDEO_HEIGHT;
-      }
-
-      // Send captures periodically
-      realTimeCaptureIntervalRef.current = setInterval(() => {
-        sendRealTimeCapture();
-      }, CAMERA_CAPTURE_INTERVAL || 1000); // Send every 1 second
-    };
-
-    const sendRealTimeCapture = async () => {
-      if (!cameraVideoRef.current || !screenVideoRef.current) return;
-      if (!isRecording) return;
-
-      try {
-        const canvas = captureCanvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        // Capture camera frame
-        let cameraDataURL = null;
-        if (cameraVideoRef.current && cameraVideoRef.current.readyState >= 2) {
-          ctx.drawImage(cameraVideoRef.current, 0, 0, canvas.width, canvas.height);
-          cameraDataURL = canvas.toDataURL('image/jpeg', 0.7);
-        }
-
-        // Capture screen frame
-        let screenDataURL = null;
-        if (screenVideoRef.current && screenVideoRef.current.readyState >= 2) {
-          ctx.drawImage(screenVideoRef.current, 0, 0, canvas.width, canvas.height);
-          screenDataURL = canvas.toDataURL('image/jpeg', 0.7);
-        }
-
-        if (!cameraDataURL && !screenDataURL) return;
-
-        // Convert data URLs to blobs
-        const formData = new FormData();
-        formData.append('olympiadId', olympiadId);
-        formData.append('timestamp', new Date().toISOString());
-
-        if (cameraDataURL) {
-          const cameraBlob = dataURLtoBlob(cameraDataURL);
-          formData.append('cameraImage', cameraBlob, 'camera.jpg');
-        }
-
-        if (screenDataURL) {
-          const screenBlob = dataURLtoBlob(screenDataURL);
-          formData.append('screenImage', screenBlob, 'screen.jpg');
-        }
-
-        // Get token from localStorage
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        // Send to backend (fire and forget - don't wait for response)
-        fetch(`${API_BASE_URL}/olympiads/real-time-capture`, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          keepalive: true
-        }).catch(error => {
-          console.error('Error sending real-time capture:', error);
-        });
-
-      } catch (error) {
-        console.error('Error in sendRealTimeCapture:', error);
-      }
-    };
-
-    // Helper function to convert data URL to blob
-    const dataURLtoBlob = (dataURL) => {
-      const byteString = atob(dataURL.split(',')[1]);
-      const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      return new Blob([ab], { type: mimeString });
     };
 
     const stopRecording = () => {
