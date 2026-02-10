@@ -219,17 +219,18 @@ const ResolterPanel = () => {
     }
   };
 
-  const fetchSubmissionDetails = async (submissionId) => {
+  const fetchSubmissionDetails = async (olympiadId, userId) => {
     try {
       setLoading(true);
-      // Try to get submission details from admin API
-      const response = await adminAPI.getSubmissions(null, submissionId);
+      // Get submissions grouped by user + olympiad
+      const response = await adminAPI.getSubmissions(olympiadId, userId);
       const data = response.data;
-      
-      if (Array.isArray(data)) {
-        setSubmissionDetails(data[0] || null);
-      } else if (data.submission || data) {
-        setSubmissionDetails(data.submission || data);
+      const details = data?.data || data?.submissions || data?.submission || data;
+
+      if (Array.isArray(details)) {
+        setSubmissionDetails(details[0] || null);
+      } else if (details) {
+        setSubmissionDetails(details);
       } else {
         setSubmissionDetails(null);
       }
@@ -249,7 +250,9 @@ const ResolterPanel = () => {
     if (submissionUserId && submissionOlympiadId) {
       await fetchCaptures(submissionOlympiadId, submissionUserId);
     }
-    await fetchSubmissionDetails(submission._id);
+    if (submissionUserId && submissionOlympiadId) {
+      await fetchSubmissionDetails(submissionOlympiadId, submissionUserId);
+    }
   };
 
   const openEditModal = (submission, type = 'submission') => {

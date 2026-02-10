@@ -480,7 +480,7 @@ const Results = () => {
           // Need to fetch olympiads and match them
           try {
             const olympiadsResponse = await olympiadAPI.getAll();
-            const olympiadsData = olympiadsResponse?.data;
+            const olympiadsData = olympiadsResponse?.data?.data || olympiadsResponse?.data || [];
             const olympiads = Array.isArray(olympiadsData) ? olympiadsData : [];
 
             resultsWithOlympiad = (submissions || []).map((submission) => {
