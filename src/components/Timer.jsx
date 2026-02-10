@@ -8,6 +8,11 @@ const Timer = ({ initialSeconds, onExpire, className = '' }) => {
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
+    setSeconds(initialSeconds);
+    setIsExpired(initialSeconds <= 0);
+  }, [initialSeconds]);
+
+  useEffect(() => {
     if (seconds <= 0) {
       setIsExpired(true);
       if (onExpire) {

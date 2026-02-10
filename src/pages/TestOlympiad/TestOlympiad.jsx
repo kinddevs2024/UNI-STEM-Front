@@ -381,34 +381,39 @@ const TestOlympiad = () => {
   // Forward-only navigation - no previous button allowed
   // Removed handlePrevious function
 
-  const handleSubmit = async () => {
-    if (window.confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
-      try {
-        setSubmitting(true);
-        await olympiadAPI.submit(id, { answers });
-        setSubmitted(true);
-        // Clear saved answers and draft after successful submission
-        localStorage.removeItem(`olympiad_${id}_answers`);
-        if (draftSaveTimeoutRef.current) {
-          clearTimeout(draftSaveTimeoutRef.current);
-        }
-        setNotification({ message: 'Answers submitted successfully!', type: 'success' });
-        setTimeout(() => {
-          navigate(`/olympiad/${id}/results`);
-        }, 2000);
-      } catch (error) {
-        setNotification({ 
-          message: error.response?.data?.message || 'Submission failed', 
-          type: 'error' 
-        });
-      } finally {
-        setSubmitting(false);
+  const handleSubmit = async ({ confirm = true } = {}) => {
+    if (confirm && !window.confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
+      return;
+    }
+    if (!confirm) {
+      setNotification({ message: 'Time expired. Submitting...', type: 'warning' });
+    }
+
+    try {
+      setSubmitting(true);
+      await olympiadAPI.submit(id, { answers });
+      setSubmitted(true);
+      // Clear saved answers and draft after successful submission
+      localStorage.removeItem(`olympiad_${id}_answers`);
+      if (draftSaveTimeoutRef.current) {
+        clearTimeout(draftSaveTimeoutRef.current);
       }
+      setNotification({ message: 'Answers submitted successfully!', type: 'success' });
+      setTimeout(() => {
+        navigate(`/olympiad/${id}/results`);
+      }, 2000);
+    } catch (error) {
+      setNotification({ 
+        message: error.response?.data?.message || 'Submission failed', 
+        type: 'error' 
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleTimeExpire = () => {
-    handleSubmit();
+    handleSubmit({ confirm: false });
   };
 
   if (loading) {
