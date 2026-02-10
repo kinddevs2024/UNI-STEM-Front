@@ -12,7 +12,6 @@ const OwnerPanel = () => {
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
   const [olympiads, setOlympiads] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
 
@@ -22,26 +21,22 @@ const OwnerPanel = () => {
 
   const fetchData = async () => {
     try {
-      const [analyticsRes, usersRes, olympiadsRes, submissionsRes] =
-        await Promise.all([
-          ownerAPI.getAnalytics(),
-          adminAPI.getUsers(),
-          adminAPI.getAllOlympiads(),
-          adminAPI.getSubmissions(null, null),
-        ]);
-      setAnalytics(analyticsRes.data);
-      setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
-      setOlympiads(Array.isArray(olympiadsRes.data) ? olympiadsRes.data : []);
-      // Ensure submissions is always an array
-      const submissionsData = submissionsRes.data;
-      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
+      const [summaryRes, usersRes, olympiadsRes] = await Promise.all([
+        ownerAPI.getDashboardSummary(),
+        adminAPI.getUsers(),
+        adminAPI.getAllOlympiads(),
+      ]);
+      setAnalytics(summaryRes.data?.data || summaryRes.data);
+      const usersData = usersRes.data?.data || usersRes.data || [];
+      const olympiadsData = olympiadsRes.data?.data || olympiadsRes.data || [];
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setOlympiads(Array.isArray(olympiadsData) ? olympiadsData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
       setNotification({ message: "Failed to load data", type: "error" });
       // Ensure arrays are set to empty arrays on error
       setUsers([]);
       setOlympiads([]);
-      setSubmissions([]);
     } finally {
       setLoading(false);
     }
@@ -85,10 +80,11 @@ const OwnerPanel = () => {
               <div className="analytics-icon">👥</div>
               <div className="analytics-label">Total Users</div>
               <div className="analytics-value">
-                {users.length || analytics?.totalUsers || 0}
+                {analytics?.totals?.users || users.length || 0}
               </div>
               <div className="analytics-change positive">
-                {users.filter((u) => u.role === "student").length} students
+                {analytics?.usersByRole?.student ||
+                  users.filter((u) => u.role === "student").length} students
               </div>
             </div>
 
@@ -96,10 +92,11 @@ const OwnerPanel = () => {
               <div className="analytics-icon">🏆</div>
               <div className="analytics-label">Total Olympiads</div>
               <div className="analytics-value">
-                {olympiads.length || analytics?.totalOlympiads || 0}
+                {analytics?.totals?.olympiads || olympiads.length || 0}
               </div>
               <div className="analytics-change">
-                {olympiads.filter((o) => o.status === "published").length}{" "}
+                {analytics?.olympiadsByStatus?.published ||
+                  olympiads.filter((o) => o.status === "published").length}{" "}
                 published
               </div>
             </div>
@@ -108,12 +105,10 @@ const OwnerPanel = () => {
               <div className="analytics-icon">📝</div>
               <div className="analytics-label">Total Submissions</div>
               <div className="analytics-value">
-                {submissions.length || analytics?.totalSubmissions || 0}
+                {analytics?.totals?.submissions || 0}
               </div>
               <div className="analytics-change">
-                {Array.isArray(submissions) && submissions.length > 0
-                  ? new Set(submissions.map((s) => s.userId || s.user?._id)).size
-                  : 0}{" "}
+                {analytics?.uniqueParticipants || 0}{" "}
                 participants
               </div>
             </div>
@@ -122,11 +117,10 @@ const OwnerPanel = () => {
               <div className="analytics-icon">⚡</div>
               <div className="analytics-label">Active Olympiads</div>
               <div className="analytics-value">
-                {
+                {analytics?.olympiadsByTime?.active ||
                   olympiads.filter((o) =>
                     isOlympiadActive(o.startTime, o.endTime)
-                  ).length
-                }
+                  ).length}
               </div>
               <div className="analytics-change positive">Currently running</div>
             </div>
@@ -145,17 +139,19 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-student"
                       style={{
                         width: `${
-                          users.length > 0
-                            ? (users.filter((u) => u.role === "student")
-                                .length /
-                                users.length) *
+                          (analytics?.totals?.users || users.length) > 0
+                            ? ((analytics?.usersByRole?.student ||
+                                users.filter((u) => u.role === "student")
+                                  .length) /
+                                (analytics?.totals?.users || users.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {users.filter((u) => u.role === "student").length}
+                      {analytics?.usersByRole?.student ||
+                        users.filter((u) => u.role === "student").length}
                     </span>
                   </div>
                 </div>
@@ -166,16 +162,19 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-admin"
                       style={{
                         width: `${
-                          users.length > 0
-                            ? (users.filter((u) => u.role === "admin").length /
-                                users.length) *
+                          (analytics?.totals?.users || users.length) > 0
+                            ? ((analytics?.usersByRole?.admin ||
+                                users.filter((u) => u.role === "admin")
+                                  .length) /
+                                (analytics?.totals?.users || users.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {users.filter((u) => u.role === "admin").length}
+                      {analytics?.usersByRole?.admin ||
+                        users.filter((u) => u.role === "admin").length}
                     </span>
                   </div>
                 </div>
@@ -186,16 +185,19 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-owner"
                       style={{
                         width: `${
-                          users.length > 0
-                            ? (users.filter((u) => u.role === "owner").length /
-                                users.length) *
+                          (analytics?.totals?.users || users.length) > 0
+                            ? ((analytics?.usersByRole?.owner ||
+                                users.filter((u) => u.role === "owner")
+                                  .length) /
+                                (analytics?.totals?.users || users.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {users.filter((u) => u.role === "owner").length}
+                      {analytics?.usersByRole?.owner ||
+                        users.filter((u) => u.role === "owner").length}
                     </span>
                   </div>
                 </div>
@@ -213,17 +215,19 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-published"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter((o) => o.status === "published")
-                                .length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByStatus?.published ||
+                                olympiads.filter((o) => o.status === "published")
+                                  .length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {olympiads.filter((o) => o.status === "published").length}
+                      {analytics?.olympiadsByStatus?.published ||
+                        olympiads.filter((o) => o.status === "published").length}
                     </span>
                   </div>
                 </div>
@@ -234,17 +238,19 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-draft"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter((o) => o.status === "draft")
-                                .length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByStatus?.draft ||
+                                olympiads.filter((o) => o.status === "draft")
+                                  .length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {olympiads.filter((o) => o.status === "draft").length}
+                      {analytics?.olympiadsByStatus?.draft ||
+                        olympiads.filter((o) => o.status === "draft").length}
                     </span>
                   </div>
                 </div>
@@ -255,21 +261,21 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-unpublished"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter(
-                                (o) => o.status === "unpublished"
-                              ).length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByStatus?.unpublished ||
+                                olympiads.filter(
+                                  (o) => o.status === "unpublished"
+                                ).length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {
+                      {analytics?.olympiadsByStatus?.unpublished ||
                         olympiads.filter((o) => o.status === "unpublished")
-                          .length
-                      }
+                          .length}
                     </span>
                   </div>
                 </div>
@@ -287,22 +293,22 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-active"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter((o) =>
-                                isOlympiadActive(o.startTime, o.endTime)
-                              ).length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByTime?.active ||
+                                olympiads.filter((o) =>
+                                  isOlympiadActive(o.startTime, o.endTime)
+                                ).length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {
+                      {analytics?.olympiadsByTime?.active ||
                         olympiads.filter((o) =>
                           isOlympiadActive(o.startTime, o.endTime)
-                        ).length
-                      }
+                        ).length}
                     </span>
                   </div>
                 </div>
@@ -313,21 +319,21 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-upcoming"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter((o) =>
-                                isOlympiadUpcoming(o.startTime)
-                              ).length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByTime?.upcoming ||
+                                olympiads.filter((o) =>
+                                  isOlympiadUpcoming(o.startTime)
+                                ).length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {
+                      {analytics?.olympiadsByTime?.upcoming ||
                         olympiads.filter((o) => isOlympiadUpcoming(o.startTime))
-                          .length
-                      }
+                          .length}
                     </span>
                   </div>
                 </div>
@@ -338,21 +344,21 @@ const OwnerPanel = () => {
                       className="stat-bar stat-bar-ended"
                       style={{
                         width: `${
-                          olympiads.length > 0
-                            ? (olympiads.filter((o) =>
-                                isOlympiadEnded(o.endTime)
-                              ).length /
-                                olympiads.length) *
+                          (analytics?.totals?.olympiads || olympiads.length) > 0
+                            ? ((analytics?.olympiadsByTime?.ended ||
+                                olympiads.filter((o) =>
+                                  isOlympiadEnded(o.endTime)
+                                ).length) /
+                                (analytics?.totals?.olympiads || olympiads.length)) *
                               100
                             : 0
                         }%`,
                       }}
                     ></div>
                     <span className="stat-value">
-                      {
+                      {analytics?.olympiadsByTime?.ended ||
                         olympiads.filter((o) => isOlympiadEnded(o.endTime))
-                          .length
-                      }
+                          .length}
                     </span>
                   </div>
                 </div>
@@ -365,19 +371,14 @@ const OwnerPanel = () => {
               <div className="stat-content">
                 <div className="stat-metric">
                   <div className="metric-value">
-                    {Array.isArray(submissions) && submissions.length > 0
-                      ? new Set(submissions.map((s) => s.userId || s.user?._id))
-                          .size
-                      : 0}
+                    {analytics?.uniqueParticipants || 0}
                   </div>
                   <div className="metric-label">Unique Participants</div>
                 </div>
                 <div className="stat-metric">
                   <div className="metric-value">
-                    {Array.isArray(submissions) &&
-                    Array.isArray(olympiads) &&
-                    olympiads.length > 0
-                      ? (submissions.length / olympiads.length).toFixed(1)
+                    {analytics?.avgSubmissionsPerOlympiad !== undefined
+                      ? analytics.avgSubmissionsPerOlympiad.toFixed(1)
                       : "0"}
                   </div>
                   <div className="metric-label">
@@ -386,15 +387,8 @@ const OwnerPanel = () => {
                 </div>
                 <div className="stat-metric">
                   <div className="metric-value">
-                    {Array.isArray(submissions) &&
-                    users.filter((u) => u.role === "student").length > 0
-                      ? (
-                          (new Set(
-                            submissions.map((s) => s.userId || s.user?._id)
-                          ).size /
-                            users.filter((u) => u.role === "student").length) *
-                          100
-                        ).toFixed(1)
+                    {analytics?.studentParticipationRate !== undefined
+                      ? analytics.studentParticipationRate.toFixed(1)
                       : "0"}
                     %
                   </div>

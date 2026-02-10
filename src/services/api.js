@@ -243,6 +243,7 @@ export const adminAPI = {
 
 // Owner endpoints
 export const ownerAPI = {
+  getDashboardSummary: () => api.get("/owner/dashboard"),
   getAnalytics: () => api.get("/owner/analytics"),
   changeUserRole: (userId, role) =>
     api.put(`/owner/users/${userId}/role`, { role }),
