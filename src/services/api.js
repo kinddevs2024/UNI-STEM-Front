@@ -171,7 +171,18 @@ export const olympiadAPI = {
 // Admin endpoints
 export const adminAPI = {
   // Olympiad management
-  getAllOlympiads: () => api.get("/admin/olympiads"),
+  getAllOlympiads: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+    if (params.search) query.append("search", params.search);
+    if (params.status) query.append("status", params.status);
+    if (params.subject) query.append("subject", params.subject);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/admin/olympiads${queryString ? `?${queryString}` : ""}`);
+  },
   getOlympiadById: (id) => api.get(`/admin/olympiads/${id}`),
   createOlympiad: (data) => {
     if (data instanceof FormData) {
@@ -225,7 +236,17 @@ export const adminAPI = {
   deleteQuestion: (id) => api.delete(`/admin/questions/${id}`),
 
   // User management
-  getUsers: () => api.get("/admin/users"),
+  getUsers: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+    if (params.search) query.append("search", params.search);
+    if (params.role) query.append("role", params.role);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/admin/users${queryString ? `?${queryString}` : ""}`);
+  },
 
   // Submissions
   getSubmissions: (olympiadId, userId) => {
@@ -244,6 +265,70 @@ export const adminAPI = {
 // Owner endpoints
 export const ownerAPI = {
   getDashboardSummary: () => api.get("/owner/dashboard"),
+  getMetrics: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/owner/metrics${queryString ? `?${queryString}` : ""}`);
+  },
+  exportUsers: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.search) query.append("search", params.search);
+    if (params.role) query.append("role", params.role);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/owner/exports/users${queryString ? `?${queryString}` : ""}`, {
+      responseType: "blob",
+    });
+  },
+  exportOlympiads: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.search) query.append("search", params.search);
+    if (params.status) query.append("status", params.status);
+    if (params.subject) query.append("subject", params.subject);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/owner/exports/olympiads${queryString ? `?${queryString}` : ""}`, {
+      responseType: "blob",
+    });
+  },
+  exportAuditLogs: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.action) query.append("action", params.action);
+    if (params.actorId) query.append("actorId", params.actorId);
+    if (params.targetType) query.append("targetType", params.targetType);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    if (params.limit) query.append("limit", params.limit);
+    const queryString = query.toString();
+    return api.get(`/owner/exports/audit-logs${queryString ? `?${queryString}` : ""}`, {
+      responseType: "blob",
+    });
+  },
+  exportMetrics: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/owner/exports/metrics${queryString ? `?${queryString}` : ""}`, {
+      responseType: "blob",
+    });
+  },
+  getAuditLogs: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.append("page", params.page);
+    if (params.limit) query.append("limit", params.limit);
+    if (params.action) query.append("action", params.action);
+    if (params.actorId) query.append("actorId", params.actorId);
+    if (params.targetType) query.append("targetType", params.targetType);
+    if (params.startDate) query.append("startDate", params.startDate);
+    if (params.endDate) query.append("endDate", params.endDate);
+    const queryString = query.toString();
+    return api.get(`/owner/audit-logs${queryString ? `?${queryString}` : ""}`);
+  },
   getAnalytics: () => api.get("/owner/analytics"),
   changeUserRole: (userId, role) =>
     api.put(`/owner/users/${userId}/role`, { role }),
