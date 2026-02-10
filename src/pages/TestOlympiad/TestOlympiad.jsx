@@ -354,11 +354,17 @@ const TestOlympiad = () => {
 
       if (nextIndex < questions.length) {
         try {
+          const resolvedIndex = typeof nextIndexOverride === 'number'
+            ? nextIndexOverride
+            : nextIndex;
+          setCurrentQuestionIndex(resolvedIndex);
           const response = await olympiadAPI.getQuestion(id, nextIndex);
 
           if (response.data.success) {
             // Update current question index from server response
-            setCurrentQuestionIndex(response.data.currentQuestionIndex);
+            if (typeof nextIndexOverride !== 'number' && typeof response.data.currentQuestionIndex === 'number') {
+              setCurrentQuestionIndex(response.data.currentQuestionIndex);
+            }
 
             // Add question to questions array if not already there
             if (response.data.question && !questions.find(q => q._id === response.data.question._id)) {
