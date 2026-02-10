@@ -272,6 +272,8 @@ const TestOlympiad = () => {
     let nextIndexOverride = null;
     setNextSubmitting(true);
 
+    try {
+
     // Submit current answer if provided
     const currentAnswer = answers[currentQuestion._id];
     if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
