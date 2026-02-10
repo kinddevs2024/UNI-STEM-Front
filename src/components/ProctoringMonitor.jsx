@@ -37,6 +37,121 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
   const FACE_MISSING_GRACE_MS = 2000;
 
+  const uploadVideo = async (type, chunks) => {
+    try {
+      setUploadStatus(`Uploading ${type} video...`);
+
+      // Combine all chunks into a single blob
+      const videoBlob = new Blob(chunks, {
+        type: 'video/webm'
+      });
+
+      // Create File object from blob
+      // Generate filename: {userId}_{date}_{olympiad-name}_{type}.webm
+      const filename = generateVideoFilename(
+        userId || 'unknown-user',
+        olympiadTitle || `Olympiad-${olympiadId}`,
+        type,
+        new Date()
+      );
+      const videoFile = new File([videoBlob], filename, { type: 'video/webm' });
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('video', videoFile);
+      formData.append('olympiadId', olympiadId);
+      formData.append('videoType', type); // 'camera' or 'screen'
+
+      // Upload video with progress tracking
+      await olympiadAPI.uploadVideo(formData, (progress) => {
+        setUploadProgress(prev => ({
+          ...prev,
+          [type]: progress
+        }));
+      });
+
+      // Clear chunks after successful upload
+      if (type === 'camera') {
+        cameraChunksRef.current = [];
+      } else {
+        screenChunksRef.current = [];
+      }
+
+    } catch (error) {
+      console.error(`Error uploading ${type} video:`, error);
+      throw error;
+    }
+  };
+
+  const handleRecordingComplete = async () => {
+    setIsUploading(true);
+    setUploadProgress({ camera: 0, screen: 0 });
+
+    try {
+      const uploadPromises = [];
+
+      // Upload camera video if available
+      if (cameraChunksRef.current.length > 0) {
+        uploadPromises.push(uploadVideo('camera', cameraChunksRef.current));
+      }
+
+      // Upload screen video if available
+      if (screenChunksRef.current.length > 0) {
+        uploadPromises.push(uploadVideo('screen', screenChunksRef.current));
+      }
+
+      // Upload both videos in parallel
+      if (uploadPromises.length > 0) {
+        await Promise.all(uploadPromises);
+        setUploadStatus('Upload complete');
+      } else {
+        console.warn('No video chunks to upload');
+        setUploadStatus('No videos recorded');
+      }
+
+    } catch (error) {
+      console.error('Error uploading videos:', error);
+      setUploadStatus('Upload failed');
+      alert('Connection failed. Please try again.');
+    } finally {
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress({ camera: 0, screen: 0 });
+        setUploadStatus('');
+      }, 2000);
+    }
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+
+    // Stop real-time capture sending
+    if (realTimeCaptureIntervalRef.current) {
+      clearInterval(realTimeCaptureIntervalRef.current);
+      realTimeCaptureIntervalRef.current = null;
+    }
+
+    // Notify parent that recording stopped
+    if (onRecordingStatusChange) {
+      onRecordingStatusChange(false);
+    }
+
+    // Stop camera recording
+    if (cameraRecorderRef.current && cameraRecorderRef.current.state !== 'inactive') {
+      cameraRecorderRef.current.stop();
+    }
+
+    // Stop screen recording
+    if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
+      screenRecorderRef.current.stop();
+    }
+
+    // Wait a bit for recording to finalize, then upload
+    setTimeout(() => {
+      handleRecordingComplete();
+    }, 1000);
+  };
+
   const isMobileDevice = () => {
     if (typeof navigator === 'undefined') return false;
     return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
@@ -734,123 +849,6 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       } catch (error) {
         console.error('Error starting screen MediaRecorder:', error);
-      }
-    };
-
-    const stopRecording = () => {
-      setIsRecording(false);
-      
-      // Stop real-time capture sending
-      if (realTimeCaptureIntervalRef.current) {
-        clearInterval(realTimeCaptureIntervalRef.current);
-        realTimeCaptureIntervalRef.current = null;
-      }
-      
-      // Notify parent that recording stopped
-      if (onRecordingStatusChange) {
-        onRecordingStatusChange(false);
-      }
-
-      // Stop camera recording
-      if (cameraRecorderRef.current && cameraRecorderRef.current.state !== 'inactive') {
-        cameraRecorderRef.current.stop();
-      }
-
-      // Stop screen recording
-      if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
-        screenRecorderRef.current.stop();
-      }
-
-      // Wait a bit for recording to finalize, then upload
-      setTimeout(() => {
-        handleRecordingComplete();
-      }, 1000);
-    };
-
-    const handleRecordingComplete = async () => {
-      setIsUploading(true);
-      setUploadProgress({ camera: 0, screen: 0 });
-
-      try {
-        const uploadPromises = [];
-
-        // Upload camera video if available
-        if (cameraChunksRef.current.length > 0) {
-          uploadPromises.push(uploadVideo('camera', cameraChunksRef.current));
-        }
-
-        // Upload screen video if available
-        if (screenChunksRef.current.length > 0) {
-          uploadPromises.push(uploadVideo('screen', screenChunksRef.current));
-        }
-
-        // Upload both videos in parallel
-        if (uploadPromises.length > 0) {
-          await Promise.all(uploadPromises);
-          setUploadStatus('Upload complete');
-        } else {
-          console.warn('No video chunks to upload');
-          setUploadStatus('No videos recorded');
-        }
-
-      } catch (error) {
-        console.error('Error uploading videos:', error);
-        setUploadStatus('Upload failed');
-        alert('Connection failed. Please try again.');
-      } finally {
-        setTimeout(() => {
-          setIsUploading(false);
-          setUploadProgress({ camera: 0, screen: 0 });
-          setUploadStatus('');
-        }, 2000);
-      }
-    };
-
-    const uploadVideo = async (type, chunks) => {
-      try {
-        setUploadStatus(`Uploading ${type} video...`);
-
-        // Combine all chunks into a single blob
-        const videoBlob = new Blob(chunks, {
-          type: 'video/webm'
-        });
-
-
-        // Create File object from blob
-        // Generate filename: {userId}_{date}_{olympiad-name}_{type}.webm
-        const filename = generateVideoFilename(
-          userId || 'unknown-user',
-          olympiadTitle || `Olympiad-${olympiadId}`,
-          type,
-          new Date()
-        );
-        const videoFile = new File([videoBlob], filename, { type: 'video/webm' });
-
-        // Create FormData
-        const formData = new FormData();
-        formData.append('video', videoFile);
-        formData.append('olympiadId', olympiadId);
-        formData.append('videoType', type); // 'camera' or 'screen'
-
-        // Upload video with progress tracking
-        await olympiadAPI.uploadVideo(formData, (progress) => {
-          setUploadProgress(prev => ({
-            ...prev,
-            [type]: progress
-          }));
-        });
-
-        
-        // Clear chunks after successful upload
-        if (type === 'camera') {
-          cameraChunksRef.current = [];
-        } else {
-          screenChunksRef.current = [];
-        }
-
-      } catch (error) {
-        console.error(`Error uploading ${type} video:`, error);
-        throw error;
       }
     };
 
