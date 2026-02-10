@@ -180,7 +180,7 @@ const TestOlympiad = () => {
           ? attempt.currentQuestionIndex
           : currentQuestionIndex;
 
-      if (authoritativeIndex !== currentQuestionIndex) {
+      if (currentQuestionIndex > authoritativeIndex) {
         setCurrentQuestionIndex(authoritativeIndex);
       }
 
@@ -568,7 +568,7 @@ const TestOlympiad = () => {
               key={index}
               className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${answers[questions[index]._id] ? 'answered' : ''}`}
               onClick={() => setCurrentQuestionIndex(index)}
-            disabled={!canProceed || submitted || index < currentQuestionIndex}
+            disabled={!canProceed || submitted}
             >
               {index + 1}
             </button>
