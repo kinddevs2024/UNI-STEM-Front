@@ -258,8 +258,8 @@ const TestOlympiad = () => {
     const currentAnswer = answers[currentQuestion._id];
     if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
       try {
-        let nonce = currentQuestion.nonce;
-        if (!nonce) {
+        let nonce = null;
+        try {
           const nonceResponse = await olympiadAPI.getQuestion(id, currentQuestionIndex);
           if (nonceResponse.data.success && nonceResponse.data.question?.nonce) {
             nonce = nonceResponse.data.question.nonce;
@@ -273,6 +273,17 @@ const TestOlympiad = () => {
               return next;
             });
           }
+        } catch (nonceError) {
+          // If nonce refresh fails, fall back to existing nonce if any
+          nonce = currentQuestion?.nonce || null;
+        }
+
+        if (!nonce) {
+          setNotification({
+            message: 'Failed to load question nonce. Please retry.',
+            type: 'error'
+          });
+          return;
         }
         const submitResponse = await olympiadAPI.submitAnswer(id, {
           questionIndex: currentQuestionIndex,
