@@ -8,6 +8,14 @@ const resolveSocketUrl = () => {
   if (envSocketUrl) return envSocketUrl;
   if (import.meta.env.DEV) return "http://localhost:3000";
 
+  if (typeof API_BASE_URL === "string" && API_BASE_URL.startsWith("http")) {
+    try {
+      return new URL(API_BASE_URL).origin;
+    } catch {
+      // Ignore invalid API base URL and fall back to current origin.
+    }
+  }
+
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl) {
     try {

@@ -23,7 +23,9 @@ const CheckerPanel = () => {
     try {
       setLoading(true);
       const response = await checkerAPI.getAllPortfolios();
-      setPortfolios(response.data || []);
+      const portfoliosData =
+        response.data?.data || response.data?.portfolios || response.data || [];
+      setPortfolios(Array.isArray(portfoliosData) ? portfoliosData : []);
     } catch (error) {
       console.error("Error fetching portfolios:", error);
       setNotification({

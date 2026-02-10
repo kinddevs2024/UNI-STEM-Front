@@ -52,7 +52,8 @@ const SchoolTeacherPanel = () => {
       const [olympiadsRes] = await Promise.all([
         olympiadAPI.getAll(),
       ]);
-      setOlympiads(olympiadsRes.data || []);
+      const olympiadsData = olympiadsRes.data?.data || olympiadsRes.data || [];
+      setOlympiads(Array.isArray(olympiadsData) ? olympiadsData : []);
       
       if (viewMode === 'monitoring') {
         await fetchActiveStudents();

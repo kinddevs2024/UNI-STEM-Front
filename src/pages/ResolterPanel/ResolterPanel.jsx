@@ -35,7 +35,8 @@ const ResolterPanel = () => {
       const [olympiadsRes] = await Promise.all([
         olympiadAPI.getAll(),
       ]);
-      setOlympiads(olympiadsRes.data || []);
+      const olympiadsData = olympiadsRes.data?.data || olympiadsRes.data || [];
+      setOlympiads(Array.isArray(olympiadsData) ? olympiadsData : []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setNotification({ message: 'Failed to load data', type: 'error' });
