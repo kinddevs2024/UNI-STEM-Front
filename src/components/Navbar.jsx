@@ -26,6 +26,11 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  const navigationItems = useMemo(() => {
+    if (!isAuthenticated || !user?.role) return [];
+    return getNavigationItems(user.role);
+  }, [isAuthenticated, user?.role]);
+
   // Hide navbar on portfolio pages
   if (isPortfolioPage) {
     return null;
@@ -34,11 +39,6 @@ const Navbar = () => {
   if (!isAuthenticated && !isPublicPage) {
     return null;
   }
-
-  const navigationItems = useMemo(() => {
-    if (!isAuthenticated || !user?.role) return [];
-    return getNavigationItems(user.role);
-  }, [isAuthenticated, user?.role]);
 
   const renderPublicLinks = () => (
     <>
