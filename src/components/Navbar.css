@@ -81,6 +81,20 @@ body[data-theme="kid-friendly"] .navbar-logo {
   background: var(--text-primary);
   border-radius: 4px;
   display: block;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+
+.navbar-mobile-toggle.open .navbar-mobile-toggle-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.navbar-mobile-toggle.open .navbar-mobile-toggle-line:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-mobile-toggle.open .navbar-mobile-toggle-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .navbar-mobile-backdrop {
@@ -90,7 +104,7 @@ body[data-theme="kid-friendly"] .navbar-logo {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 999;
+  z-index: 1100;
 }
 
 .navbar-mobile-backdrop.open {
@@ -113,7 +127,8 @@ body[data-theme="kid-friendly"] .navbar-logo {
   opacity: 0;
   pointer-events: none;
   transition: transform 0.2s ease, opacity 0.2s ease;
-  z-index: 1000;
+  z-index: 1101;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
 }
 
 .navbar-mobile-menu.open {
