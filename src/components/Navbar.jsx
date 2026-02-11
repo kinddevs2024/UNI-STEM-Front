@@ -71,23 +71,25 @@ const Navbar = () => {
         </Link>
       ))}
 
-      <BalanceDisplay />
+      <div className="navbar-account-group">
+        <BalanceDisplay />
 
-      <Link to="/profile" className="navbar-user">
-        {user?.userLogo ? (
-          <img
-            src={getImageUrl(user.userLogo)}
-            alt="Profile"
-            className="navbar-user-avatar"
-          />
-        ) : (
-          <div className="navbar-user-avatar-placeholder">
-            {user?.name?.charAt(0)?.toUpperCase() ||
-              user?.email?.charAt(0)?.toUpperCase() ||
-              "U"}
-          </div>
-        )}
-      </Link>
+        <Link to="/profile" className="navbar-user">
+          {user?.userLogo ? (
+            <img
+              src={getImageUrl(user.userLogo)}
+              alt="Profile"
+              className="navbar-user-avatar"
+            />
+          ) : (
+            <div className="navbar-user-avatar-placeholder">
+              {user?.name?.charAt(0)?.toUpperCase() ||
+                user?.email?.charAt(0)?.toUpperCase() ||
+                "U"}
+            </div>
+          )}
+        </Link>
+      </div>
 
       <button
         onClick={handleLogout}
@@ -124,9 +126,19 @@ const Navbar = () => {
           aria-expanded={mobileMenuOpen}
           onClick={() => setMobileMenuOpen((open) => !open)}
         >
-          <span className="navbar-mobile-toggle-line" />
-          <span className="navbar-mobile-toggle-line" />
-          <span className="navbar-mobile-toggle-line" />
+          <span className="navbar-mobile-toggle-icon">
+            <span className="navbar-mobile-toggle-dots">
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+            </span>
+          </span>
         </button>
       </div>
 
