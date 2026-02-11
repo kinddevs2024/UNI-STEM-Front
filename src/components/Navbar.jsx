@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
 import { getImageUrl } from "../utils/helpers";
@@ -9,6 +10,7 @@ const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -20,6 +22,10 @@ const Navbar = () => {
   const isPublicPage = publicPages.includes(location.pathname);
   const isPortfolioPage = location.pathname.startsWith("/portfolio/");
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   // Hide navbar on portfolio pages
   if (isPortfolioPage) {
     return null;
@@ -29,10 +35,68 @@ const Navbar = () => {
     return null;
   }
 
-  // Get role-based navigation items
-  const navigationItems = isAuthenticated && user?.role 
-    ? getNavigationItems(user.role)
-    : [];
+  const navigationItems = useMemo(() => {
+    if (!isAuthenticated || !user?.role) return [];
+    return getNavigationItems(user.role);
+  }, [isAuthenticated, user?.role]);
+
+  const renderPublicLinks = () => (
+    <>
+      <Link to="/" className="navbar-link">
+        Home
+      </Link>
+      <Link to="/about" className="navbar-link">
+        About
+      </Link>
+      <Link to="/services" className="navbar-link">
+        Services
+      </Link>
+      <Link to="/contact" className="navbar-link">
+        Contact
+      </Link>
+    </>
+  );
+
+  const renderAuthLinks = () => (
+    <>
+      {navigationItems.map((item, index) => (
+        <Link
+          key={`${item.path}-${item.label}-${index}`}
+          to={item.path}
+          className={`navbar-link ${
+            isActiveRoute(item.path, location.pathname) ? "active" : ""
+          }`}
+        >
+          {item.label}
+        </Link>
+      ))}
+
+      <BalanceDisplay />
+
+      <Link to="/profile" className="navbar-user">
+        {user?.userLogo ? (
+          <img
+            src={getImageUrl(user.userLogo)}
+            alt="Profile"
+            className="navbar-user-avatar"
+          />
+        ) : (
+          <div className="navbar-user-avatar-placeholder">
+            {user?.name?.charAt(0)?.toUpperCase() ||
+              user?.email?.charAt(0)?.toUpperCase() ||
+              "U"}
+          </div>
+        )}
+      </Link>
+
+      <button
+        onClick={handleLogout}
+        className="button-secondary navbar-logout"
+      >
+        Logout
+      </button>
+    </>
+  );
 
   return (
     <nav className="navbar">
@@ -41,68 +105,47 @@ const Navbar = () => {
           <img src="/LOGO.png" alt="UNI STEM" className="navbar-logo-image" />
         </Link>
 
-        <div className="navbar-menu">
-          {!isAuthenticated && (
-            <>
-              <Link to="/" className="navbar-link">
-                Home
-              </Link>
-              <Link to="/about" className="navbar-link">
-                About
-              </Link>
-              <Link to="/services" className="navbar-link">
-                Services
-              </Link>
-              <Link to="/contact" className="navbar-link">
-                Contact
-              </Link>
-            </>
-          )}
+        <div className="navbar-menu navbar-menu-desktop">
+          {!isAuthenticated && renderPublicLinks()}
 
           {isAuthenticated ? (
-            <>
-              {/* Render role-based navigation items */}
-              {navigationItems.map((item, index) => (
-                <Link
-                  key={`${item.path}-${item.label}-${index}`}
-                  to={item.path}
-                  className={`navbar-link ${
-                    isActiveRoute(item.path, location.pathname) ? "active" : ""
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-
-              <BalanceDisplay />
-
-              <Link to="/profile" className="navbar-user">
-                {user?.userLogo ? (
-                  <img
-                    src={getImageUrl(user.userLogo)}
-                    alt="Profile"
-                    className="navbar-user-avatar"
-                  />
-                ) : (
-                  <div className="navbar-user-avatar-placeholder">
-                    {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                )}
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="button-secondary navbar-logout"
-              >
-                Logout
-              </button>
-            </>
+            renderAuthLinks()
           ) : (
             <Link to="/auth" className="navbar-login">
               Login
             </Link>
           )}
         </div>
+
+        <button
+          type="button"
+          className="navbar-mobile-toggle"
+          aria-label="Toggle menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          <span className="navbar-mobile-toggle-line" />
+          <span className="navbar-mobile-toggle-line" />
+          <span className="navbar-mobile-toggle-line" />
+        </button>
+      </div>
+
+      <div
+        className={`navbar-mobile-backdrop ${mobileMenuOpen ? "open" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden={!mobileMenuOpen}
+      />
+
+      <div className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
+        {!isAuthenticated && renderPublicLinks()}
+
+        {isAuthenticated ? (
+          renderAuthLinks()
+        ) : (
+          <Link to="/auth" className="navbar-login">
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );

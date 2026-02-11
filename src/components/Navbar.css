@@ -52,6 +52,87 @@ body[data-theme="kid-friendly"] .navbar-logo {
   gap: 24px;
 }
 
+.navbar-menu-desktop {
+  display: flex;
+}
+
+.navbar-mobile-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navbar-mobile-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-mobile-toggle-line {
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 4px;
+  display: block;
+}
+
+.navbar-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 999;
+}
+
+.navbar-mobile-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navbar-mobile-menu {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  left: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  transform: translateY(-16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 1000;
+}
+
+.navbar-mobile-menu.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navbar-mobile-menu .navbar-link,
+.navbar-mobile-menu .navbar-login,
+.navbar-mobile-menu .navbar-logout {
+  width: 100%;
+  text-align: left;
+}
+
+.navbar-mobile-menu .navbar-user {
+  justify-content: flex-start;
+}
+
 .navbar-link {
   font-size: 14px;
   font-weight: 600;
@@ -252,18 +333,19 @@ body[data-theme="kid-friendly"] .navbar-login:active {
 
 @media (max-width: 768px) {
   .navbar-container {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .navbar-menu {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: row;
     gap: 12px;
   }
-  
+
+  .navbar-menu-desktop {
+    display: none;
+  }
+
+  .navbar-mobile-toggle {
+    display: inline-flex;
+  }
+
   .navbar-user {
     padding: 4px;
   }
 }
-
