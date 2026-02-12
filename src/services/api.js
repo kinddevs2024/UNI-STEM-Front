@@ -83,6 +83,7 @@ export const authAPI = {
     return api.post("/auth/cookie-consent", data);
   },
   setPassword: (data) => api.post("/auth/set-password", data),
+  verifyEmail: (data) => api.post("/auth/verify-email", data),
 };
 
 // Payment endpoints

@@ -54,6 +54,7 @@ import Universities from "./pages/Universities";
 import Schools from "./pages/Schools";
 import BuyCoins from "./pages/BuyCoins";
 import UpdatePassword from "./pages/UpdatePassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import { USER_ROLES, GOOGLE_CLIENT_ID } from "./utils/constants";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TranslationProvider } from "./context/TranslationContext";
@@ -94,6 +95,7 @@ const AppRoutes = () => {
       />
 
       <Route path="/updatepassword" element={<UpdatePassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       <Route path="/portfolio/:slug" element={<PortfolioView />} />
       <Route path="/portfolio/:slug/:sectionId" element={<PortfolioView />} />

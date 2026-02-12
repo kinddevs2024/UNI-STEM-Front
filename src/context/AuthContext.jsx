@@ -114,6 +114,8 @@ export const AuthProvider = ({ children }) => {
       console.error("Login error:", error);
       const passwordResetRequired =
         error.response?.data?.passwordResetRequired === true;
+      const emailVerificationRequired =
+        error.response?.data?.emailVerificationRequired === true;
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -124,6 +126,7 @@ export const AuthProvider = ({ children }) => {
         success: false,
         error: errorMessage,
         passwordResetRequired,
+        emailVerificationRequired,
       };
     }
   };
@@ -133,7 +136,18 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register({
         ...userData,
       });
-      const { token } = response.data;
+      const { token, emailVerificationRequired, message } = response.data || {};
+
+      if (emailVerificationRequired) {
+        return { success: true, emailVerificationRequired, message };
+      }
+
+      if (!token) {
+        return {
+          success: false,
+          error: message || "Registration failed",
+        };
+      }
 
       setToken(token);
 

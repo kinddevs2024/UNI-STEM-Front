@@ -102,6 +102,22 @@ const Auth = () => {
       if (result.success) {
         // Redirect to complete profile page after registration
         if (!isLogin) {
+          if (result.emailVerificationRequired) {
+            setNotification({
+              message: result.message || "We sent a verification link to your email.",
+              type: "info",
+            });
+            setIsLogin(true);
+            setFormData({
+              email: formData.email,
+              password: "",
+              confirmPassword: "",
+              firstName: "",
+              secondName: "",
+            });
+            setLoading(false);
+            return;
+          }
           // Check if user has already seen the intro
           const introWatched = localStorage.getItem("introWatched");
           if (!introWatched) {
@@ -114,7 +130,7 @@ const Auth = () => {
           navigate("/dashboard");
         }
       } else {
-        if (result.passwordResetRequired) {
+        if (result.passwordResetRequired || result.emailVerificationRequired) {
           setNotification({ message: result.error, type: "info" });
         } else {
           setNotification({ message: result.error, type: "error" });
