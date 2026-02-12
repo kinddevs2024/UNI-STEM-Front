@@ -114,7 +114,11 @@ const Auth = () => {
           navigate("/dashboard");
         }
       } else {
-        setNotification({ message: result.error, type: "error" });
+        if (result.passwordResetRequired) {
+          setNotification({ message: result.error, type: "info" });
+        } else {
+          setNotification({ message: result.error, type: "error" });
+        }
       }
     } catch (error) {
       setNotification({
@@ -361,7 +365,7 @@ const Auth = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required
+                required={!isLogin}
                 placeholder="Enter your password"
               />
             </div>

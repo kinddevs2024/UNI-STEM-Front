@@ -112,6 +112,8 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Login error:", error);
+      const passwordResetRequired =
+        error.response?.data?.passwordResetRequired === true;
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -121,6 +123,7 @@ export const AuthProvider = ({ children }) => {
       return {
         success: false,
         error: errorMessage,
+        passwordResetRequired,
       };
     }
   };

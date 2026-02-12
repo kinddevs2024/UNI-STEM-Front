@@ -53,6 +53,7 @@ import PortfolioView from "./pages/PortfolioView";
 import Universities from "./pages/Universities";
 import Schools from "./pages/Schools";
 import BuyCoins from "./pages/BuyCoins";
+import UpdatePassword from "./pages/UpdatePassword";
 import { USER_ROLES, GOOGLE_CLIENT_ID } from "./utils/constants";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TranslationProvider } from "./context/TranslationContext";
@@ -91,6 +92,8 @@ const AppRoutes = () => {
         path="/services"
         element={isAuthenticated ? <Navigate to="/dashboard" /> : <Services />}
       />
+
+      <Route path="/updatepassword" element={<UpdatePassword />} />
 
       <Route path="/portfolio/:slug" element={<PortfolioView />} />
       <Route path="/portfolio/:slug/:sectionId" element={<PortfolioView />} />

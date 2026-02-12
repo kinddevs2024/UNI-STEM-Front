@@ -82,6 +82,7 @@ export const authAPI = {
   updateCookieConsent: (data) => {
     return api.post("/auth/cookie-consent", data);
   },
+  setPassword: (data) => api.post("/auth/set-password", data),
 };
 
 // Payment endpoints
