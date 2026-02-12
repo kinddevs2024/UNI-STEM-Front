@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NotificationToast from "../../components/NotificationToast";
 import { authAPI } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import "./VerifyEmail.css";
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { completeAuth } = useAuth();
 
   const email = useMemo(() => searchParams.get("email") || "", [searchParams]);
   const token = useMemo(() => searchParams.get("token") || "", [searchParams]);
@@ -30,6 +32,11 @@ const VerifyEmail = () => {
         const response = await authAPI.verifyEmail({ email, token });
         if (response.data?.success) {
           setDone(true);
+          if (response.data?.token && response.data?.user) {
+            completeAuth(response.data.token, response.data.user);
+            navigate("/dashboard");
+            return;
+          }
           setNotification({
             message: response.data?.message || "Email verified successfully.",
             type: "success",

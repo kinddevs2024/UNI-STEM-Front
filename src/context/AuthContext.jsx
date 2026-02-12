@@ -274,6 +274,26 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
+  const completeAuth = (token, userData) => {
+    if (token) {
+      setToken(token);
+    }
+
+    if (userData) {
+      const normalizedUser = { ...userData };
+      if (!normalizedUser.devices) {
+        normalizedUser.devices = [];
+      }
+      setUserState(normalizedUser);
+      setUser(normalizedUser);
+      setIsAuthenticated(true);
+
+      if (!checkCookieConsent(normalizedUser)) {
+        setShowCookieConsent(true);
+      }
+    }
+  };
+
   // Balance/coins: derive from user, refresh from API
   const balance = typeof user?.coins === "number" ? user.coins : 0;
 
@@ -346,6 +366,7 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     setUser: updateUser,
+    completeAuth,
     showCookieConsent,
     handleCookieConsent,
     balance,
