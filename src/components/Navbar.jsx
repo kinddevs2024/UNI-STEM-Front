@@ -20,7 +20,6 @@ const Navbar = () => {
   // Show navbar on public pages even if not authenticated
   const publicPages = ["/", "/about", "/contact", "/services", "/auth"];
   const isPublicPage = publicPages.includes(location.pathname);
-  const isPortfolioPage = location.pathname.startsWith("/portfolio/");
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -30,11 +29,6 @@ const Navbar = () => {
     if (!isAuthenticated || !user?.role) return [];
     return getNavigationItems(user.role);
   }, [isAuthenticated, user?.role]);
-
-  // Hide navbar on portfolio pages
-  if (isPortfolioPage) {
-    return null;
-  }
 
   if (!isAuthenticated && !isPublicPage) {
     return null;

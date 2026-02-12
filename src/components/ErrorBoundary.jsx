@@ -1,7 +1,7 @@
 import { Component } from 'react';
 
 /**
- * Error boundary for critical pages (TestOlympiad, Leaderboard, PortfolioConstructor).
+ * Error boundary for critical pages (TestOlympiad, Leaderboard).
  * Prevents full app crash and shows fallback UI.
  */
 export default class ErrorBoundary extends Component {

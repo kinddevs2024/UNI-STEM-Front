@@ -18,7 +18,6 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { lazy, Suspense } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
@@ -32,7 +31,6 @@ import TestOlympiad from "./pages/TestOlympiad";
 import EssayOlympiad from "./pages/EssayOlympiad";
 import StartOlympiad from "./pages/StartOlympiad";
 import Leaderboard from "./pages/Leaderboard";
-const PortfolioConstructor = lazy(() => import("./pages/PortfolioConstructor"));
 import Results from "./pages/Results";
 import AdminPanel from "./pages/AdminPanel";
 import OwnerPanel from "./pages/OwnerPanel";
@@ -49,7 +47,6 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
-import PortfolioView from "./pages/PortfolioView";
 import Universities from "./pages/Universities";
 import Schools from "./pages/Schools";
 import BuyCoins from "./pages/BuyCoins";
@@ -96,9 +93,6 @@ const AppRoutes = () => {
 
       <Route path="/updatepassword" element={<UpdatePassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-
-      <Route path="/portfolio/:slug" element={<PortfolioView />} />
-      <Route path="/portfolio/:slug/:sectionId" element={<PortfolioView />} />
 
       <Route
         path="/dashboard"
@@ -309,19 +303,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <BuyCoins />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/dashboard/portfolio"
-        element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
-            <ErrorBoundary>
-              <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
-                <PortfolioConstructor />
-              </Suspense>
-            </ErrorBoundary>
           </ProtectedRoute>
         }
       />

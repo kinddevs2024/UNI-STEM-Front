@@ -31,13 +31,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to auth if it's a 401 AND the request was for an authenticated endpoint
-    // Don't redirect for public portfolio requests (they can return 401 if private)
-    const isPublicPortfolioRequest = error.config?.url?.includes('/portfolio/') && 
-                                     error.config?.method === 'get' &&
-                                     !error.config?.url?.includes('/portfolio/my');
-    
-    if (error.response?.status === 401 && !isPublicPortfolioRequest) {
+    if (error.response?.status === 401) {
       removeToken();
       removeUser();
       // Only redirect if we're not already on an auth page
@@ -451,52 +445,10 @@ export const schoolTeacherAPI = {
 };
 
 // Checker endpoints
-export const checkerAPI = {
-  // Get all portfolios for verification
-  getAllPortfolios: () => api.get("/checker/portfolios"),
-
-  // Verify portfolio
-  verifyPortfolio: (portfolioId, comment = "") =>
-    api.post(`/checker/verify/${portfolioId}`, { comment }),
-
-  // Reject portfolio
-  rejectPortfolio: (portfolioId, comment = "") =>
-    api.post(`/checker/reject/${portfolioId}`, { comment }),
-};
+export const checkerAPI = {};
 
 // University endpoints
 export const universityAPI = {
-  // Get all student portfolios with filters
-  getAllStudentPortfolios: (filters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.verificationStatus && filters.verificationStatus !== "all")
-      params.append("verificationStatus", filters.verificationStatus);
-    // Backend expects minILSLevel and maxILSLevel, not ilsLevel
-    // When a single level is selected, set both min and max to that value
-    if (filters.ilsLevel) {
-      params.append("minILSLevel", filters.ilsLevel);
-      params.append("maxILSLevel", filters.ilsLevel);
-    }
-    if (filters.olympiadLevel)
-      params.append("olympiadLevel", filters.olympiadLevel);
-    if (filters.search) params.append("search", filters.search);
-    if (filters.createdFrom) params.append("createdFrom", filters.createdFrom);
-    if (filters.createdTo) params.append("createdTo", filters.createdTo);
-    if (filters.minRating) params.append("minRating", filters.minRating);
-    if (filters.maxRating) params.append("maxRating", filters.maxRating);
-    if (filters.page) params.append("page", filters.page);
-    if (filters.limit) params.append("limit", filters.limit);
-    const query = params.toString();
-    return api.get(`/portfolios${query ? `?${query}` : ""}`);
-  },
-
-  // Get student contact info (if access granted)
-  getStudentContacts: (portfolioId) =>
-    api.get(`/university/contacts/${portfolioId}`),
-
-  // Unlock contacts (payment handled by backend)
-  unlockContacts: (portfolioId) =>
-    api.post(`/university/unlock-contacts/${portfolioId}`),
 
   // Olympiad management for universities
   getAllOlympiads: () => api.get("/university/olympiads"),
@@ -547,8 +499,5 @@ export const universityAPI = {
     api.get(`/university/olympiads/${olympiadId}/results`),
   getAllOlympiadResults: () => api.get("/university/olympiads/results"),
 };
-
-// Portfolio endpoints
-export { portfolioAPI } from "./portfolioAPI";
 
 export default api;
