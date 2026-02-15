@@ -1,6 +1,6 @@
-# UNI STEM (Frontend)
+# Global Olympiad (Frontend)
 
-A professional frontend for the UNI STEM platform—online academic olympiads with advanced proctoring features including screen and camera monitoring.
+A professional frontend for the Global Olympiad platform—online academic olympiads with advanced proctoring features including screen and camera monitoring.
 
 ## Features
 

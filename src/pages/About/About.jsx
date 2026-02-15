@@ -11,7 +11,7 @@ const About = () => {
         </div>
         <div className="hero-content">
           <h1 className="hero-title">
-            <span className="text-glow">About UNI STEM</span>
+            <span className="text-glow">About Global Olympiad</span>
           </h1>
           <p className="hero-subtitle">Academic competitions for everyone</p>
         </div>
@@ -24,7 +24,7 @@ const About = () => {
         <div className="about-content">
           <h2>Our Mission</h2>
           <p>
-            UNI STEM is the premier online platform for academic competitions
+            Global Olympiad is the premier online platform for academic competitions
             across Mathematics, Physics, Chemistry, English, and Science. We
             bring together students from around the world to compete, learn, and
             excel in their chosen fields.

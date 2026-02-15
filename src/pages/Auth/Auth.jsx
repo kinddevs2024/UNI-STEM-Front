@@ -325,8 +325,8 @@ const Auth = () => {
             </h1>
             <p className="auth-subtitle">
               {isLogin
-                ? "Sign in to continue to UNI STEM"
-                : "Join UNI STEM"}
+                ? "Sign in to continue to Global Olympiad"
+                : "Join Global Olympiad"}
             </p>
           </div>
 

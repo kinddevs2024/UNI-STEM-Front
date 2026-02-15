@@ -152,7 +152,7 @@ const Services = () => {
               <h2 className="section-title">Ready to Get Started?</h2>
               <div className="section-body">
                 <p className="get-started-text">
-                  Join thousands of students and start competing in UNI STEM
+                  Join thousands of students and start competing in Global Olympiad
                   today!
                 </p>
                 <div className="cta-buttons">
@@ -172,7 +172,7 @@ const Services = () => {
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 UNI STEM. All rights reserved.</p>
+          <p>&copy; 2024 Global Olympiad. All rights reserved.</p>
         </div>
       </footer>
     </div>
