@@ -5,7 +5,7 @@ import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
 import { getImageUrl } from "../utils/helpers";
 import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
-import logo from "../../public/logo.png";
+import logo from "/public/logo.png";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
