@@ -28,6 +28,7 @@ body[data-theme="kid-friendly"] .navbar {
 .navbar-logo {
   display: flex;
   align-items: center;
+  gap: 8px;
   transition: all 0.3s ease;
 }
 
@@ -35,6 +36,14 @@ body[data-theme="kid-friendly"] .navbar {
   height: 40px;
   width: auto;
   object-fit: contain;
+}
+
+.navbar-logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
 /* Kid-friendly theme logo */
@@ -373,6 +382,14 @@ body[data-theme="kid-friendly"] .navbar-login:active {
   .navbar-container {
     flex-direction: row;
     gap: 12px;
+  }
+
+  .navbar-logo-image {
+    height: 34px;
+  }
+
+  .navbar-logo-text {
+    font-size: 16px;
   }
 
   .navbar-menu-desktop {
