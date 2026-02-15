@@ -98,7 +98,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
-          <img src="/logo.png" alt="Global Olympiad logo" className="navbar-logo-image" />
+          <img src='../../public/logo.png' alt="Global Olympiad logo" className="navbar-logo-image" />
           <span className="navbar-logo-text" aria-label="Global Olympiad">
             lobal Olympiad
           </span>
