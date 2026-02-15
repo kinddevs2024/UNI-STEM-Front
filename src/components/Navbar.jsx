@@ -5,6 +5,7 @@ import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
 import { getImageUrl } from "../utils/helpers";
 import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
+import logo from "../../public/logo.png";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -98,7 +99,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
-          <img src='../../public/logo.png' alt="Global Olympiad logo" className="navbar-logo-image" />
+          <img src={logo} alt="Global Olympiad logo" className="navbar-logo-image" />
           <span className="navbar-logo-text" aria-label="Global Olympiad">
             lobal Olympiad
           </span>
