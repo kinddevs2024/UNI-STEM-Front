@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "./constants";
+
 // Helper to get full image URL (handle relative paths from API)
 export const getImageUrl = (url) => {
   if (!url) return '';
@@ -5,11 +7,17 @@ export const getImageUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
     return url;
   }
+  if (url.startsWith('/api/')) {
+    return url;
+  }
+
+  const apiBase = typeof API_BASE_URL === "string" && API_BASE_URL.trim()
+    ? API_BASE_URL.replace(/\/$/, "")
+    : "http://173.249.47.147/api";
+
   // If it starts with /, construct full URL using the API base domain
   if (url.startsWith('/')) {
-    // In production, use the Vercel backend domain
-    const backendDomain = 'https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app';
-    return `${backendDomain}${url}`;
+    return `${apiBase}${url}`;
   }
   // Otherwise return as-is (might be a relative path)
   return url;

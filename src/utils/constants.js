@@ -1,7 +1,7 @@
-// Use proxy in development, full URL in production
+// Use direct server API by default (single-server deployment)
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "/api";
+  "http://173.249.47.147/api";
 
 const resolveSocketUrl = () => {
   const envSocketUrl = import.meta.env.VITE_SOCKET_URL;
