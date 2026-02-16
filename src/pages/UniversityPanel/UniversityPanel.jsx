@@ -1335,7 +1335,7 @@ const UniversityPanel = () => {
               // Otherwise, prepend /api if in dev mode, or construct full URL
               const API_BASE_URL =
                 import.meta.env.VITE_API_URL ||
-                (import.meta.env.DEV ? "/api" : "http://173.249.47.147/api");
+                "/api";
               return logo.startsWith("/")
                 ? `${API_BASE_URL}${logo}`
                 : `${API_BASE_URL}/${logo}`;
