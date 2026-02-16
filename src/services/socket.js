@@ -10,7 +10,8 @@ export const connectSocket = () => {
       auth: {
         token: getToken(),
       },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
+      upgrade: false,
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,

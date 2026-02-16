@@ -399,9 +399,16 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
           // Validate that full screen is being shared (not window/tab)
           const videoTrack = screenStream.getVideoTracks()[0];
+          if (!videoTrack) {
+            screenStream.getTracks().forEach(track => track.stop());
+            screenStreamRef.current = null;
+            setScreenError('No screen video track found. Please try sharing your entire screen again.');
+            setScreenActive(false);
+            return;
+          }
 
           // Check displaySurface property (Screen Capture API)
-          const settings = videoTrack.getSettings();
+          const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
           const displaySurface = settings.displaySurface || settings.logicalSurface;
 
           // displaySurface can be: 'monitor', 'window', 'browser', or 'application'
@@ -529,14 +536,16 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
           });
 
           // Handle screen share stop
-          videoTrack.addEventListener('ended', () => {
-            setScreenError('Screen sharing stopped');
-            setScreenActive(false);
-            stopRecording();
-            if (onRecordingStatusChange) {
-              onRecordingStatusChange(false);
-            }
-          });
+          if (typeof videoTrack.addEventListener === 'function') {
+            videoTrack.addEventListener('ended', () => {
+              setScreenError('Screen sharing stopped');
+              setScreenActive(false);
+              stopRecording();
+              if (onRecordingStatusChange) {
+                onRecordingStatusChange(false);
+              }
+            });
+          }
         }
       } catch (err) {
         if (err.message === 'Full screen sharing required') {
