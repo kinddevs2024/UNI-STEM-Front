@@ -1,7 +1,7 @@
 // Use direct server API by default (single-server deployment)
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "http://173.249.47.147/api";
+  "https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app//api";
 
 const resolveSocketUrl = () => {
   const envSocketUrl = import.meta.env.VITE_SOCKET_URL;
