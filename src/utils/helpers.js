@@ -13,7 +13,7 @@ export const getImageUrl = (url) => {
 
   const apiBase = typeof API_BASE_URL === "string" && API_BASE_URL.trim()
     ? API_BASE_URL.replace(/\/$/, "")
-    : "http://173.249.47.147api";
+    : "https://kinddevs2024-global-olimpiad-v2-2-b.vercel.app/api";
 
   // If it starts with /, construct full URL using the API base domain
   if (url.startsWith('/')) {
