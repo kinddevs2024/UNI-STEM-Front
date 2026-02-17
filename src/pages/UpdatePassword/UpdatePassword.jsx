@@ -93,6 +93,7 @@ const UpdatePassword = () => {
                 type="email"
                 id="email"
                 value={email}
+                autoComplete="email"
                 disabled
                 readOnly
               />
@@ -105,6 +106,7 @@ const UpdatePassword = () => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 required
                 placeholder="Enter new password"
               />
@@ -117,6 +119,7 @@ const UpdatePassword = () => {
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
                 required
                 placeholder="Confirm new password"
               />

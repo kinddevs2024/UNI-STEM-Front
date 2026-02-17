@@ -76,6 +76,18 @@
   color: var(--text-primary);
 }
 
+.auth-link-button {
+  align-self: flex-end;
+  margin-top: 8px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* Login button: same animation for all themes (overrides theme-specific button-primary) */
 body[data-theme="kid-friendly"] .auth-submit,
 .auth-submit {

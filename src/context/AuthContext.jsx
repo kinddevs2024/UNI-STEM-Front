@@ -111,7 +111,9 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      console.error("Login error:", error);
+      if (error.response?.status !== 401) {
+        console.error("Login error:", error);
+      }
       const passwordResetRequired =
         error.response?.data?.passwordResetRequired === true;
       const emailVerificationRequired =

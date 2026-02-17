@@ -4,6 +4,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../context/TranslationContext";
 import NotificationToast from "../../components/NotificationToast";
+import { authAPI } from "../../services/api";
 import { testAPIConnection } from "../../utils/apiTest";
 import Intro from "../../components/Intro";
 import "./Auth.css";
@@ -22,9 +23,22 @@ const Auth = () => {
   const [notification, setNotification] = useState(null);
   const [showIntro, setShowIntro] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-  const { login, register, loginWithGoogle } = useAuth();
+  const [authView, setAuthView] = useState("main");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const { login, register, loginWithGoogle, completeAuth } = useAuth();
   const { initializeFromGoogleLocale } = useTranslation();
   const navigate = useNavigate();
+
+  const resetAuxForms = () => {
+    setEmailCode("");
+    setResetCode("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+  };
 
   // Test API connection on mount
   useEffect(() => {
@@ -103,11 +117,14 @@ const Auth = () => {
         // Redirect to complete profile page after registration
         if (!isLogin) {
           if (result.emailVerificationRequired) {
+            setPendingEmail(formData.email);
+            setAuthView("verify-email");
             setNotification({
-              message: result.message || "We sent a verification link to your email.",
+              message:
+                result.message ||
+                "We sent a 6-digit verification code to your email.",
               type: "info",
             });
-            setIsLogin(true);
             setFormData({
               email: formData.email,
               password: "",
@@ -130,11 +147,22 @@ const Auth = () => {
           navigate("/dashboard");
         }
       } else {
-        if (result.passwordResetRequired || result.emailVerificationRequired) {
+        if (result.emailVerificationRequired) {
+          setPendingEmail(formData.email);
+          setAuthView("verify-email");
           setNotification({
             message:
               result.error ||
-              "We sent a confirmation link to your email. Open it to activate your account and set a password.",
+              "Email is not verified. Enter the 6-digit code sent to your Gmail.",
+            type: "info",
+          });
+        } else if (result.passwordResetRequired) {
+          setPendingEmail(formData.email);
+          setAuthView("forgot-verify");
+          setNotification({
+            message:
+              result.error ||
+              "We sent a 6-digit code to your Gmail. Enter it and set a new password.",
             type: "info",
           });
         } else {
@@ -144,6 +172,171 @@ const Auth = () => {
     } catch (error) {
       setNotification({
         message: "An error occurred. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setNotification(null);
+
+    if (!pendingEmail || !emailCode) {
+      setNotification({ message: "Enter email and verification code", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authAPI.verifyEmail({ email: pendingEmail, code: emailCode });
+      if (response.data?.success && response.data?.token && response.data?.user) {
+        completeAuth(response.data.token, response.data.user);
+        setNotification({ message: "Email verified successfully.", type: "success" });
+        navigate("/dashboard");
+      } else {
+        setNotification({
+          message: response.data?.message || "Failed to verify email code",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to verify code",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerificationCode = async () => {
+    if (!pendingEmail) {
+      setNotification({ message: "Enter your email first", type: "error" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await authAPI.resendVerificationCode({ email: pendingEmail });
+      setNotification({
+        message: response.data?.message || "Verification code sent",
+        type: "success",
+      });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to resend code",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestResetCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setNotification(null);
+
+    if (!pendingEmail) {
+      setNotification({ message: "Enter your Gmail", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authAPI.requestPasswordResetCode({ email: pendingEmail });
+      setAuthView("forgot-verify");
+      setNotification({
+        message: response.data?.message || "Reset code sent to your email",
+        type: "success",
+      });
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to send reset code",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyResetCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setNotification(null);
+
+    if (!pendingEmail || !resetCode) {
+      setNotification({ message: "Enter email and reset code", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authAPI.verifyPasswordResetCode({
+        email: pendingEmail,
+        code: resetCode,
+      });
+      if (response.data?.success) {
+        setAuthView("forgot-reset");
+        setNotification({ message: "Code verified. Set a new password.", type: "success" });
+      } else {
+        setNotification({
+          message: response.data?.message || "Invalid reset code",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Invalid reset code",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setNotification(null);
+
+    if (newPassword.length < 6) {
+      setNotification({ message: "Password must be at least 6 characters", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setNotification({ message: "Passwords do not match", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authAPI.resetPasswordWithCode({
+        email: pendingEmail,
+        code: resetCode,
+        password: newPassword,
+      });
+
+      if (response.data?.success) {
+        setNotification({ message: "Password updated. Sign in now.", type: "success" });
+        setAuthView("main");
+        setIsLogin(true);
+        setFormData((prev) => ({ ...prev, password: "" }));
+        resetAuxForms();
+      } else {
+        setNotification({
+          message: response.data?.message || "Failed to reset password",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        message: error.response?.data?.message || "Failed to reset password",
         type: "error",
       });
     } finally {
@@ -336,6 +529,185 @@ const Auth = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
+            {authView === "verify-email" ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="verifyEmail">Gmail</label>
+                  <input
+                    type="email"
+                    id="verifyEmail"
+                    value={pendingEmail}
+                    onChange={(e) => setPendingEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    placeholder="Enter your Gmail"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="emailCode">6-digit Code</label>
+                  <input
+                    type="text"
+                    id="emailCode"
+                    value={emailCode}
+                    onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    autoComplete="one-time-code"
+                    required
+                    placeholder="Enter code from email"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="button-primary auth-submit"
+                  onClick={handleVerifyEmailCode}
+                  disabled={loading || emailCode.length !== 6}
+                >
+                  {loading ? "Processing..." : "Verify Email"}
+                </button>
+
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={handleResendVerificationCode}
+                  disabled={loading}
+                >
+                  Resend Code
+                </button>
+
+                <button
+                  type="button"
+                  className="auth-switch-button"
+                  onClick={() => {
+                    setAuthView("main");
+                    setIsLogin(true);
+                    resetAuxForms();
+                  }}
+                >
+                  Back to Sign In
+                </button>
+              </>
+            ) : authView === "forgot-request" ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="forgotEmail">Gmail</label>
+                  <input
+                    type="email"
+                    id="forgotEmail"
+                    value={pendingEmail}
+                    onChange={(e) => setPendingEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    placeholder="Enter your Gmail"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="button-primary auth-submit"
+                  onClick={handleRequestResetCode}
+                  disabled={loading}
+                >
+                  {loading ? "Sending..." : "Send Reset Code"}
+                </button>
+
+                <button
+                  type="button"
+                  className="auth-switch-button"
+                  onClick={() => {
+                    setAuthView("main");
+                    setIsLogin(true);
+                    resetAuxForms();
+                  }}
+                >
+                  Back to Sign In
+                </button>
+              </>
+            ) : authView === "forgot-verify" ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="forgotEmailReadonly">Gmail</label>
+                  <input
+                    type="email"
+                    id="forgotEmailReadonly"
+                    value={pendingEmail}
+                    onChange={(e) => setPendingEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    placeholder="Enter your Gmail"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="resetCode">6-digit Reset Code</label>
+                  <input
+                    type="text"
+                    id="resetCode"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    autoComplete="one-time-code"
+                    required
+                    placeholder="Enter reset code"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="button-primary auth-submit"
+                  onClick={handleVerifyResetCode}
+                  disabled={loading || resetCode.length !== 6}
+                >
+                  {loading ? "Verifying..." : "Verify Code"}
+                </button>
+
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={handleRequestResetCode}
+                  disabled={loading}
+                >
+                  Resend Code
+                </button>
+              </>
+            ) : authView === "forgot-reset" ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="newPassword">New Password</label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="confirmNewPassword">Confirm New Password</label>
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                    placeholder="Confirm new password"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="button-primary auth-submit"
+                  onClick={handleResetPassword}
+                  disabled={loading || resetCode.length !== 6}
+                >
+                  {loading ? "Updating..." : "Update Password"}
+                </button>
+              </>
+            ) : (
+              <>
             {!isLogin && (
               <div className="form-row">
                 <div className="form-group">
@@ -346,6 +718,7 @@ const Auth = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
+                    autoComplete="given-name"
                     required
                     placeholder="Enter your first name"
                   />
@@ -358,6 +731,7 @@ const Auth = () => {
                     name="secondName"
                     value={formData.secondName}
                     onChange={handleChange}
+                    autoComplete="family-name"
                     required
                     placeholder="Enter your last name"
                   />
@@ -373,6 +747,7 @@ const Auth = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
                 placeholder="Enter your email"
               />
@@ -386,9 +761,23 @@ const Auth = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required={!isLogin}
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                required
                 placeholder="Enter your password"
               />
+              {isLogin && (
+                <button
+                  type="button"
+                  className="auth-link-button"
+                  onClick={() => {
+                    setPendingEmail(formData.email || "");
+                    setAuthView("forgot-request");
+                    resetAuxForms();
+                  }}
+                >
+                  Forgot password?
+                </button>
+              )}
             </div>
 
             {!isLogin && (
@@ -400,6 +789,7 @@ const Auth = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required={!isLogin}
                   placeholder="Confirm your password"
                 />
@@ -413,41 +803,62 @@ const Auth = () => {
             >
               {loading ? "Processing..." : isLogin ? "Sign In" : "Sign Up"}
             </button>
+              </>
+            )}
           </form>
 
           {/* Google Login Button */}
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
+          {authView === "main" && (
+            <>
+              <div className="auth-divider">
+                <span>or</span>
+              </div>
 
-          <GoogleLoginButton
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            loading={googleLoading}
-          />
+              <GoogleLoginButton
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                loading={googleLoading}
+              />
+            </>
+          )}
 
           <div className="auth-switch">
-            <span>
-              {isLogin
-                ? "Don't have an account? "
-                : "Already have an account? "}
-            </span>
-            <button
-              className="auth-switch-button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setNotification(null);
-                setFormData({
-                  email: "",
-                  password: "",
-                  confirmPassword: "",
-                  firstName: "",
-                  secondName: "",
-                });
-              }}
-            >
-              {isLogin ? "Sign Up" : "Sign In"}
-            </button>
+            {authView === "main" ? (
+              <>
+                <span>
+                  {isLogin
+                    ? "Don't have an account? "
+                    : "Already have an account? "}
+                </span>
+                <button
+                  className="auth-switch-button"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setNotification(null);
+                    setFormData({
+                      email: "",
+                      password: "",
+                      confirmPassword: "",
+                      firstName: "",
+                      secondName: "",
+                    });
+                  }}
+                >
+                  {isLogin ? "Sign Up" : "Sign In"}
+                </button>
+              </>
+            ) : (
+              <button
+                className="auth-switch-button"
+                onClick={() => {
+                  setAuthView("main");
+                  setIsLogin(true);
+                  resetAuxForms();
+                }}
+              >
+                Back to Sign In
+              </button>
+            )}
           </div>
         </div>
       </div>

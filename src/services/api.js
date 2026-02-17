@@ -78,6 +78,14 @@ export const authAPI = {
   },
   setPassword: (data) => api.post("/auth/set-password", data),
   verifyEmail: (data) => api.post("/auth/verify-email", data),
+  resendVerificationCode: (data) =>
+    api.post("/auth/resend-verification-code", data),
+  requestPasswordResetCode: (data) =>
+    api.post("/auth/request-password-reset-code", data),
+  verifyPasswordResetCode: (data) =>
+    api.post("/auth/verify-password-reset-code", data),
+  resetPasswordWithCode: (data) =>
+    api.post("/auth/reset-password-with-code", data),
 };
 
 // Payment endpoints
