@@ -16,7 +16,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -56,7 +55,6 @@ import { USER_ROLES, GOOGLE_CLIENT_ID } from "./utils/constants";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TranslationProvider } from "./context/TranslationContext";
 import CookieConsentModal from "./components/CookieConsentModal/CookieConsentModal";
-import { Analytics } from "@vercel/analytics/react";
 import "./styles/design-tokens.css";
 import "./styles/globals.css";
 import "./styles/animations.css";
@@ -326,7 +324,6 @@ function App() {
                 }}
               >
                 <ScrollToTop />
-                <AnalyticsTracker />
                 <CookieConsentWrapper />
                 <div className="app">
                   <Navbar />
@@ -342,11 +339,6 @@ function App() {
     </GoogleOAuthProvider>
   );
 }
-
-const AnalyticsTracker = () => {
-  const location = useLocation();
-  return <Analytics route={location.pathname} path={location.pathname} />;
-};
 
 // Separate component to handle cookie consent modal
 const CookieConsentWrapper = () => {
