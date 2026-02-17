@@ -131,7 +131,12 @@ const Auth = () => {
         }
       } else {
         if (result.passwordResetRequired || result.emailVerificationRequired) {
-          setNotification({ message: result.error, type: "info" });
+          setNotification({
+            message:
+              result.error ||
+              "We sent a confirmation link to your email. Open it to activate your account and set a password.",
+            type: "info",
+          });
         } else {
           setNotification({ message: result.error, type: "error" });
         }

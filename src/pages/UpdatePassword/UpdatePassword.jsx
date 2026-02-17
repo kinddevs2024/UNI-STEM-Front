@@ -53,7 +53,7 @@ const UpdatePassword = () => {
       if (response.data?.success) {
         setDone(true);
         setNotification({
-          message: "Password set successfully. You can sign in now.",
+          message: "Account confirmed. Password set successfully. You can sign in now.",
           type: "success",
         });
       } else {
@@ -80,9 +80,9 @@ const UpdatePassword = () => {
       <div className="update-password-container">
         <div className="update-password-card card">
           <div className="update-password-header">
-            <h1 className="update-password-title text-glow">Set Password</h1>
+            <h1 className="update-password-title text-glow">Confirm Account & Set Password</h1>
             <p className="update-password-subtitle">
-              Create a password to access your account.
+              Confirm your account and create a new password to access it.
             </p>
           </div>
 
