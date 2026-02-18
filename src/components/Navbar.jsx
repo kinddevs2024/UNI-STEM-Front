@@ -7,7 +7,7 @@ import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const logoPath = `${import.meta.env.BASE_URL}logo.png`;
+  const logoPath = `${import.meta.env.BASE_URL}logo_logo.png`;
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

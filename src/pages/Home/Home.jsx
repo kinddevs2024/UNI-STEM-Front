@@ -91,7 +91,7 @@ const Home = () => {
       <header className="homepage-nav-wrap">
         <div className="homepage-shell-header homepage-nav">
           <a href="#hero" className="homepage-brand">
-            <img src="/logo.png" alt="Global Olympiads logo" className="homepage-brand-logo" />
+            <img src="/logo_logo.png" alt="Global Olympiads logo" className="homepage-brand-logo" />
           </a>
 
           <nav className="homepage-nav-links" aria-label="Главная навигация">
