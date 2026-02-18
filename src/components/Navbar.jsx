@@ -18,8 +18,8 @@ const Navbar = () => {
     navigate("/auth");
   };
 
-  // Show navbar on public pages even if not authenticated
-  const publicPages = ["/", "/about", "/contact", "/services", "/auth"];
+  // Show navbar on the auth page even if not authenticated
+  const publicPages = ["/auth"];
   const isPublicPage = publicPages.includes(location.pathname);
 
   useEffect(() => {
@@ -31,26 +31,13 @@ const Navbar = () => {
     return getNavigationItems(user.role);
   }, [isAuthenticated, user?.role]);
 
-  if (!isAuthenticated && !isPublicPage) {
+  if (location.pathname === "/") {
     return null;
   }
 
-  const renderPublicLinks = () => (
-    <>
-      <Link to="/" className="navbar-link">
-        Home
-      </Link>
-      <Link to="/about" className="navbar-link">
-        About
-      </Link>
-      <Link to="/services" className="navbar-link">
-        Services
-      </Link>
-      <Link to="/contact" className="navbar-link">
-        Contact
-      </Link>
-    </>
-  );
+  if (!isAuthenticated && !isPublicPage) {
+    return null;
+  }
 
   const renderAuthLinks = () => (
     <>
@@ -99,15 +86,13 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
-          <img src={logoPath} alt="Global Olympiad logo" className="navbar-logo-image" />
-          <span className="navbar-logo-text" aria-label="Global Olympiad">
-            lobal Olympiad
+          <img src={logoPath} alt="Global Olympiads logo" className="navbar-logo-image" />
+          <span className="navbar-logo-text" aria-label="Global Olympiads">
+            Global Olympiads
           </span>
         </Link>
 
         <div className="navbar-menu navbar-menu-desktop">
-          {!isAuthenticated && renderPublicLinks()}
-
           {isAuthenticated ? (
             renderAuthLinks()
           ) : (
@@ -147,8 +132,6 @@ const Navbar = () => {
       />
 
       <div className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
-        {!isAuthenticated && renderPublicLinks()}
-
         {isAuthenticated ? (
           renderAuthLinks()
         ) : (

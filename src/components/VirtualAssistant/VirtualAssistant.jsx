@@ -13,7 +13,7 @@ const VirtualAssistant = () => {
 
   // Predefined messages for kids
   const assistantMessages = [
-    "Hi! Welcome to Global Olympiad! 🌟",
+    "Hi! Welcome to Global Olympiads! 🌟",
     "This is a fun place where you can test your knowledge!",
     "You can compete in Math, Science, English, and more!",
     "Click 'Get Started' to begin your adventure!",

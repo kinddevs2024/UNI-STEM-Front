@@ -42,10 +42,6 @@ import CheckerPanel from "./pages/CheckerPanel";
 import UniversityDashboard from "./pages/UniversityDashboard";
 import UniversityPanel from "./pages/UniversityPanel";
 import Settings from "./pages/Settings";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Services from "./pages/Services";
 import Universities from "./pages/Universities";
 import Schools from "./pages/Schools";
 import BuyCoins from "./pages/BuyCoins";
@@ -55,6 +51,7 @@ import { USER_ROLES, GOOGLE_CLIENT_ID } from "./utils/constants";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TranslationProvider } from "./context/TranslationContext";
 import CookieConsentModal from "./components/CookieConsentModal/CookieConsentModal";
+import Home from "./pages/Home/Home";
 import "./styles/design-tokens.css";
 import "./styles/globals.css";
 import "./styles/animations.css";
@@ -64,29 +61,11 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-        <Route
-          path="/"
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Home />}
-        />
+      <Route path="/" element={<Home />} />
 
       <Route
         path="/auth"
         element={isAuthenticated ? <Navigate to="/dashboard" /> : <Auth />}
-      />
-
-      <Route
-        path="/about"
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <About />}
-      />
-
-      <Route
-        path="/contact"
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Contact />}
-      />
-
-      <Route
-        path="/services"
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Services />}
       />
 
       <Route path="/updatepassword" element={<UpdatePassword />} />

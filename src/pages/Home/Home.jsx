@@ -1,528 +1,266 @@
 import { Link } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
 import { useAuth } from "../../context/AuthContext";
-import Scene3D from "../../components/3D/Scene3D";
-import VirtualAssistant from "../../components/VirtualAssistant/VirtualAssistant";
 import "./Home.css";
+
+const valuePoints = [
+  "Для учеников: участие из любой точки",
+  "Для школ: готовая инфраструктура",
+  "Для вузов: быстрый отбор лучших",
+];
+
+const workSteps = [
+  {
+    title: "Создайте олимпиаду",
+    description: "Темы, задания и расписание в понятном конструкторе.",
+  },
+  {
+    title: "Проведите онлайн",
+    description: "Автоматический таймер, контроль попыток и единый процесс.",
+  },
+  {
+    title: "Получите результаты",
+    description: "Рейтинг, отчеты и официальные грамоты после завершения.",
+  },
+];
+
+const securityItems = [
+  "Запись камеры и аудио во время прохождения",
+  "Снимки экрана и мониторинг активности",
+  "Надежное хранение данных и журнал событий",
+];
+
+const roleItems = [
+  {
+    role: "Студент",
+    features: "Участие в олимпиадах, личный кабинет и результаты.",
+  },
+  {
+    role: "Учитель / Организатор",
+    features: "Создание заданий, настройка процесса и модерация.",
+  },
+  {
+    role: "Университет",
+    features: "Аналитика, отбор лучших участников и отчетность.",
+  },
+];
+
+const olympiadTypes = [
+  "Тестовые",
+  "С открытыми ответами и эссе",
+  "Смешанные форматы",
+];
+
+const faqItems = [
+  {
+    question: "Можно ли участвовать онлайн из дома?",
+    answer:
+      "Да. Для участия нужен стабильный интернет, камера и микрофон в соответствии с правилами олимпиады.",
+  },
+  {
+    question: "Какие требования к камере и микрофону?",
+    answer:
+      "Подойдет ноутбук или ПК с рабочей камерой и микрофоном. Перед стартом проводится быстрая проверка устройств.",
+  },
+  {
+    question: "Как гарантируется честность?",
+    answer:
+      "Платформа фиксирует активность пользователя, события сессии и материалы прокторинга для проверки.",
+  },
+  {
+    question: "Что получает победитель?",
+    answer:
+      "Участники получают подтвержденные результаты, а победители — официальные грамоты и преимущества при отборе.",
+  },
+  {
+    question: "Сколько длится олимпиада?",
+    answer:
+      "Длительность задается организатором. Таймер отображается во время прохождения и завершает попытку автоматически.",
+  },
+  {
+    question: "Как вуз может запустить олимпиаду?",
+    answer:
+      "Оставьте заявку через форму контактов — команда поможет подготовить задания и запустить олимпиаду за несколько дней.",
+  },
+];
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
-  
-  // Refs for GSAP animations
-  const heroContentRef = useRef(null);
-  const heroTitleRef = useRef(null);
-  const heroSubtitleRef = useRef(null);
-  const heroDescriptionRef = useRef(null);
-  const heroCtaRef = useRef(null);
-  const featureCardsRef = useRef(null);
-  const subjectCardsRef = useRef(null);
-  const stepsRef = useRef(null);
-  const ctaButtonsRef = useRef(null);
-  const floatingShapesRef = useRef(null);
-
-  const sections = [
-    {
-      id: "about",
-      title: "About Global Olympiad",
-      subject: "math",
-      content: (
-        <>
-          <p>
-            Welcome to Global Olympiad, the premier online platform for
-            academic competitions across multiple subjects. Our platform brings
-            together students from around the world to compete, learn, and excel
-            in their chosen fields.
-          </p>
-          <p>
-            Whether you're passionate about Mathematics, Physics, Chemistry,
-            English, or Science, we provide a fair, secure, and engaging
-            environment for you to showcase your knowledge and skills.
-          </p>
-        </>
-      ),
-    },
-    {
-      id: "features",
-      title: "Platform Features",
-      subject: "physics",
-      content: (
-        <>
-          <div className="features-grid" ref={featureCardsRef}>
-            <div className="feature-card">
-              <h3>🎯 Multiple Olympiad Types</h3>
-              <p>
-                Test-based and Essay formats to suit different learning styles
-                and assessment methods.
-              </p>
-            </div>
-            <div className="feature-card">
-              <h3>📹 Advanced Proctoring</h3>
-              <p>
-                Real-time camera and screen monitoring to ensure fair
-                competition and academic integrity.
-              </p>
-            </div>
-            <div className="feature-card">
-              <h3>⏱️ Timer System</h3>
-              <p>
-                Countdown timer with auto-submit functionality to manage your
-                time effectively.
-              </p>
-            </div>
-            <div className="feature-card">
-              <h3>📊 Real-time Leaderboard</h3>
-              <p>
-                Live rankings via Socket.io to track your progress and see how
-                you rank among participants.
-              </p>
-            </div>
-            <div className="feature-card">
-              <h3>👥 Role-based Access</h3>
-              <p>
-                Student, Admin, Owner, Resolter, and School Teacher roles with
-                appropriate permissions.
-              </p>
-            </div>
-            <div className="feature-card">
-              <h3>🎨 Modern UI</h3>
-              <p>
-                Beautiful, colorful design with smooth animations perfect for
-                young learners.
-              </p>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      id: "subjects",
-      title: "Available Subjects",
-      subject: "chemistry",
-      content: (
-        <>
-          <div className="subjects-grid" ref={subjectCardsRef}>
-            <div className="subject-card">
-              <h3>Mathematics</h3>
-              <p>
-                Challenge yourself with complex problems, equations, and
-                mathematical reasoning.
-              </p>
-            </div>
-            <div className="subject-card">
-              <h3>Physics</h3>
-              <p>
-                Explore the laws of nature, mechanics, thermodynamics, and
-                quantum physics.
-              </p>
-            </div>
-            <div className="subject-card">
-              <h3>Chemistry</h3>
-              <p>
-                Dive into molecular structures, reactions, and chemical
-                processes.
-              </p>
-            </div>
-            <div className="subject-card">
-              <h3>English</h3>
-              <p>
-                Test your language skills, comprehension, and writing abilities.
-              </p>
-            </div>
-            <div className="subject-card">
-              <h3>Science</h3>
-              <p>
-                Comprehensive scientific knowledge covering biology, astronomy,
-                and more.
-              </p>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      id: "how-it-works",
-      title: "How It Works",
-      subject: "english",
-      content: (
-        <>
-          <div className="steps-container" ref={stepsRef}>
-            <div className="step">
-              <div className="step-number">1</div>
-              <div className="step-content">
-                <h3>Sign Up & Complete Profile</h3>
-                <p>
-                  Create your account and complete your profile to get started.
-                </p>
-              </div>
-            </div>
-            <div className="step">
-              <div className="step-number">2</div>
-              <div className="step-content">
-                <h3>Browse Available Olympiads</h3>
-                <p>
-                  Explore upcoming and active olympiads in your preferred
-                  subjects.
-                </p>
-              </div>
-            </div>
-            <div className="step">
-              <div className="step-number">3</div>
-              <div className="step-content">
-                <h3>Start & Complete</h3>
-                <p>
-                  Begin the olympiad, answer questions, and submit your
-                  responses before time runs out.
-                </p>
-              </div>
-            </div>
-            <div className="step">
-              <div className="step-number">4</div>
-              <div className="step-content">
-                <h3>View Results & Leaderboard</h3>
-                <p>
-                  Check your results, see your ranking, and compare with other
-                  participants.
-                </p>
-              </div>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      id: "get-started",
-      title: "Get Started Today",
-      subject: "science",
-      content: (
-        <>
-          <p className="get-started-text">
-            Ready to test your knowledge and compete with students worldwide?
-            Join Global Olympiad today and embark on your academic journey!
-          </p>
-          <div className="cta-buttons" ref={ctaButtonsRef}>
-            {!isAuthenticated ? (
-              <>
-                <Link to="/auth" className="cta-button primary">
-                  Sign Up Now
-                </Link>
-                <Link to="/auth" className="cta-button secondary">
-                  Log In
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/dashboard" className="cta-button primary">
-                  Go to Dashboard
-                </Link>
-                <Link to="/results" className="cta-button secondary">
-                  View Results
-                </Link>
-              </>
-            )}
-          </div>
-        </>
-      ),
-    },
-  ];
-
-  // GSAP Animations on mount
-  useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    if (prefersReducedMotion) {
-      return; // Skip animations if user prefers reduced motion
-    }
-
-    // Create main timeline
-    const tl = gsap.timeline();
-
-    // Hero section animations - fade + slide up
-    if (heroContentRef.current) {
-      gsap.set(heroContentRef.current, { opacity: 0, y: 50 });
-      tl.to(heroContentRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power3.out",
-      });
-    }
-
-    // Stagger hero elements
-    if (heroTitleRef.current) {
-      gsap.set(heroTitleRef.current, { opacity: 0, y: 30 });
-      tl.to(
-        heroTitleRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      );
-    }
-
-    if (heroSubtitleRef.current) {
-      gsap.set(heroSubtitleRef.current, { opacity: 0, y: 20 });
-      tl.to(
-        heroSubtitleRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        "-=0.3"
-      );
-    }
-
-    if (heroDescriptionRef.current) {
-      gsap.set(heroDescriptionRef.current, { opacity: 0, y: 20 });
-      tl.to(
-        heroDescriptionRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        "-=0.2"
-      );
-    }
-
-    if (heroCtaRef.current) {
-      gsap.set(heroCtaRef.current, { opacity: 0, scale: 0.8 });
-      tl.to(
-        heroCtaRef.current,
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-        },
-        "-=0.2"
-      );
-    }
-
-    // Animate floating shapes
-    if (floatingShapesRef.current) {
-      const shapes = floatingShapesRef.current.children;
-      Array.from(shapes).forEach((shape, index) => {
-        gsap.to(shape, {
-          y: `+=${30 + index * 10}`,
-          x: `+=${20 + index * 5}`,
-          rotation: 360,
-          duration: 15 + index * 2,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-      });
-    }
-
-    // Intersection Observer for scroll-triggered animations
-    const observerOptions = {
-      threshold: 0.2,
-      rootMargin: "0px 0px -100px 0px",
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const target = entry.target;
-
-          // Feature cards stagger
-          if (target.classList.contains("features-grid")) {
-            const cards = target.children;
-            gsap.fromTo(
-              cards,
-              {
-                opacity: 0,
-                y: 40,
-                scale: 0.9,
-              },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: "power2.out",
-              }
-            );
-          }
-
-          // Subject cards stagger
-          if (target.classList.contains("subjects-grid")) {
-            const cards = target.children;
-            gsap.fromTo(
-              cards,
-              {
-                opacity: 0,
-                y: 40,
-                scale: 0.9,
-              },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: "power2.out",
-              }
-            );
-          }
-
-          // Steps stagger
-          if (target.classList.contains("steps-container")) {
-            const steps = target.children;
-            gsap.fromTo(
-              steps,
-              {
-                opacity: 0,
-                x: -40,
-              },
-              {
-                opacity: 1,
-                x: 0,
-                duration: 0.6,
-                stagger: 0.15,
-                ease: "power2.out",
-              }
-            );
-          }
-
-          // Section titles
-          if (target.classList.contains("section-title")) {
-            gsap.fromTo(
-              target,
-              {
-                opacity: 0,
-                y: 30,
-              },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                ease: "power2.out",
-              }
-            );
-          }
-
-          observer.unobserve(target);
-        }
-      });
-    }, observerOptions);
-
-    // Observe elements for scroll animations
-    if (featureCardsRef.current) {
-      observer.observe(featureCardsRef.current);
-    }
-    if (subjectCardsRef.current) {
-      observer.observe(subjectCardsRef.current);
-    }
-    if (stepsRef.current) {
-      observer.observe(stepsRef.current);
-    }
-
-    // Observe all section titles
-    const sectionTitles = document.querySelectorAll(".section-title");
-    sectionTitles.forEach((title) => {
-      observer.observe(title);
-    });
-
-    // Button hover animations using GSAP
-    const setupButtonHovers = () => {
-      const buttons = document.querySelectorAll(".hero-cta, .cta-button");
-      buttons.forEach((button) => {
-        button.addEventListener("mouseenter", () => {
-          gsap.to(button, {
-            scale: 1.05,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        });
-
-        button.addEventListener("mouseleave", () => {
-          gsap.to(button, {
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        });
-      });
-    };
-
-    setupButtonHovers();
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   return (
-    <div className="home-page">
-      {/* Floating Decorative Shapes */}
-      <div className="floating-shapes" ref={floatingShapesRef}>
-        <div className="floating-shape circle-1"></div>
-        <div className="floating-shape circle-2"></div>
-        <div className="floating-shape circle-3"></div>
-        <div className="floating-shape blob-1"></div>
-        <div className="floating-shape blob-2"></div>
-      </div>
+    <div className="homepage">
+      <header className="homepage-nav-wrap">
+        <div className="homepage-shell-header homepage-nav">
+          <a href="#hero" className="homepage-brand">
+            <img src="/logo.png" alt="Global Olympiads logo" className="homepage-brand-logo" />
+          </a>
 
-      {/* Virtual Assistant */}
-      <VirtualAssistant />
-      {/* Hero Section */}
-      <section className="hero-section h-svh ">
-        <div className="hero-3d">
-          <Scene3D subject="math" />
+          <nav className="homepage-nav-links" aria-label="Главная навигация">
+            <a href="#about">О нас</a>
+            <a href="#services">Сервисы</a>
+            <a href="#security">Безопасность</a>
+            <a href="#faq">FAQ</a>
+            <a href="#contact">Контакты</a>
+          </nav>
+
+          <Link to={isAuthenticated ? "/dashboard" : "/auth"} className="homepage-nav-login">
+            {isAuthenticated ? "Кабинет" : "Войти"}
+          </Link>
         </div>
-        <div className="hero-content" ref={heroContentRef}>
-          <h1 className="hero-title" ref={heroTitleRef}>
-            <span className="text-glow">Global Olympiad</span>
-          </h1>
-          <p className="hero-subtitle" ref={heroSubtitleRef}>Compete, Learn, Excel</p>
-          <p className="hero-description" ref={heroDescriptionRef}>
-            The premier online platform for academic competitions across
-            Mathematics, Physics, Chemistry, English, and Science.
+      </header>
+
+      <section id="hero" className="homepage-shell homepage-hero section-card">
+        <img src="/Illustration_2.png" alt="" aria-hidden="true" className="hero-decor hero-decor-left" />
+        <img src="/Illustration_1.png" alt="" aria-hidden="true" className="hero-decor hero-decor-right" />
+
+        <div className="hero-content">
+          <p className="section-kicker">UNI STEM</p>
+          <h1>Онлайн-олимпиады, которые открывают путь в университет</h1>
+          <p>
+            Университеты и школы проводят олимпиады онлайн, а талантливые ученики получают официальные грамоты и приглашения на поступление.
           </p>
-          {!isAuthenticated && (
-            <Link to="/auth" className="hero-cta" ref={heroCtaRef}>
-              Get Started
+          <div className="hero-actions">
+            <Link to={isAuthenticated ? "/dashboard" : "/auth"} className="btn btn-primary">
+              Найти олимпиаду
             </Link>
-          )}
+            <a href="#contact" className="btn btn-secondary">
+              Провести олимпиаду
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Informative Sections */}
-      {sections.map((section, index) => (
-        <section
-          key={section.id}
-          className={`info-section ${section.id}-section`}
-        >
-          <div className="section-3d">
-            <Scene3D subject={section.subject} />
-          </div>
-          <div className="section-content">
-            <div className="container">
-              <h2 className="section-title">{section.title}</h2>
-              <div className="section-body">{section.content}</div>
-            </div>
-          </div>
-        </section>
-      ))}
-
-      {/* Footer */}
-      <footer className="home-footer">
-        <div className="container">
-          <p>&copy; 2024 Global Olympiad. All rights reserved.</p>
+      <section id="about" className="homepage-shell section-grid-two">
+        <div>
+          <p className="section-kicker">О платформе</p>
+          <h2>Мы соединяем таланты и вузы</h2>
+          <p className="section-text">
+            Платформа для онлайн-олимпиад с официальными результатами, автоматической проверкой и прозрачной аналитикой.
+          </p>
+          <ul className="check-list">
+            {valuePoints.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
-      </footer>
+
+        <div className="illustration-box">
+          <img src="/Illustration_3.png" alt="Иллюстрация о состоянии участника" />
+        </div>
+      </section>
+
+      <section id="services" className="homepage-shell">
+        <p className="section-kicker section-center">Как это работает</p>
+        <h2 className="section-center">Простой путь к проведению олимпиады</h2>
+
+        <div className="cards-grid cards-grid-3">
+          {workSteps.map((step) => (
+            <article key={step.title} className="info-card">
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="security" className="homepage-shell section-card section-security">
+        <div>
+          <p className="section-kicker">Безопасность</p>
+          <h2>Серьезная защита и контроль</h2>
+          <p className="section-text">
+            Мы фиксируем камеру, аудио и экран, чтобы результаты были честными и признаваемыми.
+          </p>
+          <ul className="check-list">
+            {securityItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <img src="/illustration_4.png" alt="Иллюстрация контроля и проверки" className="security-image" />
+      </section>
+
+      <section className="homepage-shell">
+        <p className="section-kicker section-center">Роли и возможности</p>
+        <h2 className="section-center">Кому подходит платформа</h2>
+
+        <div className="cards-grid cards-grid-3">
+          {roleItems.map((item) => (
+            <article key={item.role} className="info-card role-card">
+              <h3>{item.role}</h3>
+              <p>{item.features}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="homepage-shell section-card section-types">
+        <div>
+          <p className="section-kicker">Виды олимпиад</p>
+          <h2>Форматы под разные задачи</h2>
+          <ul className="pill-list">
+            {olympiadTypes.map((type) => (
+              <li key={type}>{type}</li>
+            ))}
+          </ul>
+        </div>
+        <img src="/illustration_6.png" alt="Иллюстрация форматов олимпиад" className="types-image" />
+      </section>
+
+      <section className="homepage-shell">
+        <p className="section-kicker section-center">Партнеры</p>
+        <h2 className="section-center">С нами работают школы и вузы</h2>
+
+        <div className="partners-row" role="list" aria-label="Партнеры">
+          <span role="listitem">University One</span>
+          <span role="listitem">STEM School</span>
+          <span role="listitem">Edu Center</span>
+          <span role="listitem">Science Hub</span>
+          <span role="listitem">Future Campus</span>
+        </div>
+      </section>
+
+      <section className="homepage-shell section-grid-two section-card">
+        <div>
+          <p className="section-kicker">Результаты</p>
+          <h2>Официальные грамоты и отчеты</h2>
+          <p className="section-text">
+            После завершения олимпиады участники получают подтвержденные результаты, а университеты — аналитические отчеты.
+          </p>
+          <Link to={isAuthenticated ? "/results" : "/auth"} className="btn btn-primary">
+            Смотреть результаты
+          </Link>
+        </div>
+
+        <img src="/illustration_7.png" alt="Иллюстрация дипломов и достижений" className="docs-image" />
+      </section>
+
+      <section id="faq" className="homepage-shell">
+        <p className="section-kicker section-center">FAQ</p>
+        <h2 className="section-center">Частые вопросы</h2>
+
+        <div className="faq-grid w-full">
+          <div className="faq-list w-full">
+            {faqItems.map((item) => (
+              <details key={item.question} className="faq-item">
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="homepage-shell section-card final-cta">
+        <div>
+          <p className="section-kicker">Контакты</p>
+          <h2>Готовы провести олимпиаду?</h2>
+          <p className="section-text">Запустите свой конкурс за несколько дней.</p>
+          <a href="mailto:support@unistem.uz" className="btn btn-primary">
+            Связаться с нами
+          </a>
+        </div>
+        <img src="/Illustration_11.png" alt="Декоративная иллюстрация поддержки" className="cta-image" />
+      </section>
     </div>
   );
 };
