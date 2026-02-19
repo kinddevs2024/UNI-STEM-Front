@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import "./Home.css";
 
@@ -50,6 +51,19 @@ const olympiadTypes = [
   "Смешанные форматы",
 ];
 
+const partnerItems = [
+  {
+    name: "OzZone School",
+    logo: "/380841402_1328363917810010_4142529405919519408_n-removebg-preview.png",
+    alt: "Логотип OzZone School",
+  },
+  {
+    name: "Salam International School",
+    logo: "/450751796_805988671636911_1329545327916699300_n-removebg-preview.png",
+    alt: "Логотип Salam International School",
+  },
+];
+
 const faqItems = [
   {
     question: "Можно ли участвовать онлайн из дома?",
@@ -85,6 +99,19 @@ const faqItems = [
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
+  const [openFaqs, setOpenFaqs] = useState(new Set());
+
+  const toggleFaq = (question) => {
+    setOpenFaqs((prev) => {
+      const next = new Set(prev);
+      if (next.has(question)) {
+        next.delete(question);
+      } else {
+        next.add(question);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="homepage">
@@ -113,7 +140,7 @@ const Home = () => {
         <img src="/Illustration_1.png" alt="" aria-hidden="true" className="hero-decor hero-decor-right" />
 
         <div className="hero-content">
-          <p className="section-kicker">UNI STEM</p>
+          <p className="section-kicker">GLOBAL OLYMPIADS</p>
           <h1>Онлайн-олимпиады, которые открывают путь в университет</h1>
           <p>
             Университеты и школы проводят олимпиады онлайн, а талантливые ученики получают официальные грамоты и приглашения на поступление.
@@ -193,7 +220,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="homepage-shell section-card section-types">
+      <section className="homepage-shell section-card2 section-types2">
         <div>
           <p className="section-kicker">Виды олимпиад</p>
           <h2>Форматы под разные задачи</h2>
@@ -203,7 +230,7 @@ const Home = () => {
             ))}
           </ul>
         </div>
-        <img src="/illustration_6.png" alt="Иллюстрация форматов олимпиад" className="types-image" />
+        <img className="types-image2" src="/illustration_6.png" alt="Иллюстрация форматов олимпиад" />
       </section>
 
       <section className="homepage-shell">
@@ -211,15 +238,16 @@ const Home = () => {
         <h2 className="section-center">С нами работают школы и вузы</h2>
 
         <div className="partners-row" role="list" aria-label="Партнеры">
-          <span role="listitem">University One</span>
-          <span role="listitem">STEM School</span>
-          <span role="listitem">Edu Center</span>
-          <span role="listitem">Science Hub</span>
-          <span role="listitem">Future Campus</span>
+          {partnerItems.map((partner) => (
+            <article key={partner.name} className="partner-item" role="listitem">
+              <img src={partner.logo} alt={partner.alt} className="partner-logo" loading="lazy" />
+              <p className="partner-name">{partner.name}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="homepage-shell section-grid-two section-card">
+      <section className="homepage-shell section-grid-two section-card4">
         <div>
           <p className="section-kicker">Результаты</p>
           <h2>Официальные грамоты и отчеты</h2>
@@ -240,12 +268,24 @@ const Home = () => {
 
         <div className="faq-grid w-full">
           <div className="faq-list w-full">
-            {faqItems.map((item) => (
-              <details key={item.question} className="faq-item">
-                <summary>{item.question}</summary>
-                <p>{item.answer}</p>
-              </details>
-            ))}
+            {faqItems.map((item) => {
+              const isOpen = openFaqs.has(item.question);
+              return (
+                <article key={item.question} className={`faq-item ${isOpen ? "open" : ""}`}>
+                  <button
+                    type="button"
+                    className="faq-question"
+                    aria-expanded={isOpen}
+                    onClick={() => toggleFaq(item.question)}
+                  >
+                    {item.question}
+                  </button>
+                  <div className="faq-answer">
+                    <p>{item.answer}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>

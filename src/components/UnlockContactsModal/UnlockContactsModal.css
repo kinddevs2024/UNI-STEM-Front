@@ -31,7 +31,7 @@
 }
 
 .unlock-buy-link:hover {
-  color: var(--accent-dark, #1976d2);
+  color: var(--accent-dark, #216e1a);
 }
 
 .unlock-buy-info {
@@ -48,3 +48,8 @@
   color: var(--text-secondary);
 }
 
+.unlock-contacts-header h3 {
+  margin: 0;
+  color: var(--accent-dark, #216e1a);
+  font-size: 1.4rem;
+}

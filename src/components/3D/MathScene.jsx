@@ -77,9 +77,9 @@ const FloatingFormula = ({ position, formula, color, outlineColor }) => {
   );
 };
 
-export default function MathScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
-  const primaryColor = colors.primary || '#1565C0';
-  const accentColor = colors.accent || '#4FC3F7';
+export default function MathScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#216E1A';
+  const accentColor = colors.accent || '#43A806';
   const outlineColor = colors.bg === '#FFFFFF' || colors.bg === '#ffffff' ? '#000000' : '#FFFFFF';
 
   return (

@@ -382,64 +382,56 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       // Start screen capture - Force full screen sharing
       try {
         if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-          const screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-              mediaSource: 'screen',
-              width: { ideal: VIDEO_WIDTH },
-              height: { ideal: VIDEO_HEIGHT }
-            },
-            audio: false
-          });
+          let screenStream = null;
+          let videoTrack = null;
+          let displaySurface = null;
+
+          while (!screenStream) {
+            const selectedStream = await navigator.mediaDevices.getDisplayMedia({
+              video: {
+                mediaSource: 'screen',
+                width: { ideal: VIDEO_WIDTH },
+                height: { ideal: VIDEO_HEIGHT }
+              },
+              audio: false
+            });
+
+            const selectedVideoTrack = selectedStream.getVideoTracks()[0];
+            if (!selectedVideoTrack) {
+              selectedStream.getTracks().forEach((track) => track.stop());
+              setScreenError('No screen video track found. Please try sharing your entire screen again.');
+              setScreenActive(false);
+              if (!isUserGesture) {
+                return;
+              }
+              continue;
+            }
+
+            const settings = typeof selectedVideoTrack.getSettings === 'function' ? selectedVideoTrack.getSettings() : {};
+            const selectedDisplaySurface = settings.displaySurface || settings.logicalSurface;
+
+            if (selectedDisplaySurface && selectedDisplaySurface !== 'monitor') {
+              selectedVideoTrack.stop();
+              selectedStream.getTracks().forEach((track) => track.stop());
+              setScreenError('Please share ENTIRE SCREEN (monitor). Tab/window sharing is not allowed.');
+              setScreenActive(false);
+              alert('⚠️ Требуется "Весь экран" (Entire Screen).\n\nВы выбрали вкладку или окно. Выберите именно экран целиком.');
+
+              if (!isUserGesture) {
+                return;
+              }
+              continue;
+            }
+
+            screenStream = selectedStream;
+            videoTrack = selectedVideoTrack;
+            displaySurface = selectedDisplaySurface || 'monitor';
+          }
 
           screenStreamRef.current = screenStream;
 
           if (screenVideoRef.current) {
             screenVideoRef.current.srcObject = screenStream;
-          }
-
-          // Validate that full screen is being shared (not window/tab)
-          const videoTrack = screenStream.getVideoTracks()[0];
-          if (!videoTrack) {
-            screenStream.getTracks().forEach(track => track.stop());
-            screenStreamRef.current = null;
-            setScreenError('No screen video track found. Please try sharing your entire screen again.');
-            setScreenActive(false);
-            return;
-          }
-
-          // Check displaySurface property (Screen Capture API)
-          const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
-          const displaySurface = settings.displaySurface || settings.logicalSurface;
-
-          // displaySurface can be: 'monitor', 'window', 'browser', or 'application'
-          // We require 'monitor' for full screen sharing
-          if (displaySurface && displaySurface !== 'monitor') {
-            // Stop the stream if not full screen
-            videoTrack.stop();
-            screenStream.getTracks().forEach(track => track.stop());
-            screenStreamRef.current = null;
-            setScreenError(`Full screen (monitor) sharing required. You selected: ${displaySurface}`);
-            setScreenActive(false);
-            // Show alert to user
-            alert('⚠️ Full screen sharing required!\n\nPlease stop sharing and select "Entire Screen" (monitor) instead of a window, tab, or browser.');
-
-            // Re-request full screen mode if it was lost
-            try {
-              if (document.fullscreenElement === null) {
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) {
-                  await elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) { /* Safari */
-                  await elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) { /* IE11 */
-                  await elem.msRequestFullscreen();
-                }
-              }
-            } catch (fsErr) {
-              console.warn("Failed to restore full screen:", fsErr);
-            }
-
-            return;
           }
 
           // Wait for video metadata to load and validate dimensions (additional validation)
@@ -551,7 +543,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         if (err.message === 'Full screen sharing required') {
           // Error already set above
         } else {
-          setScreenError('Screen sharing denied or unavailable. Full screen sharing is required.');
+          setScreenError('Screen sharing denied or unavailable. Click retry and choose Entire Screen.');
         }
         console.error('Screen error:', err);
       }
@@ -601,10 +593,42 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
     try {
       await startMonitoring(isUserGesture);
+      if (!cameraStreamRef.current || !screenStreamRef.current) {
+        monitoringStartedRef.current = false;
+      }
     } catch (error) {
       monitoringStartedRef.current = false;
       throw error;
     }
+  };
+
+  const retryMonitoring = async () => {
+    if (isRecording) return;
+
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach((track) => track.stop());
+      cameraStreamRef.current = null;
+    }
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      screenStreamRef.current = null;
+    }
+
+    if (cameraVideoRef.current) {
+      cameraVideoRef.current.srcObject = null;
+    }
+    if (screenVideoRef.current) {
+      screenVideoRef.current.srcObject = null;
+    }
+
+    setCameraActive(false);
+    setScreenActive(false);
+    setCameraError(null);
+    setScreenError(null);
+    setIsRecording(false);
+    monitoringStartedRef.current = false;
+
+    await beginMonitoring(true);
   };
 
   // Function to capture last frame from video element synchronously
@@ -1053,6 +1077,16 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
           <div className="monitor-error">
             <div className="error-icon">🖥️</div>
             <div className="error-text">{screenError}</div>
+            {!screenActive && !isRecording && (
+              <button
+                type="button"
+                className="button-primary"
+                style={{ marginTop: '10px' }}
+                onClick={retryMonitoring}
+              >
+                Retry Screen Share
+              </button>
+            )}
           </div>
         ) : (
           <div className="monitor-preview">

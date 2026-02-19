@@ -17,17 +17,20 @@
 .assistant-bubble {
   background: white;
   border-radius: 24px;
-  box-shadow: 0 12px 32px rgba(79, 195, 247, 0.25),
-              0 4px 16px rgba(0, 0, 0, 0.1);
-  border: 2px solid rgba(79, 195, 247, 0.3);
+  box-shadow: 0 12px 32px rgba(67, 168, 6, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(67, 168, 6, 0.3);
   overflow: hidden;
   animation: floatBubble 3s ease-in-out infinite;
 }
 
 @keyframes floatBubble {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-8px);
   }
@@ -39,7 +42,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  background: linear-gradient(135deg, #43A806 0%, #216E1A 100%);
   color: white;
 }
 
@@ -108,7 +111,7 @@
   padding: 20px;
   max-height: 300px;
   overflow-y: auto;
-  background: #F5F9FC;
+  background: #ebe7e8;
 }
 
 .assistant-messages::-webkit-scrollbar {
@@ -120,12 +123,12 @@
 }
 
 .assistant-messages::-webkit-scrollbar-thumb {
-  background: rgba(79, 195, 247, 0.3);
+  background: rgba(67, 168, 6, 0.3);
   border-radius: 3px;
 }
 
 .assistant-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 195, 247, 0.5);
+  background: rgba(67, 168, 6, 0.5);
 }
 
 /* Individual Message */
@@ -141,8 +144,8 @@
   background: white;
   padding: 14px 18px;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(79, 195, 247, 0.15);
-  border: 1px solid rgba(79, 195, 247, 0.2);
+  box-shadow: 0 2px 8px rgba(67, 168, 6, 0.15);
+  border: 1px solid rgba(67, 168, 6, 0.2);
   position: relative;
 }
 
@@ -160,7 +163,7 @@
 
 .message-bubble p {
   margin: 0;
-  color: #1565C0;
+  color: #216E1A;
   font-size: 1rem;
   line-height: 1.5;
   font-weight: 500;
@@ -174,9 +177,11 @@
   0% {
     transform: scale(0.9);
   }
+
   50% {
     transform: scale(1.02);
   }
+
   100% {
     transform: scale(1);
   }
@@ -188,10 +193,10 @@
   height: 60px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  background: linear-gradient(135deg, #43A806 0%, #216E1A 100%);
   color: white;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(79, 195, 247, 0.35);
+  box-shadow: 0 8px 24px rgba(67, 168, 6, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +207,7 @@
 
 .assistant-toggle:hover {
   transform: scale(1.1);
-  box-shadow: 0 12px 32px rgba(79, 195, 247, 0.45);
+  box-shadow: 0 12px 32px rgba(67, 168, 6, 0.45);
 }
 
 .assistant-toggle:active {
@@ -215,9 +220,12 @@
 }
 
 @keyframes bounceIcon {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-4px);
   }
@@ -288,6 +296,7 @@
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
+
   .assistant-bubble,
   .assistant-icon,
   .message-bubble {
@@ -298,5 +307,3 @@
     transform: none;
   }
 }
-
-

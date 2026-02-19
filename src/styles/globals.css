@@ -9,27 +9,27 @@
 :root {
   /* Default values - will be overridden by ThemeContext */
   /* These are fallback values for kid-friendly theme */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F5F9FC;
-  --bg-tertiary: #E3F2FD;
-  --text-primary: #1565C0;
-  --text-secondary: #546E7A;
-  --text-tertiary: #90CAF9;
-  --accent: #4FC3F7;
-  --accent-dark: #29B6F6;
-  --accent-light: #81D4FA;
-  --secondary-yellow: #FFE082;
-  --accent-green: #81C784;
-  --border: rgba(79, 195, 247, 0.2);
-  --border-hover: rgba(79, 195, 247, 0.4);
-  --glow: rgba(79, 195, 247, 0.3);
-  --glow-strong: rgba(79, 195, 247, 0.5);
-  --success: #81C784;
+  --bg-primary: #f6f4f4;
+  --bg-secondary: #ebe7e8;
+  --bg-tertiary: #d5d1d2;
+  --text-primary: #216e1a;
+  --text-secondary: #3b6f2f;
+  --text-tertiary: #6b8a63;
+  --accent: #43a806;
+  --accent-dark: #216e1a;
+  --accent-light: #7acb45;
+  --secondary-yellow: #f0ba00;
+  --accent-green: #43a806;
+  --border: rgba(67, 168, 6, 0.26);
+  --border-hover: rgba(67, 168, 6, 0.46);
+  --glow: rgba(67, 168, 6, 0.28);
+  --glow-strong: rgba(67, 168, 6, 0.5);
+  --success: #43a806;
   --error: #EF5350;
-  --warning: #FFE082;
-  --shadow-soft: rgba(79, 195, 247, 0.15);
-  --shadow-medium: rgba(79, 195, 247, 0.25);
-  --shadow-strong: rgba(79, 195, 247, 0.35);
+  --warning: #f0ba00;
+  --shadow-soft: rgba(67, 168, 6, 0.2);
+  --shadow-medium: rgba(67, 168, 6, 0.32);
+  --shadow-strong: rgba(67, 168, 6, 0.44);
 }
 
 body {

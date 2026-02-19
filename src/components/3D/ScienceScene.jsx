@@ -109,9 +109,9 @@ const Planet = ({ position, size, color, speed }) => {
   );
 };
 
-export default function ScienceScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
-  const primaryColor = colors.primary || '#1565C0';
-  const accentColor = colors.accent || '#4FC3F7';
+export default function ScienceScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#216E1A';
+  const accentColor = colors.accent || '#43A806';
 
   return (
     <>

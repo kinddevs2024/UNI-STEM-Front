@@ -18,10 +18,6 @@ const Navbar = () => {
     navigate("/auth");
   };
 
-  // Show navbar on the auth page even if not authenticated
-  const publicPages = ["/auth"];
-  const isPublicPage = publicPages.includes(location.pathname);
-
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
@@ -31,11 +27,13 @@ const Navbar = () => {
     return getNavigationItems(user.role);
   }, [isAuthenticated, user?.role]);
 
-  if (location.pathname === "/") {
+  const isOlympiadRoute = location.pathname.startsWith("/olympiad/");
+
+  if (location.pathname === "/" || location.pathname === "/auth" || isOlympiadRoute) {
     return null;
   }
 
-  if (!isAuthenticated && !isPublicPage) {
+  if (!isAuthenticated) {
     return null;
   }
 

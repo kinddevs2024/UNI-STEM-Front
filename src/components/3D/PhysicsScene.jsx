@@ -92,10 +92,10 @@ const Particle = ({ position, velocity, color }) => {
   );
 };
 
-export default function PhysicsScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
-  const primaryColor = colors.primary || '#1565C0';
-  const accentColor = colors.accent || '#4FC3F7';
-  const secondaryColor = colors.secondary || '#546E7A';
+export default function PhysicsScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#216E1A';
+  const accentColor = colors.accent || '#43A806';
+  const secondaryColor = colors.secondary || '#3B6F2F';
 
   const particles = Array.from({ length: 10 }, (_, i) => ({
     position: [

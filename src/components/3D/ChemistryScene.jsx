@@ -99,9 +99,9 @@ const co2Structure = [
   { position: [0.6, 0, 0], size: 0.15 },
 ];
 
-export default function ChemistryScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
-  const primaryColor = colors.primary || '#1565C0';
-  const accentColor = colors.accent || '#4FC3F7';
+export default function ChemistryScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+  const primaryColor = colors.primary || '#216E1A';
+  const accentColor = colors.accent || '#43A806';
 
   return (
     <>

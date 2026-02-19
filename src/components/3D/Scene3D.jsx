@@ -11,9 +11,9 @@ import ScienceScene from "./ScienceScene";
 const Scene3D = ({ subject = "math" }) => {
   const { currentTheme, customTheme } = useTheme();
   const [themeColors, setThemeColors] = useState({
-    primary: '#1565C0',
-    secondary: '#546E7A',
-    accent: '#4FC3F7',
+    primary: '#216E1A',
+    secondary: '#3B6F2F',
+    accent: '#43A806',
     bg: '#FFFFFF',
   });
   
@@ -22,9 +22,9 @@ const Scene3D = ({ subject = "math" }) => {
     const updateColors = () => {
       const root = document.documentElement;
       setThemeColors({
-        primary: getComputedStyle(root).getPropertyValue('--text-primary').trim() || '#1565C0',
-        secondary: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#546E7A',
-        accent: getComputedStyle(root).getPropertyValue('--accent').trim() || '#4FC3F7',
+        primary: getComputedStyle(root).getPropertyValue('--text-primary').trim() || '#216E1A',
+        secondary: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#3B6F2F',
+        accent: getComputedStyle(root).getPropertyValue('--accent').trim() || '#43A806',
         bg: getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#FFFFFF',
       });
     };

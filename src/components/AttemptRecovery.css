@@ -57,7 +57,7 @@
 .recovery-button {
   margin-top: 1.5rem;
   padding: 0.75rem 2rem;
-  background: #1976d2;
+  background: #43a806;
   color: white;
   border: none;
   border-radius: 8px;
@@ -67,7 +67,7 @@
 }
 
 .recovery-button:hover:not(:disabled) {
-  background: #1565c0;
+  background: #216e1a;
 }
 
 .recovery-button:disabled {
@@ -80,12 +80,17 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #1976d2;
+  border-top: 4px solid #43a806;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

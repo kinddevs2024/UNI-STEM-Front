@@ -191,8 +191,8 @@ const Settings = () => {
                   textColor = localCustomTheme.textPrimary;
                   displayName = 'Custom';
                 } else if (theme === 'kid-friendly') {
-                  bgGradient = 'linear-gradient(135deg, #FFFFFF 0%, #E3F2FD 100%)';
-                  textColor = '#1565C0';
+                  bgGradient = 'linear-gradient(135deg, #F6F4F4 0%, #D5D1D2 100%)';
+                  textColor = '#216E1A';
                   displayName = 'Kid-Friendly';
                 } else if (theme === 'system') {
                   // Show system theme based on current OS preference

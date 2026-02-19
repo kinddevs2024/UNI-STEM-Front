@@ -66,11 +66,11 @@ const FloatingWord = ({ word, position, color, outlineColor }) => {
   );
 };
 
-export default function EnglishScene({ colors = { primary: '#1565C0', secondary: '#546E7A', accent: '#4FC3F7', bg: '#FFFFFF' } }) {
+export default function EnglishScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
   const letters = ["A", "B", "C", "D", "E"];
   const words = ["READ", "WRITE", "LEARN"];
-  const primaryColor = colors.primary || '#1565C0';
-  const accentColor = colors.accent || '#4FC3F7';
+  const primaryColor = colors.primary || '#216E1A';
+  const accentColor = colors.accent || '#43A806';
   const outlineColor = colors.bg === '#FFFFFF' || colors.bg === '#ffffff' ? '#000000' : '#FFFFFF';
 
   return (

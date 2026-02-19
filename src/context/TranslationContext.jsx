@@ -13,6 +13,16 @@ export const useTranslation = () => {
 const STORAGE_KEY = "olympiad_auto_translate";
 const STORAGE_LANGUAGE_KEY = "olympiad_translate_language";
 
+const getPreferredDeviceLanguage = () => {
+  const preferredLocale =
+    (Array.isArray(navigator.languages) && navigator.languages[0]) ||
+    navigator.language ||
+    navigator.userLanguage ||
+    "en";
+
+  return mapGoogleLocaleToLanguage(preferredLocale);
+};
+
 // Map Google locale to language code for Google Translate
 const mapGoogleLocaleToLanguage = (locale) => {
   if (!locale) return "en";
@@ -135,22 +145,64 @@ const translateElement = async (element, targetLanguage) => {
       }
     }
   }
+
+  // Translate common UI attributes (especially input placeholders)
+  const translatableAttributeRules = [
+    {
+      selector: "input[placeholder], textarea[placeholder]",
+      attrs: ["placeholder"],
+    },
+    {
+      selector: "[title]",
+      attrs: ["title"],
+    },
+    {
+      selector: "[aria-label]",
+      attrs: ["aria-label"],
+    },
+    {
+      selector: 'input[type="button"][value], input[type="submit"][value], input[type="reset"][value]',
+      attrs: ["value"],
+    },
+  ];
+
+  for (const rule of translatableAttributeRules) {
+    const elements = [
+      ...(element.matches?.(rule.selector) ? [element] : []),
+      ...element.querySelectorAll(rule.selector),
+    ];
+
+    for (const el of elements) {
+      if (el.getAttribute("data-translate") === "false") continue;
+
+      for (const attr of rule.attrs) {
+        const originalAttrKey = `data-original-${attr}`;
+        const sourceValue =
+          el.getAttribute(originalAttrKey) ?? el.getAttribute(attr);
+
+        if (!sourceValue || sourceValue.length > 500) continue;
+
+        if (!el.hasAttribute(originalAttrKey)) {
+          el.setAttribute(originalAttrKey, sourceValue);
+        }
+
+        try {
+          const translated = await translateText(sourceValue, targetLanguage);
+          if (translated && translated !== el.getAttribute(attr)) {
+            el.setAttribute(attr, translated);
+          }
+        } catch (error) {
+          console.error(`Error translating ${attr}:`, error);
+        }
+      }
+    }
+  }
 };
 
 export const TranslationProvider = ({ children }) => {
-  const [autoTranslate, setAutoTranslate] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? saved === "true" : true; // Default: enabled
-  });
+  const [autoTranslate, setAutoTranslate] = useState(true);
   
-  const [targetLanguage, setTargetLanguage] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_LANGUAGE_KEY);
-    if (saved) return saved;
-    
-    // Fallback to browser language
-    const browserLang = navigator.language || navigator.userLanguage;
-    return mapGoogleLocaleToLanguage(browserLang);
-  });
+  const [targetLanguage, setTargetLanguage] = useState(getPreferredDeviceLanguage);
   
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -163,16 +215,25 @@ export const TranslationProvider = ({ children }) => {
     }
   };
 
+  // Always keep auto-translate enabled and sync language with device/browser
+  useEffect(() => {
+    const deviceLanguage = getPreferredDeviceLanguage();
+
+    setAutoTranslate(true);
+    setTargetLanguage(deviceLanguage);
+
+    localStorage.setItem(STORAGE_KEY, "true");
+    localStorage.setItem(STORAGE_LANGUAGE_KEY, deviceLanguage);
+  }, []);
+
   // Toggle auto-translate
   const toggleAutoTranslate = (enabled) => {
-    setAutoTranslate(enabled);
-    localStorage.setItem(STORAGE_KEY, enabled.toString());
-    
-    if (enabled) {
+    const nextEnabled = enabled ? true : true;
+    setAutoTranslate(nextEnabled);
+    localStorage.setItem(STORAGE_KEY, "true");
+
+    if (targetLanguage && targetLanguage !== "en") {
       translatePage(targetLanguage);
-    } else {
-      // Reload page to show original text
-      window.location.reload();
     }
   };
 
