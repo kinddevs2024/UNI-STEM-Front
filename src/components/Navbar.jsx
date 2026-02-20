@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
-import { getImageUrl } from "../utils/helpers";
+import { getImageUrl, getToken, getUser } from "../utils/helpers";
 import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
 
@@ -12,6 +12,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const cachedUser = useMemo(() => {
+    try {
+      return getUser();
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const effectiveUser = user || cachedUser;
+  const hasSession = isAuthenticated || Boolean(getToken()) || Boolean(effectiveUser?._id);
 
   const handleLogout = () => {
     logout();
@@ -23,15 +34,15 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const navigationItems = useMemo(() => {
-    if (!isAuthenticated || !user?.role) return [];
-    return getNavigationItems(user.role);
-  }, [isAuthenticated, user?.role]);
+    if (!hasSession || !effectiveUser?.role) return [];
+    return getNavigationItems(effectiveUser.role);
+  }, [hasSession, effectiveUser?.role]);
 
   if (location.pathname === "/" || location.pathname === "/auth") {
     return null;
   }
 
-  if (!isAuthenticated) {
+  if (!hasSession) {
     return null;
   }
 
@@ -53,16 +64,16 @@ const Navbar = () => {
         <BalanceDisplay />
 
         <Link to="/profile" className="navbar-user">
-          {user?.userLogo ? (
+          {effectiveUser?.userLogo ? (
             <img
-              src={getImageUrl(user.userLogo)}
+              src={getImageUrl(effectiveUser.userLogo)}
               alt="Profile"
               className="navbar-user-avatar"
             />
           ) : (
             <div className="navbar-user-avatar-placeholder">
-              {user?.name?.charAt(0)?.toUpperCase() ||
-                user?.email?.charAt(0)?.toUpperCase() ||
+              {effectiveUser?.name?.charAt(0)?.toUpperCase() ||
+                effectiveUser?.email?.charAt(0)?.toUpperCase() ||
                 "U"}
             </div>
           )}
@@ -81,15 +92,15 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
+        <Link to={hasSession ? "/dashboard" : "/"} className="navbar-logo">
           <img src={logoPath} alt="Global Olympiads logo" className="navbar-logo-image" />
           <span className="navbar-logo-text" aria-label="Global Olympiads">
-            lobal Olympiads
+            Global Olympiads
           </span>
         </Link>
 
         <div className="navbar-menu navbar-menu-desktop">
-          {isAuthenticated ? (
+          {hasSession ? (
             renderAuthLinks()
           ) : (
             <Link to="/auth" className="navbar-login">
@@ -128,7 +139,7 @@ const Navbar = () => {
       />
 
       <div className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
-        {isAuthenticated ? (
+        {hasSession ? (
           renderAuthLinks()
         ) : (
           <Link to="/auth" className="navbar-login">
