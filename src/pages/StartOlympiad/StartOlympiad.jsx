@@ -36,6 +36,53 @@ const StartOlympiad = () => {
   const [proctoringStatus, setProctoringStatus] = useState(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState(null);
 
+  const getDisplaySurfaceFromStream = (stream) => {
+    const track = stream?.getVideoTracks?.()[0];
+    if (!track || typeof track.getSettings !== "function") {
+      return null;
+    }
+    const settings = track.getSettings();
+    return settings.displaySurface || settings.logicalSurface || null;
+  };
+
+  const requestEntireScreenStream = async () => {
+    while (true) {
+      try {
+        const stream = await requestScreenStream({ video: true, audio: false });
+        const displaySurface = getDisplaySurfaceFromStream(stream);
+
+        if (displaySurface === "monitor") {
+          return { stream, displaySurface };
+        }
+
+        stream.getTracks().forEach((track) => track.stop());
+        setNotification({
+          message:
+            'Please select "Entire Screen" in the share dialog. Window/tab sharing is not allowed.',
+          type: "error",
+        });
+      } catch (error) {
+        const friendlyMessage = getMediaAccessErrorMessage(error, { needsScreen: true });
+        const isFatalUnsupported =
+          friendlyMessage.includes("secure context") ||
+          friendlyMessage.includes("not supported") ||
+          friendlyMessage.includes("unsupported");
+
+        if (isFatalUnsupported) {
+          throw error;
+        }
+
+        setNotification({
+          message:
+            'Screen sharing is required. Please choose "Entire Screen" to continue.',
+          type: "error",
+        });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+  };
+
   useEffect(() => {
     fetchOlympiad();
     
@@ -175,11 +222,14 @@ const StartOlympiad = () => {
 
     let cameraStream = null;
     let screenStream = null;
+    let sharedDisplaySurface = null;
     try {
       clearPendingProctoringStreams();
 
       cameraStream = await requestCameraStream({ video: true, audio: false });
-      screenStream = await requestScreenStream({ video: true, audio: false });
+      const screenResult = await requestEntireScreenStream();
+      screenStream = screenResult.stream;
+      sharedDisplaySurface = screenResult.displaySurface;
 
       setPendingProctoringStreams({ cameraStream, screenStream });
     } catch (permissionError) {
@@ -274,7 +324,7 @@ const StartOlympiad = () => {
         frontCameraActive: true, 
         backCameraActive: false,
         screenShareActive: true,
-        displaySurface: 'monitor'
+        displaySurface: sharedDisplaySurface || getDisplaySurfaceFromStream(screenStream) || 'monitor'
       };
 
       // Generate device fingerprint if not already done
@@ -642,10 +692,10 @@ const StartOlympiad = () => {
                   aria-disabled={!consentGiven || starting || !isActive || (user && user.role === USER_ROLES.STUDENT && profileIncomplete) || alreadySubmittedThisMonth}
                 >
                   {starting
-                    ? "Запуск..."
+                    ? "Starting..."
                     : !consentGiven
-                    ? "Примите условия, чтобы начать →"
-                    : "Начать олимпиаду →"}
+                    ? "Accept Terms to Start →"
+                    : "Start Olympiad →"}
                 </button>
               </div>
             </>

@@ -166,6 +166,56 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
     return 'Screen sharing is not supported on this browser. Use a desktop browser that supports screen sharing.';
   };
 
+  const getDisplaySurfaceFromStream = (stream) => {
+    const videoTrack = stream?.getVideoTracks?.()[0];
+    if (!videoTrack || typeof videoTrack.getSettings !== 'function') {
+      return null;
+    }
+    const settings = videoTrack.getSettings();
+    return settings.displaySurface || settings.logicalSurface || null;
+  };
+
+  const stopStreamTracks = (stream) => {
+    if (!stream) return;
+    stream.getTracks().forEach((track) => track.stop());
+  };
+
+  const requestEntireScreenStream = async (initialStream = null) => {
+    let candidateStream = initialStream;
+
+    while (true) {
+      try {
+        if (!candidateStream) {
+          candidateStream = await requestScreenStream({ video: true, audio: false });
+        }
+
+        const displaySurface = getDisplaySurfaceFromStream(candidateStream);
+        if (displaySurface === 'monitor') {
+          return { stream: candidateStream, displaySurface };
+        }
+
+        stopStreamTracks(candidateStream);
+        candidateStream = null;
+        setScreenError('Please select "Entire Screen" to continue. Window/tab sharing is not allowed.');
+      } catch (error) {
+        candidateStream = null;
+        const friendlyMessage = getMediaAccessErrorMessage(error, { needsScreen: true });
+        const isFatalUnsupported =
+          friendlyMessage.includes('secure context') ||
+          friendlyMessage.includes('not supported') ||
+          friendlyMessage.includes('unsupported');
+
+        if (isFatalUnsupported) {
+          throw error;
+        }
+
+        setScreenError('Screen sharing is required. Please choose "Entire Screen" in the next prompt.');
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+  };
+
   const startCameraRecording = () => {
     const stream = cameraStreamRef.current;
     if (!stream) return;
@@ -380,16 +430,14 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         console.error('Camera error:', err);
       }
 
-      // Start screen capture (standard browser prompt)
+      // Start screen capture (Entire Screen required)
       try {
-        const screenStream = pendingStreams.screenStream || await requestScreenStream({
-          video: true,
-          audio: false,
-        });
+        const screenResult = await requestEntireScreenStream(pendingStreams.screenStream || null);
+        const screenStream = screenResult.stream;
 
         const videoTrack = screenStream.getVideoTracks()[0];
         if (!videoTrack) {
-          screenStream.getTracks().forEach((track) => track.stop());
+          stopStreamTracks(screenStream);
           throw new Error('No screen video track found.');
         }
 
@@ -402,8 +450,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         setScreenActive(true);
         setScreenError(null);
 
-        const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
-        const displaySurface = settings.displaySurface || settings.logicalSurface || null;
+        const displaySurface = screenResult.displaySurface;
 
         if (onProctoringStatusChange) {
           onProctoringStatusChange({
@@ -949,51 +996,29 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       </div>
 
       <div className="monitor-stats">
-        <div className="monitor-status-card">
-          <span className="monitor-status-label">Status</span>
-          <div className={`monitor-status-badge ${isRecording ? 'active' : 'stopped'}`}>
-            <span className="monitor-status-dot" aria-hidden="true" />
-            <span className="monitor-status-icon" aria-hidden="true">{isRecording ? '🎥' : '⏸'}</span>
-            <span className="monitor-status-text">{isRecording ? 'Recording' : 'Stopped'}</span>
-          </div>
-        </div>
-        {isUploading && (
-          <>
-            {uploadStatus && (
-              <div className="stat-item">
-                <span className="stat-label">{uploadStatus}</span>
-              </div>
-            )}
-            {uploadProgress.camera > 0 && (
-              <div className="stat-item">
-                <span className="stat-label">Camera:</span>
-                <span className="stat-value">{uploadProgress.camera}%</span>
-                <div className="upload-progress-bar">
-                  <div 
-                    className="upload-progress-fill" 
-                    style={{ width: `${uploadProgress.camera}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            {uploadProgress.screen > 0 && (
-              <div className="stat-item">
-                <span className="stat-label">Screen:</span>
-                <span className="stat-value">{uploadProgress.screen}%</span>
-                <div className="upload-progress-bar">
-                  <div 
-                    className="upload-progress-fill" 
-                    style={{ width: `${uploadProgress.screen}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            <div className="stat-item">
-              <span className="stat-label">Total:</span>
-              <span className="stat-value">{Math.round(totalProgress)}%</span>
+        <div className="monitor-status-row">
+          <div className="monitor-status-card">
+            <span className="monitor-status-label">Status</span>
+            <div className={`monitor-status-badge ${isRecording ? 'active' : 'stopped'}`}>
+              <span className="monitor-status-dot" aria-hidden="true" />
+              <span className="monitor-status-icon" aria-hidden="true">{isRecording ? '🎥' : '⏸'}</span>
+              <span className="monitor-status-text">{isRecording ? 'Recording' : 'Stopped'}</span>
             </div>
-          </>
-        )}
+          </div>
+
+          {isUploading && (
+            <div className="monitor-upload-inline">
+              <span className="monitor-upload-label">{uploadStatus || 'Uploading'}</span>
+              <span className="monitor-upload-value">{Math.round(totalProgress)}%</span>
+              <div className="upload-progress-bar compact">
+                <div
+                  className="upload-progress-fill"
+                  style={{ width: `${Math.round(totalProgress)}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
