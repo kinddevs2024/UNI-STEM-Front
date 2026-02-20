@@ -16,6 +16,7 @@ import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import { generateDeviceFingerprint } from "../../utils/device-fingerprint";
 import { setProctoringSessionStreams, clearProctoringSessionStreams } from "../../utils/proctoringSession";
+import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from "../../utils/mediaAccess";
 import "./StartOlympiad.css";
 
 const StartOlympiad = () => {
@@ -176,18 +177,14 @@ const StartOlympiad = () => {
     let screenStream = null;
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.getDisplayMedia) {
-        throw new Error("Your browser does not support camera/screen sharing. Please use a modern desktop browser.");
-      }
-
       clearProctoringSessionStreams();
 
-      cameraStream = await navigator.mediaDevices.getUserMedia({
+      cameraStream = await requestCameraStream({
         video: true,
         audio: false,
       });
 
-      screenStream = await navigator.mediaDevices.getDisplayMedia({
+      screenStream = await requestScreenStream({
         video: true,
         audio: false,
       });
@@ -210,7 +207,7 @@ const StartOlympiad = () => {
         screenStream.getTracks().forEach((track) => track.stop());
       }
       setNotification({
-        message: permissionError?.message || "Please allow camera and screen sharing before starting.",
+        message: getMediaAccessErrorMessage(permissionError, { needsScreen: true }),
         type: "error",
       });
       return;
