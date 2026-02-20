@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { olympiadAPI } from '../services/api';
 import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from '../utils/constants';
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
+import { consumeProctoringSessionStreams } from '../utils/proctoringSession';
 import './ProctoringMonitor.css';
 
 const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {
@@ -336,6 +337,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
   const startMonitoring = async () => {
     try {
+      const preloadedStreams = consumeProctoringSessionStreams() || {};
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setCameraError('Camera access is not supported on this device/browser.');
       }
@@ -346,7 +349,24 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start camera
       try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        if (preloadedStreams.cameraStream) {
+          cameraStreamRef.current = preloadedStreams.cameraStream;
+
+          if (cameraVideoRef.current) {
+            cameraVideoRef.current.srcObject = preloadedStreams.cameraStream;
+            setCameraActive(true);
+            setCameraError(null);
+
+            if (onProctoringStatusChange) {
+              onProctoringStatusChange({
+                frontCameraActive: true,
+                backCameraActive: false,
+                screenShareActive: screenActive,
+                displaySurface: null
+              });
+            }
+          }
+        } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           const cameraStream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: 'user',
@@ -381,7 +401,45 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start screen capture - Force full screen sharing
       try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        if (preloadedStreams.screenStream) {
+          const screenStream = preloadedStreams.screenStream;
+          const videoTrack = screenStream.getVideoTracks()[0];
+
+          if (!videoTrack) {
+            setScreenError('Screen stream is missing video track. Please restart and share the entire screen.');
+            setScreenActive(false);
+          } else {
+            screenStreamRef.current = screenStream;
+            if (screenVideoRef.current) {
+              screenVideoRef.current.srcObject = screenStream;
+            }
+            setScreenActive(true);
+            setScreenError(null);
+
+            const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
+            const displaySurface = settings.displaySurface || settings.logicalSurface || 'monitor';
+
+            if (onProctoringStatusChange) {
+              onProctoringStatusChange({
+                frontCameraActive: cameraActive,
+                backCameraActive: false,
+                screenShareActive: true,
+                displaySurface
+              });
+            }
+
+            if (typeof videoTrack.addEventListener === 'function') {
+              videoTrack.addEventListener('ended', () => {
+                setScreenError('Screen sharing stopped');
+                setScreenActive(false);
+                stopRecording();
+                if (onRecordingStatusChange) {
+                  onRecordingStatusChange(false);
+                }
+              });
+            }
+          }
+        } else if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
           let screenStream = null;
           let videoTrack = null;
           let displaySurface = null;
@@ -398,6 +456,18 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
                 audio: false
               });
             } catch (screenPromptError) {
+              const promptMessage = String(screenPromptError?.message || '').toLowerCase();
+              const blockedByGesture =
+                screenPromptError?.name === 'InvalidStateError' ||
+                promptMessage.includes('gesture') ||
+                promptMessage.includes('activation');
+
+              if (blockedByGesture) {
+                setScreenError('Screen-share request was blocked. Please return to the Start page and press Start again.');
+                setScreenActive(false);
+                break;
+              }
+
               setScreenError('Please share your entire screen to continue.');
               setScreenActive(false);
               alert('⚠️ Для продолжения необходимо поделиться ВЕСЬ ЭКРАНОМ.\n\nПожалуйста, разрешите доступ и выберите "Entire Screen".');
@@ -427,6 +497,10 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
             screenStream = selectedStream;
             videoTrack = selectedVideoTrack;
             displaySurface = selectedDisplaySurface || 'monitor';
+          }
+
+          if (!screenStream) {
+            return;
           }
 
           screenStreamRef.current = screenStream;

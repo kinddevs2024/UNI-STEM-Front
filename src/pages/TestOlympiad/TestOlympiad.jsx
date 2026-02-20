@@ -11,7 +11,7 @@ import { useServerTimer } from '../../hooks/useServerTimer';
 import { useAttemptSession } from '../../hooks/useAttemptSession';
 import { useAntiCheat } from '../../hooks/useAntiCheat';
 import { saveAnswers, getSavedAnswers, deleteSavedAnswers } from '../../utils/indexeddb';
-import { getTimeRemaining, getTimeRemainingFromDuration, getImageUrl } from '../../utils/helpers';
+import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
 import { generateDeviceFingerprint } from '../../utils/device-fingerprint';
 import './TestOlympiad.css';
 
@@ -527,10 +527,6 @@ const TestOlympiad = () => {
     );
   }
 
-  const olympiadLogoField =
-    olympiad?.olympiadLogo || olympiad?.logo || olympiad?.logoUrl || olympiad?.image || '';
-  const olympiadLogoUrl = olympiadLogoField ? getImageUrl(olympiadLogoField) : '';
-
   return (
     <div className="test-olympiad-page">
       <ProctoringMonitor 
@@ -577,16 +573,6 @@ const TestOlympiad = () => {
             formatted={timerFormatted}
           />
         </div>
-
-        {olympiadLogoUrl && (
-          <div className="olympiad-hero-image-wrap">
-            <img
-              src={olympiadLogoUrl}
-              alt={`${olympiad?.title || 'Olympiad'} banner`}
-              className="olympiad-hero-image"
-            />
-          </div>
-        )}
 
         <div className="olympiad-progress">
           <div className="progress-bar">

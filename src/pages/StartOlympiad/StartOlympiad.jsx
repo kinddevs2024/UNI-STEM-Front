@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import { generateDeviceFingerprint } from "../../utils/device-fingerprint";
+import { setProctoringSessionStreams, clearProctoringSessionStreams } from "../../utils/proctoringSession";
 import "./StartOlympiad.css";
 
 const StartOlympiad = () => {
@@ -171,6 +172,50 @@ const StartOlympiad = () => {
       }
     }
 
+    let cameraStream = null;
+    let screenStream = null;
+
+    try {
+      if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.getDisplayMedia) {
+        throw new Error("Your browser does not support camera/screen sharing. Please use a modern desktop browser.");
+      }
+
+      clearProctoringSessionStreams();
+
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+      });
+
+      screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+
+      const screenTrack = screenStream.getVideoTracks()?.[0];
+      const settings = typeof screenTrack?.getSettings === "function" ? screenTrack.getSettings() : {};
+      const surface = settings.displaySurface || settings.logicalSurface;
+      if (surface && surface !== "monitor") {
+        cameraStream.getTracks().forEach((track) => track.stop());
+        screenStream.getTracks().forEach((track) => track.stop());
+        throw new Error('Please select "Entire Screen" to continue. Window/tab sharing is not allowed.');
+      }
+
+      setProctoringSessionStreams({ cameraStream, screenStream });
+    } catch (permissionError) {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+      }
+      setNotification({
+        message: permissionError?.message || "Please allow camera and screen sharing before starting.",
+        type: "error",
+      });
+      return;
+    }
+
     // Request Full Screen
     try {
       const elem = document.documentElement;
@@ -183,7 +228,6 @@ const StartOlympiad = () => {
       }
     } catch (err) {
       console.warn("Full screen request failed:", err);
-      // Don't block start if full screen fails, but maybe notify?
     }
 
     setStarting(true);
