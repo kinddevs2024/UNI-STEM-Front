@@ -949,11 +949,13 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       </div>
 
       <div className="monitor-stats">
-        <div className="stat-item">
-          <span className="stat-label">Status:</span>
-          <span className={`stat-value ${isRecording ? 'recording' : ''}`}>
-            {isRecording ? '● Recording' : 'Stopped'}
-          </span>
+        <div className="monitor-status-card">
+          <span className="monitor-status-label">Status</span>
+          <div className={`monitor-status-badge ${isRecording ? 'active' : 'stopped'}`}>
+            <span className="monitor-status-dot" aria-hidden="true" />
+            <span className="monitor-status-icon" aria-hidden="true">{isRecording ? '🎥' : '⏸'}</span>
+            <span className="monitor-status-text">{isRecording ? 'Recording' : 'Stopped'}</span>
+          </div>
         </div>
         {isUploading && (
           <>

@@ -158,6 +158,62 @@
   animation: fadeIn 0.5s ease;
 }
 
+.monitor-status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.monitor-status-label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+}
+
+.monitor-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.monitor-status-badge.active {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--bg-secondary));
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+}
+
+.monitor-status-badge.stopped {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, var(--bg-secondary));
+  border-color: color-mix(in srgb, var(--warning) 32%, var(--border));
+}
+
+.monitor-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.monitor-status-icon {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.monitor-status-text {
+  white-space: nowrap;
+}
+
 .monitor-stats span {
   font-weight: 500;
 }
@@ -181,13 +237,20 @@
 }
 
 .stat-value.recording {
-  color: var(--error);
-  animation: blink 1s ease-in-out infinite;
+  color: var(--success);
+  animation: blink 1.4s ease-in-out infinite;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .upload-progress-bar {
@@ -208,8 +271,15 @@
 }
 
 @keyframes progressGlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 768px) {
@@ -218,19 +288,18 @@
     top: 10px;
     right: 10px;
   }
-  
+
   .monitor-camera,
   .monitor-screen {
     width: 100%;
   }
-  
+
   .monitor-preview {
     height: 120px;
   }
-  
+
   .monitor-stats {
     font-size: 9px;
     padding: 6px 10px;
   }
 }
-
