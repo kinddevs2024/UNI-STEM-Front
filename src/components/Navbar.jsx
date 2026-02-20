@@ -85,9 +85,6 @@ const Navbar = () => {
       <div className="navbar-container">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
           <img src={logoPath} alt="Global Olympiads logo" className="navbar-logo-image" />
-          <span className="navbar-logo-text" aria-label="Global Olympiads">
-            lobal Olympiads
-          </span>
         </Link>
 
         <div className="navbar-menu navbar-menu-desktop">

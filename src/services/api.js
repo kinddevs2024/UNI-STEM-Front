@@ -435,6 +435,8 @@ export const ownerAPI = {
     const queryString = query.toString();
     return api.get(`/owner/audit-logs${queryString ? `?${queryString}` : ""}`);
   },
+  getSystemControls: () => api.get('/owner/system-controls'),
+  updateSystemControls: (data) => api.put('/owner/system-controls', data),
   getAnalytics: () => api.get("/owner/analytics"),
   changeUserRole: (userId, role) =>
     api.put(`/owner/users/${userId}/role`, { role }),

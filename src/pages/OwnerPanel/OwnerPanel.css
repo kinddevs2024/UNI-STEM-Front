@@ -22,6 +22,97 @@
   letter-spacing: -2px;
 }
 
+.owner-controls-section {
+  margin-bottom: 32px;
+  padding: 24px;
+}
+
+.owner-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.owner-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.owner-control-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+}
+
+.owner-control-danger {
+  border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+}
+
+.owner-control-text h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.owner-control-text p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.owner-switch {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.owner-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.owner-switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.owner-switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.owner-switch input:checked+.owner-switch-slider {
+  background: color-mix(in srgb, var(--accent) 25%, var(--bg-secondary));
+  border-color: var(--accent);
+}
+
+.owner-switch input:checked+.owner-switch-slider::before {
+  transform: translateX(22px);
+  background: var(--accent);
+}
+
 .analytics-section,
 .users-section {
   margin-bottom: 40px;
@@ -467,10 +558,30 @@
   color: var(--bg-primary);
 }
 
+.modal-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .modal-button.ghost {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border);
+}
+
+.modal-confirm-input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-confirm-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .section-header {
@@ -747,5 +858,10 @@
 
   .section-title {
     font-size: 24px;
+  }
+
+  .owner-control-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

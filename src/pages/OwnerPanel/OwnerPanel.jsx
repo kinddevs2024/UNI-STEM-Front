@@ -79,9 +79,19 @@ const OwnerPanel = () => {
   });
 
   const [pendingRoleChange, setPendingRoleChange] = useState(null);
+  const [systemControls, setSystemControls] = useState({
+    emailVerificationEnabled: true,
+    requireProfileCompletion: true,
+    apiEnabled: true,
+  });
+  const [controlsLoading, setControlsLoading] = useState(true);
+  const [controlsSaving, setControlsSaving] = useState(false);
+  const [pendingApiToggleValue, setPendingApiToggleValue] = useState(null);
+  const [apiToggleConfirmText, setApiToggleConfirmText] = useState("");
 
   useEffect(() => {
     fetchSummary();
+    fetchSystemControls();
   }, []);
 
   useEffect(() => {
@@ -112,6 +122,68 @@ const OwnerPanel = () => {
       setNotification({ message: "Failed to load data", type: "error" });
     } finally {
       setSummaryLoading(false);
+    }
+  };
+
+  const fetchSystemControls = async () => {
+    setControlsLoading(true);
+    try {
+      const controlsRes = await ownerAPI.getSystemControls();
+      const controls = controlsRes.data?.data || {};
+      setSystemControls({
+        emailVerificationEnabled: controls.emailVerificationEnabled !== false,
+        requireProfileCompletion: controls.requireProfileCompletion !== false,
+        apiEnabled: controls.apiEnabled !== false,
+      });
+    } catch (error) {
+      console.error("Error fetching system controls:", error);
+      setNotification({ message: "Failed to load owner controls", type: "error" });
+    } finally {
+      setControlsLoading(false);
+    }
+  };
+
+  const handleControlToggle = (key) => {
+    if (key === "apiEnabled") {
+      setPendingApiToggleValue(!systemControls.apiEnabled);
+      setApiToggleConfirmText("");
+      return;
+    }
+
+    setSystemControls((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const cancelApiToggle = () => {
+    setPendingApiToggleValue(null);
+    setApiToggleConfirmText("");
+  };
+
+  const confirmApiToggle = () => {
+    if (pendingApiToggleValue === null) return;
+    if (apiToggleConfirmText.trim() !== "CONFIRM") return;
+
+    setSystemControls((prev) => ({
+      ...prev,
+      apiEnabled: pendingApiToggleValue,
+    }));
+    setPendingApiToggleValue(null);
+    setApiToggleConfirmText("");
+  };
+
+  const handleSaveSystemControls = async () => {
+    setControlsSaving(true);
+    try {
+      await ownerAPI.updateSystemControls(systemControls);
+      setNotification({ message: "Owner controls updated", type: "success" });
+      fetchAuditLogs();
+    } catch (error) {
+      console.error("Error saving system controls:", error);
+      setNotification({ message: "Failed to save owner controls", type: "error" });
+    } finally {
+      setControlsSaving(false);
     }
   };
 
@@ -382,6 +454,70 @@ const OwnerPanel = () => {
       <div className="container">
         <div className="owner-header">
           <h1 className="owner-title text-glow">Owner Panel</h1>
+        </div>
+
+        <div className="owner-controls-section card">
+          <div className="owner-controls-header">
+            <h2 className="section-title">🛡️ Owner Control Panel</h2>
+            <button
+              className="export-button"
+              onClick={handleSaveSystemControls}
+              disabled={controlsLoading || controlsSaving}
+            >
+              {controlsSaving ? "Saving..." : "Save Controls"}
+            </button>
+          </div>
+
+          {controlsLoading ? (
+            <div className="section-loading">Loading controls...</div>
+          ) : (
+            <div className="owner-controls-grid">
+              <div className="owner-control-item">
+                <div className="owner-control-text">
+                  <h3>Email Verification</h3>
+                  <p>Require email verification during authentication.</p>
+                </div>
+                <label className="owner-switch">
+                  <input
+                    type="checkbox"
+                    checked={systemControls.emailVerificationEnabled}
+                    onChange={() => handleControlToggle("emailVerificationEnabled")}
+                  />
+                  <span className="owner-switch-slider" />
+                </label>
+              </div>
+
+              <div className="owner-control-item">
+                <div className="owner-control-text">
+                  <h3>Profile Completeness Check</h3>
+                  <p>Require full student profile before olympiad start.</p>
+                </div>
+                <label className="owner-switch">
+                  <input
+                    type="checkbox"
+                    checked={systemControls.requireProfileCompletion}
+                    onChange={() => handleControlToggle("requireProfileCompletion")}
+                  />
+                  <span className="owner-switch-slider" />
+                </label>
+              </div>
+
+              <div className="owner-control-item owner-control-danger">
+                <div className="owner-control-text">
+                  <h3>Global API Access</h3>
+                  <p>Emergency switch: disable or enable API responses platform-wide.</p>
+                </div>
+                <label className="owner-switch">
+                  <input
+                    type="checkbox"
+                    checked={systemControls.apiEnabled}
+                    onChange={() => handleControlToggle("apiEnabled")}
+                  />
+                  <span className="owner-switch-slider" />
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Analytics Dashboard */}
@@ -1109,6 +1245,40 @@ const OwnerPanel = () => {
             <div className="modal-actions">
               <button className="modal-button ghost" onClick={cancelRoleChange}>Cancel</button>
               <button className="modal-button primary" onClick={confirmRoleChange}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingApiToggleValue !== null && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <h3 className="modal-title">Confirm Global API Access Change</h3>
+            <p className="modal-text">
+              You are about to <strong>{pendingApiToggleValue ? "ENABLE" : "DISABLE"}</strong> all API endpoints.
+              This affects the entire platform.
+            </p>
+            <p className="modal-text">
+              Type <strong>CONFIRM</strong> to continue.
+            </p>
+
+            <input
+              type="text"
+              value={apiToggleConfirmText}
+              onChange={(e) => setApiToggleConfirmText(e.target.value)}
+              className="modal-confirm-input"
+              placeholder="Type CONFIRM"
+            />
+
+            <div className="modal-actions">
+              <button className="modal-button ghost" onClick={cancelApiToggle}>Cancel</button>
+              <button
+                className="modal-button primary"
+                onClick={confirmApiToggle}
+                disabled={apiToggleConfirmText.trim() !== "CONFIRM"}
+              >
+                Apply Change
+              </button>
             </div>
           </div>
         </div>
