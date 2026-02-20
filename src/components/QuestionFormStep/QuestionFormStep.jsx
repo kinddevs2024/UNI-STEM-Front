@@ -259,9 +259,10 @@ const QuestionFormStep = ({
           <>
             <div className="form-group">
               <label>Options</label>
-              <div className="form-group" style={{ marginBottom: "10px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="answer-mode-toggle-wrapper">
+                <label className="answer-mode-toggle">
                   <input
+                    className="answer-mode-toggle-input"
                     type="checkbox"
                     checked={Boolean(questionForm.allowMultipleCorrect)}
                     onChange={(e) =>
@@ -289,7 +290,8 @@ const QuestionFormStep = ({
                       })
                     }
                   />
-                  <span>Allow multiple correct answers</span>
+                  <span className="answer-mode-toggle-slider" aria-hidden="true" />
+                  <span className="answer-mode-toggle-text">Allow multiple correct answers</span>
                 </label>
               </div>
               {questionForm.options.map((option, index) => {
@@ -308,45 +310,54 @@ const QuestionFormStep = ({
                     placeholder={`Option ${String.fromCharCode(65 + index)}`}
                     className="option-input"
                   />
-                  {questionForm.allowMultipleCorrect ? (
-                    <input
-                      type="checkbox"
-                      value={option}
-                      checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
-                      onChange={(e) =>
-                        setQuestionForm((prev) => {
-                          const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
-                          const nextCorrectAnswers = e.target.checked
-                            ? [...new Set([...current, option])]
-                            : current.filter((answer) => answer !== option);
+                  <label className="option-select-control">
+                    {questionForm.allowMultipleCorrect ? (
+                      <input
+                        className="option-select-input"
+                        type="checkbox"
+                        value={option}
+                        checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
+                        onChange={(e) =>
+                          setQuestionForm((prev) => {
+                            const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
+                            const nextCorrectAnswers = e.target.checked
+                              ? [...new Set([...current, option])]
+                              : current.filter((answer) => answer !== option);
 
-                          return {
-                            ...prev,
-                            correctAnswers: nextCorrectAnswers,
-                            correctAnswer: nextCorrectAnswers[0] || "",
-                          };
-                        })
-                      }
-                      disabled={!option.trim()}
-                    />
-                  ) : (
-                    <input
-                      type="radio"
-                      name="correctAnswer"
-                      value={option}
-                      checked={questionForm.correctAnswer === option}
-                      onChange={(e) =>
-                        setQuestionForm({
-                          ...questionForm,
-                          correctAnswer: e.target.value,
-                          correctAnswers: [e.target.value],
-                        })
-                      }
-                      disabled={!option.trim()}
-                    />
-                  )}
-                  <label className="radio-label">Correct</label>
-                  {isSelected && <span className="selected-badge">Selected</span>}
+                            return {
+                              ...prev,
+                              correctAnswers: nextCorrectAnswers,
+                              correctAnswer: nextCorrectAnswers[0] || "",
+                            };
+                          })
+                        }
+                        disabled={!option.trim()}
+                      />
+                    ) : (
+                      <input
+                        className="option-select-input"
+                        type="radio"
+                        name="correctAnswer"
+                        value={option}
+                        checked={questionForm.correctAnswer === option}
+                        onChange={(e) =>
+                          setQuestionForm({
+                            ...questionForm,
+                            correctAnswer: e.target.value,
+                            correctAnswers: [e.target.value],
+                          })
+                        }
+                        disabled={!option.trim()}
+                      />
+                    )}
+                    <span
+                      className={`option-select-indicator ${questionForm.allowMultipleCorrect ? "is-checkbox" : "is-radio"} ${isSelected ? "is-selected" : ""}`}
+                      aria-hidden="true"
+                    >
+                      {questionForm.allowMultipleCorrect && isSelected ? "✓" : ""}
+                    </span>
+                    <span className="option-select-text">Correct</span>
+                  </label>
                 </div>
                 );
               })}

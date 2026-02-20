@@ -18,7 +18,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ camera: 0, screen: 0 });
   const [uploadStatus, setUploadStatus] = useState('');
-  const [consentGiven, setConsentGiven] = useState(false);
+  const [consentGiven, setConsentGiven] = useState(true);
   
   const cameraStreamRef = useRef(null);
   const screenStreamRef = useRef(null);
@@ -602,6 +602,13 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       throw error;
     }
   };
+
+  useEffect(() => {
+    if (!consentGiven) return;
+    beginMonitoring().catch((error) => {
+      console.error("Auto proctoring start failed:", error);
+    });
+  }, [consentGiven]);
 
   // Function to capture last frame from video element synchronously
   const captureLastFrameSync = (videoElement, type) => {
