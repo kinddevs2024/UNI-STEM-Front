@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../context/TranslationContext';
 import './Settings.css';
@@ -18,6 +18,8 @@ const Settings = () => {
   const [localCustomTheme, setLocalCustomTheme] = useState(customTheme);
   const [localItemsPerPage, setLocalItemsPerPage] = useState(itemsPerPage);
   const [languageSearch, setLanguageSearch] = useState('');
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const languagePickerRef = useRef(null);
   
   const {
     autoTranslate,
@@ -38,6 +40,26 @@ const Settings = () => {
         lang.code.toLowerCase().includes(searchLower)
     );
   }, [availableLanguages, languageSearch]);
+
+  const selectedLanguage = useMemo(
+    () => availableLanguages.find((lang) => lang.code === targetLanguage) || { code: targetLanguage, name: targetLanguage },
+    [availableLanguages, targetLanguage]
+  );
+
+  useEffect(() => {
+    const onPointerDown = (event) => {
+      if (!languagePickerRef.current?.contains(event.target)) {
+        setLanguageMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, []);
+
+  useEffect(() => {
+    setLanguageSearch('');
+  }, [targetLanguage]);
 
   const handleThemeChange = (themeName) => {
     changeTheme(themeName);
@@ -132,44 +154,72 @@ const Settings = () => {
                 <div className="language-selector" data-translate="false">
                   <label className="settings-label" data-translate="false">
                     Target Language ({availableLanguages.length} languages available)
-                    <input
-                      type="text"
-                      placeholder="Search languages..."
-                      value={languageSearch}
-                      onChange={(e) => setLanguageSearch(e.target.value)}
-                      className="language-search-input"
-                      data-translate="false"
-                    />
-                    <select
-                      value={targetLanguage}
-                      onChange={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const newLang = e.target.value;
-                        if (newLang && newLang !== targetLanguage) {
-                          changeLanguage(newLang);
-                        }
-                      }}
-                      className="settings-select"
-                      disabled={isTranslating}
-                      data-translate="false"
-                    >
-                      {filteredLanguages.map((lang) => (
-                        <option key={lang.code} value={lang.code} data-translate="false">
-                          {lang.name} ({lang.code})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="language-picker" ref={languagePickerRef} data-translate="false">
+                      <div className="language-picker-controls">
+                        <input
+                          type="text"
+                          placeholder="Search language by name or code..."
+                          value={languageSearch}
+                          onChange={(e) => {
+                            setLanguageSearch(e.target.value);
+                            setLanguageMenuOpen(true);
+                          }}
+                          onFocus={() => setLanguageMenuOpen(true)}
+                          className="language-search-input"
+                          data-translate="false"
+                        />
+
+                        <button
+                          type="button"
+                          className="language-current-button"
+                          onClick={() => setLanguageMenuOpen((open) => !open)}
+                          data-translate="false"
+                          aria-expanded={languageMenuOpen}
+                          aria-haspopup="listbox"
+                        >
+                          <span className="language-current-label">{selectedLanguage.name}</span>
+                          <span className="language-current-code">{selectedLanguage.code.toUpperCase()}</span>
+                        </button>
+                      </div>
+
+                      {languageMenuOpen && (
+                        <div className="language-options" role="listbox" data-translate="false">
+                          {filteredLanguages.length > 0 ? (
+                            filteredLanguages.map((lang) => (
+                              <button
+                                key={lang.code}
+                                type="button"
+                                className={`language-option ${lang.code === targetLanguage ? 'active' : ''}`}
+                                onClick={() => {
+                                  if (lang.code !== targetLanguage) {
+                                    changeLanguage(lang.code);
+                                  }
+                                  setLanguageMenuOpen(false);
+                                }}
+                                role="option"
+                                aria-selected={lang.code === targetLanguage}
+                                data-translate="false"
+                              >
+                                <span>{lang.name}</span>
+                                <span className="language-option-code">{lang.code.toUpperCase()}</span>
+                              </button>
+                            ))
+                          ) : (
+                            <div className="language-option-empty" data-translate="false">
+                              No languages found for “{languageSearch}”
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </label>
                   {isTranslating && (
-                    <p className="settings-hint" data-translate="false">Translating page...</p>
+                    <p className="settings-hint" data-translate="false">Applying translation...</p>
                   )}
                   <p className="settings-hint" data-translate="false">
                     All text on the page will be automatically translated to the selected language.
                     The default language is detected from your Google account.
                     {languageSearch && ` Showing ${filteredLanguages.length} of ${availableLanguages.length} languages.`}
-                    <br />
-                    <strong>Note:</strong> Changing language will reload the page to apply the translation.
                   </p>
                 </div>
               )}

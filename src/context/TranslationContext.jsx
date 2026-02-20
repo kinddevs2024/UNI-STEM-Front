@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 
 const TranslationContext = createContext(null);
 
@@ -12,6 +12,7 @@ export const useTranslation = () => {
 
 const STORAGE_KEY = "olympiad_auto_translate";
 const STORAGE_LANGUAGE_KEY = "olympiad_translate_language";
+const originalTextCache = new WeakMap();
 
 const getPreferredDeviceLanguage = () => {
   const preferredLocale =
@@ -85,8 +86,8 @@ const translateText = async (text, targetLanguage) => {
 };
 
 // Translate all text nodes in an element
-const translateElement = async (element, targetLanguage) => {
-  if (!element || targetLanguage === "en") return;
+const translateElement = async (element, targetLanguage, shouldAbort = () => false) => {
+  if (!element) return;
   
   const walker = document.createTreeWalker(
     element,
@@ -98,6 +99,10 @@ const translateElement = async (element, targetLanguage) => {
   const textNodes = [];
   let node;
   while ((node = walker.nextNode())) {
+    if (shouldAbort()) {
+      return;
+    }
+
     // Skip if parent has data-translate="false"
     if (node.parentElement?.getAttribute("data-translate") === "false") {
       continue;
@@ -109,17 +114,34 @@ const translateElement = async (element, targetLanguage) => {
       continue;
     }
     
-    const text = node.textContent.trim();
-    if (text && text.length > 0 && text.length < 500) {
-      textNodes.push({ node, text });
+    const currentText = node.textContent || "";
+    if (!originalTextCache.has(node)) {
+      originalTextCache.set(node, currentText);
+    }
+
+    const sourceText = originalTextCache.get(node) || "";
+    const normalizedSource = sourceText.trim();
+    if (normalizedSource && normalizedSource.length < 500) {
+      textNodes.push({ node, sourceText });
     }
   }
   
   // Translate text nodes in batches
-  for (const { node, text } of textNodes) {
+  for (const { node, sourceText } of textNodes) {
+    if (shouldAbort()) {
+      return;
+    }
+
     try {
-      const translated = await translateText(text, targetLanguage);
-      if (translated && translated !== text) {
+      if (targetLanguage === "en") {
+        if (node.textContent !== sourceText) {
+          node.textContent = sourceText;
+        }
+        continue;
+      }
+
+      const translated = await translateText(sourceText, targetLanguage);
+      if (translated && translated !== node.textContent) {
         node.textContent = translated;
       }
     } catch (error) {
@@ -130,11 +152,23 @@ const translateElement = async (element, targetLanguage) => {
   // Translate attributes
   const elementsWithAttributes = element.querySelectorAll("[data-translate-attr]");
   for (const el of elementsWithAttributes) {
+    if (shouldAbort()) {
+      return;
+    }
+
     const attrs = el.getAttribute("data-translate-attr").split(",");
     for (const attr of attrs) {
       const value = el.getAttribute(attr.trim());
       if (value) {
         try {
+          if (targetLanguage === "en") {
+            const originalAttr = el.getAttribute(`data-original-${attr.trim()}`);
+            if (originalAttr !== null) {
+              el.setAttribute(attr.trim(), originalAttr);
+            }
+            continue;
+          }
+
           const translated = await translateText(value, targetLanguage);
           if (translated && translated !== value) {
             el.setAttribute(attr.trim(), translated);
@@ -173,6 +207,10 @@ const translateElement = async (element, targetLanguage) => {
     ];
 
     for (const el of elements) {
+      if (shouldAbort()) {
+        return;
+      }
+
       if (el.getAttribute("data-translate") === "false") continue;
 
       for (const attr of rule.attrs) {
@@ -187,6 +225,11 @@ const translateElement = async (element, targetLanguage) => {
         }
 
         try {
+          if (targetLanguage === "en") {
+            el.setAttribute(attr, sourceValue);
+            continue;
+          }
+
           const translated = await translateText(sourceValue, targetLanguage);
           if (translated && translated !== el.getAttribute(attr)) {
             el.setAttribute(attr, translated);
@@ -205,6 +248,7 @@ export const TranslationProvider = ({ children }) => {
   const [targetLanguage, setTargetLanguage] = useState(getPreferredDeviceLanguage);
   
   const [isTranslating, setIsTranslating] = useState(false);
+  const translationJobRef = useRef(0);
 
   // Initialize from Google user locale
   const initializeFromGoogleLocale = (googleLocale) => {
@@ -249,51 +293,45 @@ export const TranslationProvider = ({ children }) => {
     
     setTargetLanguage(lang);
     localStorage.setItem(STORAGE_LANGUAGE_KEY, lang);
-    
-    if (autoTranslate) {
-      if (lang === "en") {
-        // If switching to English, just reload to show original
-        window.location.reload();
-      } else {
-        // For other languages, reload first to reset, then translate
-        // The useEffect will handle translation after reload
-        window.location.reload();
-      }
-    } else {
-      // If auto-translate is off, just save the preference
-      // User can enable it later
-    }
+
+    // Cancel current translation work immediately when user picks a new language
+    translationJobRef.current += 1;
+    setIsTranslating(false);
   };
 
   // Translate the entire page
   const translatePage = async (lang) => {
-    if (!lang || lang === "en") return;
+    if (!lang) return;
+
+    const currentJobId = ++translationJobRef.current;
+    const shouldAbort = () => currentJobId !== translationJobRef.current;
     
     setIsTranslating(true);
     try {
       // Translate navbar
       const navbar = document.querySelector(".navbar");
       if (navbar) {
-        await translateElement(navbar, lang);
+        await translateElement(navbar, lang, shouldAbort);
       }
       
       // Translate main content
       const mainContent = document.querySelector(".main-content") || document.body;
-      await translateElement(mainContent, lang);
+      await translateElement(mainContent, lang, shouldAbort);
     } catch (error) {
       console.error("Error translating page:", error);
     } finally {
-      setIsTranslating(false);
+      if (!shouldAbort()) {
+        setIsTranslating(false);
+      }
     }
   };
 
   // Auto-translate on mount if enabled
   useEffect(() => {
-    if (autoTranslate && targetLanguage !== "en") {
-      // Wait for page to load
+    if (autoTranslate) {
       const timer = setTimeout(() => {
         translatePage(targetLanguage);
-      }, 1000);
+      }, 120);
       
       return () => clearTimeout(timer);
     }
@@ -302,7 +340,7 @@ export const TranslationProvider = ({ children }) => {
 
   // Translate new content when route changes
   useEffect(() => {
-    if (autoTranslate && targetLanguage !== "en") {
+    if (autoTranslate) {
       let timeoutId;
       const observer = new MutationObserver(() => {
         if (!isTranslating) {
@@ -310,7 +348,7 @@ export const TranslationProvider = ({ children }) => {
           clearTimeout(timeoutId);
           timeoutId = setTimeout(() => {
             translatePage(targetLanguage);
-          }, 500);
+          }, 250);
         }
       });
       
