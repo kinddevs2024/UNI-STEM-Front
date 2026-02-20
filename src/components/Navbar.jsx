@@ -27,9 +27,7 @@ const Navbar = () => {
     return getNavigationItems(user.role);
   }, [isAuthenticated, user?.role]);
 
-  const isOlympiadRoute = location.pathname.startsWith("/olympiad/");
-
-  if (location.pathname === "/" || location.pathname === "/auth" || isOlympiadRoute) {
+  if (location.pathname === "/" || location.pathname === "/auth") {
     return null;
   }
 

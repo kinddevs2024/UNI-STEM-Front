@@ -3,24 +3,30 @@ import { API_BASE_URL } from "./constants";
 // Helper to get full image URL (handle relative paths from API)
 export const getImageUrl = (url) => {
   if (!url) return '';
+  const normalizedUrl = String(url).trim();
+  if (!normalizedUrl) return '';
   // If it's already a full URL, return as-is
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-    return url;
-  }
-  if (url.startsWith('/api/')) {
-    return url;
+  if (normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://') || normalizedUrl.startsWith('data:')) {
+    return normalizedUrl;
   }
 
   const apiBase = typeof API_BASE_URL === "string" && API_BASE_URL.trim()
     ? API_BASE_URL.replace(/\/$/, "")
     : "/api";
 
-  // If it starts with /, construct full URL using the API base domain
-  if (url.startsWith('/')) {
-    return `${apiBase}${url}`;
+  if (normalizedUrl.startsWith('/api/')) {
+    if (apiBase === '/api') {
+      return normalizedUrl;
+    }
+    return `${apiBase}${normalizedUrl.replace(/^\/api/, '')}`;
   }
-  // Otherwise return as-is (might be a relative path)
-  return url;
+
+  // If it starts with /, construct full URL using the API base domain
+  if (normalizedUrl.startsWith('/')) {
+    return `${apiBase}${normalizedUrl}`;
+  }
+  // Relative upload path (e.g. olympiads/id/file.jpg)
+  return `${apiBase}/${normalizedUrl}`;
 };
 
 export const formatTime = (seconds) => {

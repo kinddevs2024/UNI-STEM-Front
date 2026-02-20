@@ -6,7 +6,7 @@ import Timer from '../../components/Timer';
 import ProctoringMonitor from '../../components/ProctoringMonitor';
 import NotificationToast from '../../components/NotificationToast';
 import { useAuth } from '../../context/AuthContext';
-import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
+import { getTimeRemaining, getTimeRemainingFromDuration, getImageUrl } from '../../utils/helpers';
 import './EssayOlympiad.css';
 
 const EssayOlympiad = () => {
@@ -230,6 +230,9 @@ const EssayOlympiad = () => {
   const wordCount = getWordCount(currentAnswer);
   const faceAllowed = faceCheckReady && faceDetected;
   const canProceed = isRecording && faceAllowed;
+  const olympiadLogoField =
+    olympiad?.olympiadLogo || olympiad?.logo || olympiad?.logoUrl || olympiad?.image || '';
+  const olympiadLogoUrl = olympiadLogoField ? getImageUrl(olympiadLogoField) : '';
 
   return (
     <div className="essay-olympiad-page">
@@ -276,6 +279,16 @@ const EssayOlympiad = () => {
             className="olympiad-timer"
           />
         </div>
+
+        {olympiadLogoUrl && (
+          <div className="olympiad-hero-image-wrap">
+            <img
+              src={olympiadLogoUrl}
+              alt={`${olympiad?.title || 'Olympiad'} banner`}
+              className="olympiad-hero-image"
+            />
+          </div>
+        )}
 
         <div className="olympiad-progress">
           <div className="progress-bar">

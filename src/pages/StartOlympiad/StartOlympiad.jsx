@@ -9,6 +9,7 @@ import {
   getTimeRemaining,
   isProfileComplete,
   getMissingProfileFields,
+  getImageUrl,
 } from "../../utils/helpers";
 import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
@@ -342,6 +343,9 @@ const StartOlympiad = () => {
   const isUpcoming = isOlympiadUpcoming(olympiad.startTime);
   const isActive = isOlympiadActive(olympiad.startTime, olympiad.endTime);
   const isEnded = isOlympiadEnded(olympiad.endTime);
+  const olympiadLogoField =
+    olympiad?.olympiadLogo || olympiad?.logo || olympiad?.logoUrl || olympiad?.image || "";
+  const olympiadLogoUrl = olympiadLogoField ? getImageUrl(olympiadLogoField) : "";
 
   return (
     <div className="start-olympiad-page">
@@ -351,6 +355,16 @@ const StartOlympiad = () => {
           <div className="start-header card">
             <h1 className="start-title text-glow">{olympiad.title}</h1>
             <p className="start-subtitle">{olympiad.description}</p>
+
+            {olympiadLogoUrl && (
+              <div className="olympiad-hero-image-wrap">
+                <img
+                  src={olympiadLogoUrl}
+                  alt={`${olympiad.title} banner`}
+                  className="olympiad-hero-image"
+                />
+              </div>
+            )}
 
             <div className="olympiad-info-grid">
               <div className="info-item">

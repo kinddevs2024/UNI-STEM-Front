@@ -94,6 +94,22 @@
   flex-shrink: 0;
 }
 
+.olympiad-hero-image-wrap {
+  width: 100%;
+  margin: 0 0 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.olympiad-hero-image {
+  display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: cover;
+}
+
 .olympiad-progress {
   margin-bottom: 24px;
 }

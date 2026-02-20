@@ -39,6 +39,22 @@
   line-height: 1.6;
 }
 
+.olympiad-hero-image-wrap {
+  width: 100%;
+  margin: 0 auto 28px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.olympiad-hero-image {
+  display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: cover;
+}
+
 .olympiad-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
