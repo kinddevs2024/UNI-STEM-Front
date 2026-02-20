@@ -642,10 +642,10 @@ const StartOlympiad = () => {
                   aria-disabled={!consentGiven || starting || !isActive || (user && user.role === USER_ROLES.STUDENT && profileIncomplete) || alreadySubmittedThisMonth}
                 >
                   {starting
-                    ? "Starting..."
+                    ? "Запуск..."
                     : !consentGiven
-                    ? "Accept Terms to Start →"
-                    : "Start Olympiad →"}
+                    ? "Примите условия, чтобы начать →"
+                    : "Начать олимпиаду →"}
                 </button>
               </div>
             </>

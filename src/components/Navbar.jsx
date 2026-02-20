@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
-import { getImageUrl, getToken, getUser } from "../utils/helpers";
+import { getImageUrl } from "../utils/helpers";
 import BalanceDisplay from "./BalanceDisplay/BalanceDisplay";
 import "./Navbar.css";
 
@@ -12,17 +12,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const cachedUser = useMemo(() => {
-    try {
-      return getUser();
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const effectiveUser = user || cachedUser;
-  const hasSession = isAuthenticated || Boolean(getToken()) || Boolean(effectiveUser?._id);
 
   const handleLogout = () => {
     logout();
@@ -34,15 +23,17 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const navigationItems = useMemo(() => {
-    if (!hasSession || !effectiveUser?.role) return [];
-    return getNavigationItems(effectiveUser.role);
-  }, [hasSession, effectiveUser?.role]);
+    if (!isAuthenticated || !user?.role) return [];
+    return getNavigationItems(user.role);
+  }, [isAuthenticated, user?.role]);
 
-  if (location.pathname === "/" || location.pathname === "/auth") {
+  const isOlympiadInProgressRoute = /^\/olympiad\/[^/]+(?:\/essay)?$/.test(location.pathname);
+
+  if (location.pathname === "/" || location.pathname === "/auth" || isOlympiadInProgressRoute) {
     return null;
   }
 
-  if (!hasSession) {
+  if (!isAuthenticated) {
     return null;
   }
 
@@ -64,16 +55,16 @@ const Navbar = () => {
         <BalanceDisplay />
 
         <Link to="/profile" className="navbar-user">
-          {effectiveUser?.userLogo ? (
+          {user?.userLogo ? (
             <img
-              src={getImageUrl(effectiveUser.userLogo)}
+              src={getImageUrl(user.userLogo)}
               alt="Profile"
               className="navbar-user-avatar"
             />
           ) : (
             <div className="navbar-user-avatar-placeholder">
-              {effectiveUser?.name?.charAt(0)?.toUpperCase() ||
-                effectiveUser?.email?.charAt(0)?.toUpperCase() ||
+              {user?.name?.charAt(0)?.toUpperCase() ||
+                user?.email?.charAt(0)?.toUpperCase() ||
                 "U"}
             </div>
           )}
@@ -92,15 +83,15 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to={hasSession ? "/dashboard" : "/"} className="navbar-logo">
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
           <img src={logoPath} alt="Global Olympiads logo" className="navbar-logo-image" />
           <span className="navbar-logo-text" aria-label="Global Olympiads">
-            Global Olympiads
+            lobal Olympiads
           </span>
         </Link>
 
         <div className="navbar-menu navbar-menu-desktop">
-          {hasSession ? (
+          {isAuthenticated ? (
             renderAuthLinks()
           ) : (
             <Link to="/auth" className="navbar-login">
@@ -139,7 +130,7 @@ const Navbar = () => {
       />
 
       <div className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
-        {hasSession ? (
+        {isAuthenticated ? (
           renderAuthLinks()
         ) : (
           <Link to="/auth" className="navbar-login">
