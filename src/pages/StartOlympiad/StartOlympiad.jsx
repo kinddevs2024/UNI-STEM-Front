@@ -7,8 +7,6 @@ import {
   isOlympiadUpcoming,
   isOlympiadEnded,
   getTimeRemaining,
-  isProfileComplete,
-  getMissingProfileFields,
   getImageUrl,
 } from "../../utils/helpers";
 import { useAuth } from "../../context/AuthContext";
@@ -29,8 +27,6 @@ const StartOlympiad = () => {
   const [notification, setNotification] = useState(null);
   const [consentGiven, setConsentGiven] = useState(false);
   const [timeUntilStart, setTimeUntilStart] = useState(0);
-  const [profileIncomplete, setProfileIncomplete] = useState(false);
-  const [missingFields, setMissingFields] = useState([]);
   const [alreadySubmittedThisMonth, setAlreadySubmittedThisMonth] = useState(false);
   const [nextAvailableDate, setNextAvailableDate] = useState(null);
   const [proctoringStatus, setProctoringStatus] = useState(null);
@@ -85,15 +81,6 @@ const StartOlympiad = () => {
 
   useEffect(() => {
     fetchOlympiad();
-    
-    // Check profile completeness for students
-    if (user && user.role === USER_ROLES.STUDENT) {
-      const complete = isProfileComplete(user);
-      setProfileIncomplete(!complete);
-      if (!complete) {
-        setMissingFields(getMissingProfileFields(user));
-      }
-    }
 
     // Load or generate device fingerprint (persisted per olympiad)
     const storedFingerprint = localStorage.getItem(`olympiad_${id}_deviceFingerprint`);
@@ -205,19 +192,6 @@ const StartOlympiad = () => {
         type: "error",
       });
       return;
-    }
-
-    // Check profile completeness for students
-    if (user && user.role === USER_ROLES.STUDENT) {
-      const complete = isProfileComplete(user);
-      if (!complete) {
-        const missing = getMissingProfileFields(user);
-        setNotification({
-          message: `Please complete your profile before starting. Missing: ${missing.join(', ')}`,
-          type: "error",
-        });
-        return;
-      }
     }
 
     let cameraStream = null;
@@ -483,27 +457,6 @@ const StartOlympiad = () => {
             </div>
           </div>
 
-          {/* Profile Incomplete Warning for Students */}
-          {user && user.role === USER_ROLES.STUDENT && profileIncomplete && (
-            <div className="status-message card status-error">
-              <div className="status-icon">⚠️</div>
-              <div className="status-content">
-                <h3>Profile Incomplete</h3>
-                <p>
-                  Please complete your profile before starting an olympiad. Missing fields:
-                </p>
-                <ul style={{ marginTop: '12px', marginBottom: '16px', paddingLeft: '20px' }}>
-                  {(missingFields || []).map((field, index) => (
-                    <li key={index} style={{ marginBottom: '4px' }}>{field}</li>
-                  ))}
-                </ul>
-                <Link to="/profile/edit" className="button-primary">
-                  Complete Profile
-                </Link>
-              </div>
-            </div>
-          )}
-
           {/* Status Messages */}
           {isUpcoming && (
             <div className="status-message card status-warning">
@@ -688,8 +641,8 @@ const StartOlympiad = () => {
                   type="button"
                   className="button-primary start-button"
                   onClick={handleStart}
-                  disabled={!consentGiven || starting || !isActive || (user && user.role === USER_ROLES.STUDENT && profileIncomplete) || alreadySubmittedThisMonth}
-                  aria-disabled={!consentGiven || starting || !isActive || (user && user.role === USER_ROLES.STUDENT && profileIncomplete) || alreadySubmittedThisMonth}
+                  disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}
+                  aria-disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}
                 >
                   {starting
                     ? "Starting..."
