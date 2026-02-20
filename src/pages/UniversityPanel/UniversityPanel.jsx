@@ -17,6 +17,8 @@ const QuestionManager = ({ olympiad, onClose }) => {
     type: olympiad.type === "test" ? "multiple-choice" : "essay",
     options: ["", "", "", ""],
     correctAnswer: "",
+    correctAnswers: [],
+    allowMultipleCorrect: false,
     points: 10,
   });
 
@@ -41,6 +43,8 @@ const QuestionManager = ({ olympiad, onClose }) => {
       type: olympiad.type === "test" ? "multiple-choice" : "essay",
       options: ["", "", "", ""],
       correctAnswer: "",
+      correctAnswers: [],
+      allowMultipleCorrect: false,
       points: 10,
     });
   };
@@ -49,11 +53,17 @@ const QuestionManager = ({ olympiad, onClose }) => {
     e.preventDefault();
 
     const isEditing = Boolean(editingQuestionId);
-    const normalizedCorrectAnswer = questionForm.correctAnswer;
+    const selectedCorrectAnswers = questionForm.allowMultipleCorrect
+      ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).filter((answer) =>
+          (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
+        )
+      : (typeof questionForm.correctAnswer === "string" ? [questionForm.correctAnswer] : []).filter((answer) =>
+          (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
+        );
 
     try {
       if (olympiad.type === "test") {
-        if (!questionForm.question || !questionForm.correctAnswer) {
+        if (!questionForm.question) {
           setNotification({
             message: "Please fill all required fields",
             type: "error",
@@ -71,11 +81,21 @@ const QuestionManager = ({ olympiad, onClose }) => {
           return;
         }
 
+        if (selectedCorrectAnswers.length === 0) {
+          setNotification({
+            message: "Please select at least one correct answer",
+            type: "error",
+          });
+          return;
+        }
+
         const payload = {
           question: questionForm.question,
           type: "multiple-choice",
           options: validOptions,
-          correctAnswer: normalizedCorrectAnswer,
+          correctAnswer: selectedCorrectAnswers[0],
+          correctAnswers: selectedCorrectAnswers,
+          allowMultipleCorrect: Boolean(questionForm.allowMultipleCorrect),
           points: Number(questionForm.points) || 10,
         };
 
@@ -138,12 +158,19 @@ const QuestionManager = ({ olympiad, onClose }) => {
     while (paddedOptions.length < 4) {
       paddedOptions.push("");
     }
+    const derivedCorrectAnswers = Array.isArray(question?.correctAnswers) && question.correctAnswers.length > 0
+      ? question.correctAnswers.filter((answer) => normalizedOptions.includes(answer))
+      : question?.correctAnswer
+        ? [question.correctAnswer]
+        : [];
 
     setQuestionForm({
       question: question?.question || "",
       type: question?.type === "multiple-choice" ? "multiple-choice" : "essay",
       options: paddedOptions,
-      correctAnswer: question?.correctAnswer || "",
+      correctAnswer: derivedCorrectAnswers[0] || "",
+      correctAnswers: derivedCorrectAnswers,
+      allowMultipleCorrect: Boolean(question?.allowMultipleCorrect || derivedCorrectAnswers.length > 1),
       points: Number(question?.points) || 10,
     });
     setEditingQuestionId(question?._id || null);
@@ -171,9 +198,29 @@ const QuestionManager = ({ olympiad, onClose }) => {
   };
 
   const handleOptionChange = (index, value) => {
-    const newOptions = [...questionForm.options];
-    newOptions[index] = value;
-    setQuestionForm({ ...questionForm, options: newOptions });
+    setQuestionForm((prev) => {
+      const nextOptions = [...(Array.isArray(prev.options) ? prev.options : [])];
+      nextOptions[index] = value;
+      const validOptionSet = new Set(nextOptions.filter((opt) => String(opt).trim() !== ""));
+      const nextCorrectAnswers = (Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []).filter((answer) =>
+        validOptionSet.has(answer)
+      );
+      const nextCorrectAnswer = validOptionSet.has(prev.correctAnswer) ? prev.correctAnswer : "";
+
+      return {
+        ...prev,
+        options: nextOptions,
+        correctAnswers: nextCorrectAnswers,
+        correctAnswer: nextCorrectAnswer,
+      };
+    });
+  };
+
+  const handleAddOption = () => {
+    setQuestionForm((prev) => ({
+      ...prev,
+      options: [...(Array.isArray(prev.options) ? prev.options : []), ""],
+    }));
   };
 
   if (loading) {
@@ -237,8 +284,43 @@ const QuestionManager = ({ olympiad, onClose }) => {
               {olympiad.type === "test" && (
                 <div className="form-group">
                   <label>Options</label>
+                  <div className="form-group" style={{ marginBottom: "10px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(questionForm.allowMultipleCorrect)}
+                        onChange={(e) =>
+                          setQuestionForm((prev) => {
+                            const nextAllowMultiple = e.target.checked;
+                            const nextCorrectAnswers = nextAllowMultiple
+                              ? Array.from(
+                                  new Set([
+                                    ...(Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []),
+                                    ...(prev.correctAnswer ? [prev.correctAnswer] : []),
+                                  ].filter(Boolean))
+                                )
+                              : [
+                                  (Array.isArray(prev.correctAnswers) ? prev.correctAnswers[0] : null) ||
+                                    prev.correctAnswer ||
+                                    "",
+                                ].filter(Boolean);
+
+                            return {
+                              ...prev,
+                              allowMultipleCorrect: nextAllowMultiple,
+                              correctAnswers: nextAllowMultiple ? nextCorrectAnswers : nextCorrectAnswers.slice(0, 1),
+                              correctAnswer: nextCorrectAnswers[0] || "",
+                            };
+                          })
+                        }
+                      />
+                      <span>Allow multiple correct answers</span>
+                    </label>
+                  </div>
                   {(Array.isArray(questionForm.options) ? questionForm.options : []).map((option, index) => {
-                    const isSelected = questionForm.correctAnswer === option && option.trim() !== "";
+                    const isSelected = questionForm.allowMultipleCorrect
+                      ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== ""
+                      : questionForm.correctAnswer === option && option.trim() !== "";
                     return (
                       <div
                         key={index}
@@ -258,24 +340,55 @@ const QuestionManager = ({ olympiad, onClose }) => {
                         )}`}
                         className="option-input"
                       />
-                      <input
-                        type="radio"
-                        name="correctAnswer"
-                        value={option}
-                        checked={questionForm.correctAnswer === option}
-                        onChange={(e) =>
-                          setQuestionForm({
-                            ...questionForm,
-                            correctAnswer: e.target.value,
-                          })
-                        }
-                        disabled={!option.trim()}
-                      />
+                      {questionForm.allowMultipleCorrect ? (
+                        <input
+                          type="checkbox"
+                          value={option}
+                          checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
+                          onChange={(e) =>
+                            setQuestionForm((prev) => {
+                              const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
+                              const nextCorrectAnswers = e.target.checked
+                                ? [...new Set([...current, option])]
+                                : current.filter((answer) => answer !== option);
+
+                              return {
+                                ...prev,
+                                correctAnswers: nextCorrectAnswers,
+                                correctAnswer: nextCorrectAnswers[0] || "",
+                              };
+                            })
+                          }
+                          disabled={!option.trim()}
+                        />
+                      ) : (
+                        <input
+                          type="radio"
+                          name="correctAnswer"
+                          value={option}
+                          checked={questionForm.correctAnswer === option}
+                          onChange={(e) =>
+                            setQuestionForm({
+                              ...questionForm,
+                              correctAnswer: e.target.value,
+                              correctAnswers: [e.target.value],
+                            })
+                          }
+                          disabled={!option.trim()}
+                        />
+                      )}
                       <label className="radio-label">Correct</label>
                       {isSelected && <span className="selected-badge">Selected</span>}
                     </div>
                     );
                   })}
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={handleAddOption}
+                  >
+                    + Add Option
+                  </button>
                 </div>
               )}
 
@@ -319,14 +432,22 @@ const QuestionManager = ({ olympiad, onClose }) => {
                   {q.type === "multiple-choice" && q.options && (
                     <div className="question-options">
                       {(Array.isArray(q.options) ? q.options : []).map((opt, optIndex) => (
+                        (() => {
+                          const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0
+                            ? q.correctAnswers
+                            : q.correctAnswer
+                              ? [q.correctAnswer]
+                              : [];
+                          const isCorrect = correctList.includes(opt);
+                          return (
                         <div
                           key={optIndex}
-                          className={`option ${
-                            opt === q.correctAnswer ? "correct" : ""
-                          }`}
+                          className={`option ${isCorrect ? "correct" : ""}`}
                         >
                           {String.fromCharCode(65 + optIndex)}. {opt}
                         </div>
+                          );
+                        })()
                       ))}
                     </div>
                   )}

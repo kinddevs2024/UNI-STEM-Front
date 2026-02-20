@@ -9,6 +9,95 @@ const api = axios.create({
   },
 });
 
+const TARGET_LOGO_MAX_BYTES = 900 * 1024;
+const ABSOLUTE_LOGO_MAX_BYTES = 5 * 1024 * 1024;
+const MAX_LOGO_DIMENSION = 1600;
+
+const readImageDimensions = (file) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({ width: image.width, height: image.height, image });
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Failed to read selected image'));
+    };
+
+    image.src = objectUrl;
+  });
+
+const canvasToBlob = (canvas, type, quality) =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Failed to process image before upload'));
+        return;
+      }
+      resolve(blob);
+    }, type, quality);
+  });
+
+const prepareOlympiadLogoFile = async (logoFile) => {
+  if (!(logoFile instanceof File)) {
+    return logoFile;
+  }
+
+  if (!logoFile.type || !logoFile.type.startsWith('image/')) {
+    throw new Error('Logo must be an image file (PNG, JPG, GIF, WEBP).');
+  }
+
+  if (logoFile.size <= TARGET_LOGO_MAX_BYTES) {
+    return logoFile;
+  }
+
+  const { width, height, image } = await readImageDimensions(logoFile);
+  const scale = Math.min(1, MAX_LOGO_DIMENSION / Math.max(width, height));
+  const targetWidth = Math.max(1, Math.round(width * scale));
+  const targetHeight = Math.max(1, Math.round(height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error('Failed to process image before upload');
+  }
+
+  context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+  const mimeType = logoFile.type === 'image/png' ? 'image/png' : 'image/jpeg';
+  const qualitySteps = mimeType === 'image/png' ? [undefined] : [0.88, 0.8, 0.72, 0.64, 0.56];
+
+  let bestBlob = null;
+  for (const quality of qualitySteps) {
+    const blob = await canvasToBlob(canvas, mimeType, quality);
+    if (!bestBlob || blob.size < bestBlob.size) {
+      bestBlob = blob;
+    }
+    if (blob.size <= TARGET_LOGO_MAX_BYTES) {
+      break;
+    }
+  }
+
+  if (!bestBlob || bestBlob.size > ABSOLUTE_LOGO_MAX_BYTES) {
+    throw new Error('Logo is too large. Please choose a smaller image (up to 5MB).');
+  }
+
+  const extension = mimeType === 'image/png' ? '.png' : '.jpg';
+  const safeName = (logoFile.name || 'logo').replace(/\.[^.]+$/, '');
+
+  return new File([bestBlob], `${safeName}${extension}`, {
+    type: mimeType,
+    lastModified: Date.now(),
+  });
+};
+
 // Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
@@ -207,9 +296,10 @@ export const adminAPI = {
   deleteOlympiad: (id) => api.delete(`/admin/olympiads/${id}`),
 
   // Upload olympiad logo
-  uploadOlympiadLogo: (logoFile, olympiadId = null) => {
+  uploadOlympiadLogo: async (logoFile, olympiadId = null) => {
+    const preparedLogoFile = await prepareOlympiadLogoFile(logoFile);
     const formData = new FormData();
-    formData.append("photo", logoFile);
+    formData.append("photo", preparedLogoFile);
 
     // Add olympiadId to form data (backend requires it)
     // Send empty string if null (for new olympiads)
@@ -478,9 +568,10 @@ export const universityAPI = {
     return api.put(`/university/olympiads/${id}`, data);
   },
   deleteOlympiad: (id) => api.delete(`/university/olympiads/${id}`),
-  uploadOlympiadLogo: (logoFile, olympiadId = null) => {
+  uploadOlympiadLogo: async (logoFile, olympiadId = null) => {
+    const preparedLogoFile = await prepareOlympiadLogoFile(logoFile);
     const formData = new FormData();
-    formData.append("photo", logoFile);
+    formData.append("photo", preparedLogoFile);
     formData.append("olympiadId", olympiadId || "");
     let url = "/university/olympiads/upload-logo";
     if (olympiadId) {

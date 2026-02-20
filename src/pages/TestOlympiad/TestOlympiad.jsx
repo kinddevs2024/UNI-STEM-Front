@@ -269,6 +269,16 @@ const TestOlympiad = () => {
     }
   };
 
+  const hasAnswerValue = (value) => {
+    if (Array.isArray(value)) {
+      return value.filter((item) => typeof item === 'string' && item.trim() !== '').length > 0;
+    }
+    if (typeof value === 'string') {
+      return value.trim() !== '';
+    }
+    return value !== undefined && value !== null;
+  };
+
   const currentQuestion = questions[currentQuestionIndex];
 
   // Submit current answer and move to next question
@@ -280,7 +290,7 @@ const TestOlympiad = () => {
     try {
       // Submit current answer if provided
       const currentAnswer = answers[currentQuestion._id];
-      if (currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '') {
+      if (hasAnswerValue(currentAnswer)) {
         try {
           let nonce = null;
           try {
@@ -455,7 +465,7 @@ const TestOlympiad = () => {
     );
   }
 
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = Object.values(answers).filter((value) => hasAnswerValue(value)).length;
   const faceAllowed = faceCheckReady && faceDetected;
   const canProceed = isRecording && faceAllowed;
 
@@ -582,7 +592,7 @@ const TestOlympiad = () => {
           {questions.map((_, index) => (
             <button
               key={index}
-              className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${answers[questions[index]._id] ? 'answered' : ''}`}
+              className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${hasAnswerValue(answers[questions[index]._id]) ? 'answered' : ''}`}
               onClick={() => setCurrentQuestionIndex(index)}
               disabled={!canProceed || submitted}
             >

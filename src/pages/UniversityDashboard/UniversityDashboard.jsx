@@ -483,14 +483,22 @@ const UniversityDashboard = () => {
                         {q.type === "multiple-choice" && q.options && (
                           <div className="question-options">
                             {(q.options || []).map((opt, optIndex) => (
+                              (() => {
+                                const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0
+                                  ? q.correctAnswers
+                                  : q.correctAnswer
+                                    ? [q.correctAnswer]
+                                    : [];
+                                const isCorrect = correctList.includes(opt);
+                                return (
                               <div
                                 key={optIndex}
-                                className={`option ${
-                                  opt === q.correctAnswer ? "correct" : ""
-                                }`}
+                                className={`option ${isCorrect ? "correct" : ""}`}
                               >
                                 {String.fromCharCode(65 + optIndex)}. {opt}
                               </div>
+                                );
+                              })()
                             ))}
                           </div>
                         )}
