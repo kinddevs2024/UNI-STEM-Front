@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { olympiadAPI } from '../services/api';
 import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from '../utils/constants';
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
-import { consumeProctoringSessionStreams } from '../utils/proctoringSession';
 import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from '../utils/mediaAccess';
 import './ProctoringMonitor.css';
 
@@ -338,8 +337,6 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
   const startMonitoring = async () => {
     try {
-      const preloadedStreams = consumeProctoringSessionStreams() || {};
-
       if (!navigator.mediaDevices?.getUserMedia && !navigator.getUserMedia && !navigator.webkitGetUserMedia && !navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
         setCameraError('Camera access is not supported on this device/browser.');
       }
@@ -350,277 +347,82 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start camera
       try {
-        if (preloadedStreams.cameraStream) {
-          cameraStreamRef.current = preloadedStreams.cameraStream;
+        const cameraStream = await requestCameraStream({
+          video: {
+            facingMode: 'user',
+            width: { ideal: VIDEO_WIDTH },
+            height: { ideal: VIDEO_HEIGHT }
+          },
+          audio: false
+        });
 
-          if (cameraVideoRef.current) {
-            cameraVideoRef.current.srcObject = preloadedStreams.cameraStream;
-            setCameraActive(true);
-            setCameraError(null);
+        cameraStreamRef.current = cameraStream;
 
-            if (onProctoringStatusChange) {
-              onProctoringStatusChange({
-                frontCameraActive: true,
-                backCameraActive: false,
-                screenShareActive: screenActive,
-                displaySurface: null
-              });
-            }
-          }
-        } else {
-          const cameraStream = await requestCameraStream({
-            video: {
-              facingMode: 'user',
-              width: { ideal: VIDEO_WIDTH },
-              height: { ideal: VIDEO_HEIGHT }
-            },
-            audio: false
-          });
+        if (cameraVideoRef.current) {
+          cameraVideoRef.current.srcObject = cameraStream;
+          setCameraActive(true);
+          setCameraError(null);
 
-          cameraStreamRef.current = cameraStream;
-
-          if (cameraVideoRef.current) {
-            cameraVideoRef.current.srcObject = cameraStream;
-            setCameraActive(true);
-            setCameraError(null);
-
-            // Notify parent component of proctoring status
-            if (onProctoringStatusChange) {
-              onProctoringStatusChange({
-                frontCameraActive: true,
-                backCameraActive: false,
-                screenShareActive: screenActive,
-                displaySurface: null // Screen not yet active
-              });
-            }
-          }
-        }
-      } catch (err) {
-        setCameraError('Camera access denied');
-        console.error('Camera error:', err);
-      }
-
-      // Start screen capture - Force full screen sharing
-      try {
-        if (preloadedStreams.screenStream) {
-          const screenStream = preloadedStreams.screenStream;
-          const videoTrack = screenStream.getVideoTracks()[0];
-
-          if (!videoTrack) {
-            setScreenError('Screen stream is missing video track. Please restart and share the entire screen.');
-            setScreenActive(false);
-          } else {
-            screenStreamRef.current = screenStream;
-            if (screenVideoRef.current) {
-              screenVideoRef.current.srcObject = screenStream;
-            }
-            setScreenActive(true);
-            setScreenError(null);
-
-            const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
-            const displaySurface = settings.displaySurface || settings.logicalSurface || 'monitor';
-
-            if (onProctoringStatusChange) {
-              onProctoringStatusChange({
-                frontCameraActive: cameraActive,
-                backCameraActive: false,
-                screenShareActive: true,
-                displaySurface
-              });
-            }
-
-            if (typeof videoTrack.addEventListener === 'function') {
-              videoTrack.addEventListener('ended', () => {
-                setScreenError('Screen sharing stopped');
-                setScreenActive(false);
-                stopRecording();
-                if (onRecordingStatusChange) {
-                  onRecordingStatusChange(false);
-                }
-              });
-            }
-          }
-        } else if ((navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) || typeof navigator.getDisplayMedia === 'function') {
-          let screenStream = null;
-          let videoTrack = null;
-          let displaySurface = null;
-
-          while (!screenStream) {
-            let selectedStream;
-            try {
-              selectedStream = await requestScreenStream({
-                video: {
-                  mediaSource: 'screen',
-                  width: { ideal: VIDEO_WIDTH },
-                  height: { ideal: VIDEO_HEIGHT }
-                },
-                audio: false
-              });
-            } catch (screenPromptError) {
-              const promptMessage = String(screenPromptError?.message || '').toLowerCase();
-              const blockedByGesture =
-                screenPromptError?.name === 'InvalidStateError' ||
-                promptMessage.includes('gesture') ||
-                promptMessage.includes('activation');
-
-              if (blockedByGesture) {
-                setScreenError('Screen-share request was blocked. Please return to the Start page and press Start again.');
-                setScreenActive(false);
-                break;
-              }
-
-              setScreenError(getMediaAccessErrorMessage(screenPromptError, { needsScreen: true }) || 'Please share your entire screen to continue.');
-              setScreenActive(false);
-              alert('⚠️ Для продолжения необходимо поделиться ВЕСЬ ЭКРАНОМ.\n\nПожалуйста, разрешите доступ и выберите "Entire Screen".');
-              continue;
-            }
-
-            const selectedVideoTrack = selectedStream.getVideoTracks()[0];
-            if (!selectedVideoTrack) {
-              selectedStream.getTracks().forEach((track) => track.stop());
-              setScreenError('No screen video track found. Please try sharing your entire screen again.');
-              setScreenActive(false);
-              continue;
-            }
-
-            const settings = typeof selectedVideoTrack.getSettings === 'function' ? selectedVideoTrack.getSettings() : {};
-            const selectedDisplaySurface = settings.displaySurface || settings.logicalSurface;
-
-            if (selectedDisplaySurface && selectedDisplaySurface !== 'monitor') {
-              selectedVideoTrack.stop();
-              selectedStream.getTracks().forEach((track) => track.stop());
-              setScreenError('Please share ENTIRE SCREEN (monitor). Tab/window sharing is not allowed.');
-              setScreenActive(false);
-              alert('⚠️ Требуется "Весь экран" (Entire Screen).\n\nВы выбрали вкладку или окно. Выберите именно экран целиком.');
-              continue;
-            }
-
-            screenStream = selectedStream;
-            videoTrack = selectedVideoTrack;
-            displaySurface = selectedDisplaySurface || 'monitor';
-          }
-
-          if (!screenStream) {
-            return;
-          }
-
-          screenStreamRef.current = screenStream;
-
-          if (screenVideoRef.current) {
-            screenVideoRef.current.srcObject = screenStream;
-          }
-
-          // Wait for video metadata to load and validate dimensions (additional validation)
-          await new Promise((resolve) => {
-            const checkDimensions = () => {
-              if (screenVideoRef.current && screenVideoRef.current.readyState >= 2) {
-                const video = screenVideoRef.current;
-                const width = video.videoWidth || 0;
-                const height = video.videoHeight || 0;
-
-                // Full screen typically has dimensions >= 1200px width
-                // Window/tab shares are usually smaller (< 1200px)
-                const isFullScreen = width >= 1200 && height >= 800;
-
-                // Check track label for screen indicator
-                const trackLabel = videoTrack.label?.toLowerCase() || '';
-                const hasScreenInLabel = trackLabel.includes('screen') ||
-                                         trackLabel.includes('entire') ||
-                                         trackLabel.includes('display');
-
-                // If displaySurface check passed but dimensions suggest it's not full screen, warn
-                if (!isFullScreen && !hasScreenInLabel && width > 0 && displaySurface !== 'monitor') {
-                  // Stop the stream if not full screen
-                  videoTrack.stop();
-                  screenStream.getTracks().forEach(track => track.stop());
-                  screenStreamRef.current = null;
-                  setScreenError('Full screen sharing required. Please select "Entire Screen" option.');
-                  setScreenActive(false);
-                  // Show alert to user
-                  alert('⚠️ Full screen sharing required!\n\nPlease stop sharing and select "Entire Screen" instead of a window or tab.');
-
-                  // Re-request full screen mode if it was lost
-                  try {
-                    if (document.fullscreenElement === null) {
-                      const elem = document.documentElement;
-                      if (elem.requestFullscreen) {
-                        elem.requestFullscreen().catch(e => console.warn(e));
-                      }
-                    }
-                  } catch (fsErr) {
-                    console.warn("Failed to restore full screen:", fsErr);
-                  }
-
-                  resolve();
-                  return;
-                }
-
-                // Validation passed
-                setScreenActive(true);
-                setScreenError(null);
-
-                // Notify parent component of proctoring status
-                if (onProctoringStatusChange) {
-                  onProctoringStatusChange({
-                    frontCameraActive: cameraActive,
-                    backCameraActive: false, // Can be enhanced if back camera is supported
-                    screenShareActive: true,
-                    displaySurface: displaySurface || 'monitor' // Use detected displaySurface
-                  });
-                }
-
-                // Re-request full screen mode if it was lost during permission dialog
-                try {
-                  if (document.fullscreenElement === null) {
-                    const elem = document.documentElement;
-                    if (elem.requestFullscreen) {
-                      elem.requestFullscreen().catch(e => console.warn(e));
-                    }
-                  }
-                } catch (fsErr) {
-                  console.warn("Failed to restore full screen:", fsErr);
-                }
-
-                resolve();
-              } else if (screenVideoRef.current) {
-                setTimeout(checkDimensions, 200);
-              } else {
-                // Video ref not available yet
-                setTimeout(checkDimensions, 200);
-              }
-            };
-
-            // Start checking after a brief delay
-            setTimeout(checkDimensions, 500);
-
-            // Timeout after 3 seconds
-            setTimeout(() => {
-              // If timeout, assume it's okay and proceed
-              if (!screenVideoRef.current || screenVideoRef.current.readyState < 2) {
-                console.warn('Screen validation timeout, proceeding anyway');
-              }
-              resolve();
-            }, 3000);
-          });
-
-          // Handle screen share stop
-          if (typeof videoTrack.addEventListener === 'function') {
-            videoTrack.addEventListener('ended', () => {
-              setScreenError('Screen sharing stopped');
-              setScreenActive(false);
-              stopRecording();
-              if (onRecordingStatusChange) {
-                onRecordingStatusChange(false);
-              }
+          if (onProctoringStatusChange) {
+            onProctoringStatusChange({
+              frontCameraActive: true,
+              backCameraActive: false,
+              screenShareActive: screenActive,
+              displaySurface: null
             });
           }
         }
       } catch (err) {
-        if (err.message === 'Full screen sharing required') {
-          // Error already set above
-        } else {
-          setScreenError(getMediaAccessErrorMessage(err, { needsScreen: true }));
+        setCameraError(getMediaAccessErrorMessage(err, { needsScreen: false }));
+        console.error('Camera error:', err);
+      }
+
+      // Start screen capture (standard browser prompt)
+      try {
+        const screenStream = await requestScreenStream({
+          video: true,
+          audio: false,
+        });
+
+        const videoTrack = screenStream.getVideoTracks()[0];
+        if (!videoTrack) {
+          screenStream.getTracks().forEach((track) => track.stop());
+          throw new Error('No screen video track found.');
         }
+
+        screenStreamRef.current = screenStream;
+
+        if (screenVideoRef.current) {
+          screenVideoRef.current.srcObject = screenStream;
+        }
+
+        setScreenActive(true);
+        setScreenError(null);
+
+        const settings = typeof videoTrack.getSettings === 'function' ? videoTrack.getSettings() : {};
+        const displaySurface = settings.displaySurface || settings.logicalSurface || null;
+
+        if (onProctoringStatusChange) {
+          onProctoringStatusChange({
+            frontCameraActive: Boolean(cameraStreamRef.current),
+            backCameraActive: false,
+            screenShareActive: true,
+            displaySurface,
+          });
+        }
+
+        if (typeof videoTrack.addEventListener === 'function') {
+          videoTrack.addEventListener('ended', () => {
+            setScreenError('Screen sharing stopped');
+            setScreenActive(false);
+            stopRecording();
+            if (onRecordingStatusChange) {
+              onRecordingStatusChange(false);
+            }
+          });
+        }
+      } catch (err) {
+        setScreenError(getMediaAccessErrorMessage(err, { needsScreen: true }));
         console.error('Screen error:', err);
       }
 

@@ -15,8 +15,6 @@ import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import { generateDeviceFingerprint } from "../../utils/device-fingerprint";
-import { setProctoringSessionStreams, clearProctoringSessionStreams } from "../../utils/proctoringSession";
-import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from "../../utils/mediaAccess";
 import "./StartOlympiad.css";
 
 const StartOlympiad = () => {
@@ -171,46 +169,6 @@ const StartOlympiad = () => {
         });
         return;
       }
-    }
-
-    let cameraStream = null;
-    let screenStream = null;
-
-    try {
-      clearProctoringSessionStreams();
-
-      cameraStream = await requestCameraStream({
-        video: true,
-        audio: false,
-      });
-
-      screenStream = await requestScreenStream({
-        video: true,
-        audio: false,
-      });
-
-      const screenTrack = screenStream.getVideoTracks()?.[0];
-      const settings = typeof screenTrack?.getSettings === "function" ? screenTrack.getSettings() : {};
-      const surface = settings.displaySurface || settings.logicalSurface;
-      if (surface && surface !== "monitor") {
-        cameraStream.getTracks().forEach((track) => track.stop());
-        screenStream.getTracks().forEach((track) => track.stop());
-        throw new Error('Please select "Entire Screen" to continue. Window/tab sharing is not allowed.');
-      }
-
-      setProctoringSessionStreams({ cameraStream, screenStream });
-    } catch (permissionError) {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach((track) => track.stop());
-      }
-      if (screenStream) {
-        screenStream.getTracks().forEach((track) => track.stop());
-      }
-      setNotification({
-        message: getMediaAccessErrorMessage(permissionError, { needsScreen: true }),
-        type: "error",
-      });
-      return;
     }
 
     // Request Full Screen
