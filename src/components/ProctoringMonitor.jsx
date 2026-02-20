@@ -3,6 +3,7 @@ import { olympiadAPI } from '../services/api';
 import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from '../utils/constants';
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
 import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from '../utils/mediaAccess';
+import { consumePendingProctoringStreams } from '../utils/proctoringSession';
 import './ProctoringMonitor.css';
 
 const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {
@@ -337,6 +338,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
   const startMonitoring = async () => {
     try {
+      const pendingStreams = consumePendingProctoringStreams() || {};
+
       if (!navigator.mediaDevices?.getUserMedia && !navigator.getUserMedia && !navigator.webkitGetUserMedia && !navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
         setCameraError('Camera access is not supported on this device/browser.');
       }
@@ -347,7 +350,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start camera
       try {
-        const cameraStream = await requestCameraStream({
+        const cameraStream = pendingStreams.cameraStream || await requestCameraStream({
           video: {
             facingMode: 'user',
             width: { ideal: VIDEO_WIDTH },
@@ -379,7 +382,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start screen capture (standard browser prompt)
       try {
-        const screenStream = await requestScreenStream({
+        const screenStream = pendingStreams.screenStream || await requestScreenStream({
           video: true,
           audio: false,
         });

@@ -19,6 +19,10 @@ export const requestCameraStream = async (constraints = { video: true, audio: fa
     throw new Error('Browser environment is not available.');
   }
 
+  if (typeof window !== 'undefined' && !window.isSecureContext) {
+    throw new Error('Camera/screen sharing requires HTTPS (or localhost).');
+  }
+
   if (navigator.mediaDevices?.getUserMedia) {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
@@ -36,6 +40,10 @@ export const requestCameraStream = async (constraints = { video: true, audio: fa
 export const requestScreenStream = async (constraints = { video: true, audio: false }) => {
   if (typeof navigator === 'undefined') {
     throw new Error('Browser environment is not available.');
+  }
+
+  if (typeof window !== 'undefined' && !window.isSecureContext) {
+    throw new Error('Camera/screen sharing requires HTTPS (or localhost).');
   }
 
   if (navigator.mediaDevices?.getDisplayMedia) {

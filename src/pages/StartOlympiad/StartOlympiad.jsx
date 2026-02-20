@@ -15,6 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import { generateDeviceFingerprint } from "../../utils/device-fingerprint";
+import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from "../../utils/mediaAccess";
+import { setPendingProctoringStreams, clearPendingProctoringStreams } from "../../utils/proctoringSession";
 import "./StartOlympiad.css";
 
 const StartOlympiad = () => {
@@ -171,6 +173,30 @@ const StartOlympiad = () => {
       }
     }
 
+    let cameraStream = null;
+    let screenStream = null;
+    try {
+      clearPendingProctoringStreams();
+
+      cameraStream = await requestCameraStream({ video: true, audio: false });
+      screenStream = await requestScreenStream({ video: true, audio: false });
+
+      setPendingProctoringStreams({ cameraStream, screenStream });
+    } catch (permissionError) {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+      }
+
+      setNotification({
+        message: getMediaAccessErrorMessage(permissionError, { needsScreen: true }),
+        type: "error",
+      });
+      return;
+    }
+
     // Request Full Screen
     try {
       const elem = document.documentElement;
@@ -294,6 +320,7 @@ const StartOlympiad = () => {
       navigate(targetPath);
     } catch (error) {
       console.error("❌ Error starting olympiad:", error);
+      clearPendingProctoringStreams();
       const errorMessage = error?.response?.data?.message || error?.message;
       setNotification({
         message: errorMessage 
