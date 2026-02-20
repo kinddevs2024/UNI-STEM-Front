@@ -215,15 +215,21 @@ export const TranslationProvider = ({ children }) => {
     }
   };
 
-  // Always keep auto-translate enabled and sync language with device/browser
+  // Always keep auto-translate enabled, but preserve manually selected language
   useEffect(() => {
-    const deviceLanguage = getPreferredDeviceLanguage();
+    const storedLanguage = localStorage.getItem(STORAGE_LANGUAGE_KEY);
+    const initialLanguage = storedLanguage
+      ? mapGoogleLocaleToLanguage(storedLanguage)
+      : getPreferredDeviceLanguage();
 
     setAutoTranslate(true);
-    setTargetLanguage(deviceLanguage);
+    setTargetLanguage(initialLanguage);
 
     localStorage.setItem(STORAGE_KEY, "true");
-    localStorage.setItem(STORAGE_LANGUAGE_KEY, deviceLanguage);
+
+    if (!storedLanguage) {
+      localStorage.setItem(STORAGE_LANGUAGE_KEY, initialLanguage);
+    }
   }, []);
 
   // Toggle auto-translate
