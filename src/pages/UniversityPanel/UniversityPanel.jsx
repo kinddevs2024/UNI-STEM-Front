@@ -3,7 +3,17 @@ import { universityAPI, olympiadAPI } from "../../services/api";
 import NotificationToast from "../../components/NotificationToast";
 import { formatDate } from "../../utils/helpers";
 import QuestionFormStep from "../../components/QuestionFormStep/QuestionFormStep";
+import {
+  DEFAULT_OLYMPIAD_SUBJECT,
+  DEFAULT_OLYMPIAD_SUBJECTS,
+  loadCustomSubjects,
+  mergeSubjects,
+  normalizeSubject,
+  saveCustomSubjects,
+} from "../../utils/olympiadSubjects";
 import "../AdminPanel/AdminPanel.css";
+
+const CUSTOM_SUBJECTS_STORAGE_KEY = "universityCustomOlympiadSubjects";
 
 // Question Manager Component
 const QuestionManager = ({ olympiad, onClose }) => {
@@ -512,7 +522,7 @@ const UniversityPanel = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    subject: "Mathematics",
+    subject: DEFAULT_OLYMPIAD_SUBJECT,
     type: "", // Will be set in step 1
     startTime: "",
     endTime: "",
@@ -525,6 +535,18 @@ const UniversityPanel = () => {
   const [statusFilter, setStatusFilter] = useState("all"); // all, published, unpublished, draft
 
   const [questions, setQuestions] = useState([]);
+  const [customSubjects, setCustomSubjects] = useState(() =>
+    loadCustomSubjects(CUSTOM_SUBJECTS_STORAGE_KEY)
+  );
+  const [showAddSubjectInput, setShowAddSubjectInput] = useState(false);
+  const [newSubjectInput, setNewSubjectInput] = useState("");
+
+  const availableSubjects = mergeSubjects(
+    DEFAULT_OLYMPIAD_SUBJECTS,
+    (Array.isArray(olympiads) ? olympiads : []).map((item) => item?.subject),
+    customSubjects,
+    formData?.subject ? [formData.subject] : []
+  );
 
   useEffect(() => {
     fetchOlympiads();
@@ -546,6 +568,32 @@ const UniversityPanel = () => {
   const handleTypeSelect = (type) => {
     setFormData({ ...formData, type });
     setCurrentStep(2);
+  };
+
+  const handleSubjectSelect = (subject) => {
+    setFormData((prev) => ({ ...prev, subject }));
+  };
+
+  const handleAddSubject = () => {
+    const normalizedSubject = normalizeSubject(newSubjectInput);
+    if (!normalizedSubject) {
+      setNotification({
+        message: "Please enter a valid subject name",
+        type: "error",
+      });
+      return;
+    }
+
+    const nextCustomSubjects = mergeSubjects(customSubjects, [normalizedSubject]);
+    setCustomSubjects(nextCustomSubjects);
+    saveCustomSubjects(CUSTOM_SUBJECTS_STORAGE_KEY, nextCustomSubjects);
+    setFormData((prev) => ({ ...prev, subject: normalizedSubject }));
+    setNewSubjectInput("");
+    setShowAddSubjectInput(false);
+    setNotification({
+      message: `Subject "${normalizedSubject}" added`,
+      type: "success",
+    });
   };
 
   // Step 2: Create olympiad with basic info
@@ -751,7 +799,7 @@ const UniversityPanel = () => {
     setFormData({
       title: "",
       description: "",
-      subject: "Mathematics",
+      subject: DEFAULT_OLYMPIAD_SUBJECT,
       type: "",
       startTime: "",
       endTime: "",
@@ -777,7 +825,7 @@ const UniversityPanel = () => {
     setFormData({
       title: "",
       description: "",
-      subject: "Mathematics",
+      subject: DEFAULT_OLYMPIAD_SUBJECT,
       type: "",
       startTime: "",
       endTime: "",
@@ -815,7 +863,7 @@ const UniversityPanel = () => {
       const buildFormData = (data) => ({
         title: data?.title || "",
         description: data?.description || "",
-        subject: data?.subject || "Mathematics",
+        subject: data?.subject || DEFAULT_OLYMPIAD_SUBJECT,
         type: data?.type || "test",
         startTime: formatToLocalDateTime(data?.startTime),
         endTime: formatToLocalDateTime(data?.endTime),
@@ -918,7 +966,7 @@ const UniversityPanel = () => {
       setFormData({
         title: "",
         description: "",
-        subject: "Mathematics",
+        subject: DEFAULT_OLYMPIAD_SUBJECT,
         type: "",
         startTime: "",
         endTime: "",
@@ -1196,19 +1244,45 @@ const UniversityPanel = () => {
                     </div>
                     <div className="form-group">
                       <label>Subject</label>
-                      <select
-                        value={formData.subject}
-                        onChange={(e) =>
-                          setFormData({ ...formData, subject: e.target.value })
-                        }
-                        required
-                      >
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="English">English</option>
-                        <option value="Science">Science</option>
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                      </select>
+                      <div className="subject-management">
+                        <select
+                          value={formData.subject}
+                          onChange={(e) => handleSubjectSelect(e.target.value)}
+                          required
+                        >
+                          {availableSubjects.map((subject) => (
+                            <option key={subject} value={subject}>
+                              {subject}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          className="button-secondary subject-add-toggle"
+                          onClick={() => setShowAddSubjectInput((prev) => !prev)}
+                        >
+                          {showAddSubjectInput ? "Cancel" : "+ Add new subject"}
+                        </button>
+
+                        {showAddSubjectInput && (
+                          <div className="subject-add-row">
+                            <input
+                              type="text"
+                              value={newSubjectInput}
+                              onChange={(e) => setNewSubjectInput(e.target.value)}
+                              placeholder="e.g., Psychology"
+                              maxLength={60}
+                            />
+                            <button
+                              type="button"
+                              className="button-primary"
+                              onClick={handleAddSubject}
+                            >
+                              Add
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 

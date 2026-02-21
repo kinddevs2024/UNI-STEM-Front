@@ -138,6 +138,39 @@
   color: var(--text-primary);
 }
 
+.subject-management {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subject-add-toggle {
+  width: fit-content;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.subject-add-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.subject-add-row input {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .subject-add-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subject-add-row .button-primary {
+    width: 100%;
+  }
+}
+
 .admin-olympiads {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
