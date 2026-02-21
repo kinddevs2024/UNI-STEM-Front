@@ -832,8 +832,24 @@
     0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
+.question-manager .modal-header {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.question-manager .modal-header h2 {
+  color: var(--text-primary);
+}
+
+.question-manager .modal-close {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
 .question-manager .modal-body {
   background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
 }
 
 .question-manager .questions-header {
