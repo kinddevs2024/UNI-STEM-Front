@@ -822,11 +822,37 @@
 
 .question-manager {
   max-width: 1000px;
+  background: var(--bg-primary);
   border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 0 36px rgba(255, 255, 255, 0.08),
     0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.question-manager .modal-body {
+  background: var(--bg-secondary);
+}
+
+.question-manager .questions-header {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.question-manager .questions-list {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.question-manager .question-item {
+  border-radius: 12px;
+  background: var(--bg-secondary);
 }
 
 .questions-header {
