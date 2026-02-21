@@ -5,6 +5,7 @@ import { useSocket } from '../../context/SocketContext';
 import Timer from '../../components/Timer';
 import ProctoringMonitor from '../../components/ProctoringMonitor';
 import NotificationToast from '../../components/NotificationToast';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
 import './EssayOlympiad.css';
@@ -27,7 +28,14 @@ const EssayOlympiad = () => {
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceCheckReady, setFaceCheckReady] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmLabel: 'Confirm',
+  });
   const draftSaveTimeoutRef = useRef(null);
+  const confirmResolverRef = useRef(null);
 
   useEffect(() => {
     fetchOlympiad();
@@ -176,31 +184,67 @@ const EssayOlympiad = () => {
     return text.trim() ? text.trim().split(/\s+/).length : 0;
   };
 
-  const handleSubmit = async () => {
-    if (window.confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
-      try {
-        await olympiadAPI.submit(id, { answers });
-        setSubmitted(true);
-        // Clear saved answers and draft after successful submission
-        localStorage.removeItem(`olympiad_${id}_essay_answers`);
-        if (draftSaveTimeoutRef.current) {
-          clearTimeout(draftSaveTimeoutRef.current);
-        }
-        setNotification({ message: 'Essay submitted successfully!', type: 'success' });
-        setTimeout(() => {
-          navigate(`/olympiad/${id}/results`);
-        }, 2000);
-      } catch (error) {
-        setNotification({ 
-          message: error.response?.data?.message || 'Submission failed', 
-          type: 'error' 
-        });
+  const askForConfirmation = ({ title, message, confirmLabel = 'Confirm' }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmLabel,
+    });
+
+    return new Promise((resolve) => {
+      confirmResolverRef.current = resolve;
+    });
+  };
+
+  const handleConfirmApprove = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(true);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleConfirmCancel = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(false);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleSubmit = async ({ confirm = true } = {}) => {
+    if (confirm) {
+      const shouldSubmit = await askForConfirmation({
+        title: 'Confirm Submission',
+        message: 'Are you sure you want to submit? You cannot change answers after submission.',
+        confirmLabel: 'Submit',
+      });
+      if (!shouldSubmit) return;
+    }
+
+    try {
+      await olympiadAPI.submit(id, { answers });
+      setSubmitted(true);
+      // Clear saved answers and draft after successful submission
+      localStorage.removeItem(`olympiad_${id}_essay_answers`);
+      if (draftSaveTimeoutRef.current) {
+        clearTimeout(draftSaveTimeoutRef.current);
       }
+      setNotification({ message: 'Essay submitted successfully!', type: 'success' });
+      setTimeout(() => {
+        navigate(`/olympiad/${id}/results`);
+      }, 2000);
+    } catch (error) {
+      setNotification({ 
+        message: error.response?.data?.message || 'Submission failed', 
+        type: 'error' 
+      });
     }
   };
 
   const handleTimeExpire = () => {
-    handleSubmit();
+    handleSubmit({ confirm: false });
   };
 
   if (loading) {
@@ -369,6 +413,15 @@ const EssayOlympiad = () => {
           onClose={() => setNotification(null)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmLabel={confirmDialog.confirmLabel}
+        onConfirm={handleConfirmApprove}
+        onCancel={handleConfirmCancel}
+      />
     </div>
   );
 };

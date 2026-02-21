@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { resolterAPI, olympiadAPI, adminAPI } from '../../services/api';
 import { formatDate, getImageUrl } from '../../utils/helpers';
 import NotificationToast from '../../components/NotificationToast';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import './ResolterPanel.css';
 
 const ResolterPanel = () => {
@@ -20,6 +21,13 @@ const ResolterPanel = () => {
   const [submissionDetails, setSubmissionDetails] = useState(null);
   const [captures, setCaptures] = useState([]);
   const [capturesLoading, setCapturesLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmLabel: 'Confirm',
+  });
+  const confirmResolverRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -420,8 +428,42 @@ const ResolterPanel = () => {
     }
   };
 
+  const askForConfirmation = ({ title, message, confirmLabel = 'Confirm' }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmLabel,
+    });
+
+    return new Promise((resolve) => {
+      confirmResolverRef.current = resolve;
+    });
+  };
+
+  const handleConfirmApprove = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(true);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleConfirmCancel = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(false);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const handleMakeAllVisible = async () => {
-    if (!window.confirm('Are you sure you want to make all results visible? This will make all results visible to all students.')) {
+    const shouldMakeVisible = await askForConfirmation({
+      title: 'Confirm Make Results Visible',
+      message: 'Are you sure you want to make all results visible? This will make all results visible to all students.',
+      confirmLabel: 'Confirm',
+    });
+    if (!shouldMakeVisible) {
       return;
     }
 
@@ -1016,6 +1058,15 @@ const ResolterPanel = () => {
             onClose={() => setNotification(null)}
           />
         )}
+
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmLabel={confirmDialog.confirmLabel}
+          onConfirm={handleConfirmApprove}
+          onCancel={handleConfirmCancel}
+        />
       </div>
     </div>
   );

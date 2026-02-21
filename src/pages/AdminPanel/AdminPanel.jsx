@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { adminAPI } from "../../services/api";
 import NotificationToast from "../../components/NotificationToast";
+import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import { formatDate } from "../../utils/helpers";
 import {
   DEFAULT_OLYMPIAD_SUBJECT,
@@ -367,6 +368,13 @@ const AdminPanel = () => {
   );
   const [showAddSubjectInput, setShowAddSubjectInput] = useState(false);
   const [newSubjectInput, setNewSubjectInput] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "Confirm",
+  });
+  const confirmResolverRef = useRef(null);
 
   const availableSubjects = useMemo(
     () =>
@@ -400,6 +408,35 @@ const AdminPanel = () => {
   const handleTypeSelect = useCallback((type) => {
     setFormData((prev) => ({ ...prev, type }));
     setCurrentStep(2);
+  }, []);
+
+  const askForConfirmation = useCallback(({ title, message, confirmLabel = "Confirm" }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmLabel,
+    });
+
+    return new Promise((resolve) => {
+      confirmResolverRef.current = resolve;
+    });
+  }, []);
+
+  const handleConfirmApprove = useCallback(() => {
+    if (typeof confirmResolverRef.current === "function") {
+      confirmResolverRef.current(true);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleConfirmCancel = useCallback(() => {
+    if (typeof confirmResolverRef.current === "function") {
+      confirmResolverRef.current(false);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const handleSubjectSelect = useCallback((subject) => {
@@ -597,7 +634,12 @@ const AdminPanel = () => {
   }, []);
 
   const handleDeleteQuestion = useCallback(async (questionId) => {
-    if (!window.confirm("Delete this question?")) return;
+    const shouldDelete = await askForConfirmation({
+      title: "Confirm Question Delete",
+      message: "Delete this question?",
+      confirmLabel: "Delete",
+    });
+    if (!shouldDelete) return;
     try {
       await adminAPI.deleteQuestion(questionId);
       setQuestions((prev) =>
@@ -610,7 +652,7 @@ const AdminPanel = () => {
         type: "error",
       });
     }
-  }, []);
+  }, [askForConfirmation]);
 
   // Finish and close
   const handleFinish = useCallback(() => {
@@ -869,26 +911,36 @@ const AdminPanel = () => {
   }, []);
 
   const handleDelete = useCallback(async (id) => {
-    if (window.confirm("Are you sure you want to delete this olympiad?")) {
-      try {
-        await adminAPI.deleteOlympiad(id);
-        setNotification({
-          message: "Olympiad deleted successfully",
-          type: "success",
-        });
-        fetchOlympiads();
-      } catch (error) {
-        setNotification({
-          message: "Failed to delete olympiad",
-          type: "error",
-        });
-      }
+    const shouldDelete = await askForConfirmation({
+      title: "Confirm Olympiad Delete",
+      message: "Are you sure you want to delete this olympiad?",
+      confirmLabel: "Delete",
+    });
+    if (!shouldDelete) return;
+
+    try {
+      await adminAPI.deleteOlympiad(id);
+      setNotification({
+        message: "Olympiad deleted successfully",
+        type: "success",
+      });
+      fetchOlympiads();
+    } catch (error) {
+      setNotification({
+        message: "Failed to delete olympiad",
+        type: "error",
+      });
     }
-  }, [fetchOlympiads]);
+  }, [askForConfirmation, fetchOlympiads]);
 
   // Duplicate olympiad
   const handleDuplicate = useCallback(async (olympiad) => {
-    if (!window.confirm(`Are you sure you want to duplicate "${olympiad.title}"?`)) {
+    const shouldDuplicate = await askForConfirmation({
+      title: "Confirm Olympiad Duplicate",
+      message: `Are you sure you want to duplicate "${olympiad.title}"?`,
+      confirmLabel: "Duplicate",
+    });
+    if (!shouldDuplicate) {
       return;
     }
 
@@ -992,7 +1044,7 @@ const AdminPanel = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchOlympiads]);
+  }, [askForConfirmation, fetchOlympiads]);
 
   if (loading) {
     return (
@@ -1568,6 +1620,15 @@ const AdminPanel = () => {
           onClose={() => setNotification(null)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmLabel={confirmDialog.confirmLabel}
+        onConfirm={handleConfirmApprove}
+        onCancel={handleConfirmCancel}
+      />
     </div>
   );
 };
@@ -1578,6 +1639,13 @@ const QuestionManager = ({ olympiad, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "Confirm",
+  });
+  const confirmResolverRef = useRef(null);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionForm, setQuestionForm] = useState({
     question: "",
@@ -1750,8 +1818,42 @@ const QuestionManager = ({ olympiad, onClose }) => {
     setShowAddForm(false);
   };
 
+  const askForConfirmation = ({ title, message, confirmLabel = "Confirm" }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmLabel,
+    });
+
+    return new Promise((resolve) => {
+      confirmResolverRef.current = resolve;
+    });
+  };
+
+  const handleConfirmApprove = () => {
+    if (typeof confirmResolverRef.current === "function") {
+      confirmResolverRef.current(true);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleConfirmCancel = () => {
+    if (typeof confirmResolverRef.current === "function") {
+      confirmResolverRef.current(false);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const handleDeleteQuestion = async (questionId) => {
-    if (!window.confirm("Delete this question?")) return;
+    const shouldDelete = await askForConfirmation({
+      title: "Confirm Question Delete",
+      message: "Delete this question?",
+      confirmLabel: "Delete",
+    });
+    if (!shouldDelete) return;
     try {
       await adminAPI.deleteQuestion(questionId);
       setNotification({ message: "Question deleted", type: "success" });
@@ -2050,6 +2152,15 @@ const QuestionManager = ({ olympiad, onClose }) => {
             onClose={() => setNotification(null)}
           />
         )}
+
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmLabel={confirmDialog.confirmLabel}
+          onConfirm={handleConfirmApprove}
+          onCancel={handleConfirmCancel}
+        />
       </div>
     </div>
   );

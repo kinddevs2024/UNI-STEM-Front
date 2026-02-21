@@ -6,6 +6,7 @@ import Timer from '../../components/Timer';
 import QuestionCard from '../../components/QuestionCard';
 import ProctoringMonitor from '../../components/ProctoringMonitor';
 import NotificationToast from '../../components/NotificationToast';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { useServerTimer } from '../../hooks/useServerTimer';
 import { useAttemptSession } from '../../hooks/useAttemptSession';
@@ -35,7 +36,14 @@ const TestOlympiad = () => {
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceCheckReady, setFaceCheckReady] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmLabel: 'Confirm',
+  });
   const draftSaveTimeoutRef = useRef(null);
+  const confirmResolverRef = useRef(null);
   const [attemptId, setAttemptId] = useState(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState(null);
   const attemptIndexSyncedRef = useRef(false);
@@ -408,9 +416,43 @@ const TestOlympiad = () => {
   // Forward-only navigation - no previous button allowed
   // Removed handlePrevious function
 
+  const askForConfirmation = ({ title, message, confirmLabel = 'Confirm' }) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmLabel,
+    });
+
+    return new Promise((resolve) => {
+      confirmResolverRef.current = resolve;
+    });
+  };
+
+  const handleConfirmApprove = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(true);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleConfirmCancel = () => {
+    if (typeof confirmResolverRef.current === 'function') {
+      confirmResolverRef.current(false);
+    }
+    confirmResolverRef.current = null;
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const handleSubmit = async ({ confirm = true } = {}) => {
-    if (confirm && !window.confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
-      return;
+    if (confirm) {
+      const shouldSubmit = await askForConfirmation({
+        title: 'Confirm Submission',
+        message: 'Are you sure you want to submit? You cannot change answers after submission.',
+        confirmLabel: 'Submit',
+      });
+      if (!shouldSubmit) return;
     }
     if (!confirm) {
       setNotification({ message: 'Time expired. Submitting...', type: 'warning' });
@@ -646,6 +688,15 @@ const TestOlympiad = () => {
           onClose={() => setNotification(null)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmLabel={confirmDialog.confirmLabel}
+        onConfirm={handleConfirmApprove}
+        onCancel={handleConfirmCancel}
+      />
     </div>
   );
 };
