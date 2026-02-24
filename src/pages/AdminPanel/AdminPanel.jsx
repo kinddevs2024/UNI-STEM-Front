@@ -1988,8 +1988,12 @@ const QuestionManager = ({ olympiad, onClose }) => {
                       <span className="answer-mode-toggle-text">Allow multiple correct answers</span>
                     </label>
                   </div>
-                  {(questionForm.options || []).map((option, index) => (
-                    <div key={index} className="option-input-row">
+                  {(questionForm.options || []).map((option, index) => {
+                    const isSelected = questionForm.allowMultipleCorrect
+                      ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== ""
+                      : questionForm.correctAnswer === option && option.trim() !== "";
+                    return (
+                    <div key={index} className={`option-input-row ${isSelected ? "is-selected" : ""}`}>
                       <span className="option-label">
                         {String.fromCharCode(65 + index)}.
                       </span>
@@ -2053,7 +2057,8 @@ const QuestionManager = ({ olympiad, onClose }) => {
                         <span className="option-select-text">Correct</span>
                       </label>
                     </div>
-                  ))}
+                    );
+                  })}
                   <button
                     type="button"
                     className="button-secondary"
