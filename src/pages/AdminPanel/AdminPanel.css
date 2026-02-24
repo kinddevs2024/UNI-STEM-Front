@@ -893,6 +893,22 @@
   font-size: 20px;
 }
 
+.questions-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.question-manager .hidden-file-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;

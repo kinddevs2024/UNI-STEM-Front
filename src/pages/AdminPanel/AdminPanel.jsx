@@ -12,6 +12,7 @@ import {
   normalizeSubject,
   saveCustomSubjects,
 } from "../../utils/olympiadSubjects";
+import { parseQuestionsFromExcelFile } from "../../utils/parseQuestionsFromExcel";
 import "./AdminPanel.css";
 
 const CUSTOM_SUBJECTS_STORAGE_KEY = "adminCustomOlympiadSubjects";
@@ -1646,6 +1647,8 @@ const QuestionManager = ({ olympiad, onClose }) => {
     confirmLabel: "Confirm",
   });
   const confirmResolverRef = useRef(null);
+  const excelInputRef = useRef(null);
+  const [importingExcel, setImportingExcel] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionForm, setQuestionForm] = useState({
     question: "",
@@ -1682,6 +1685,55 @@ const QuestionManager = ({ olympiad, onClose }) => {
       allowMultipleCorrect: false,
       points: 10,
     });
+  };
+
+  const handleExcelImport = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+    if (olympiad.type !== "test") {
+      setNotification({ message: "Import is only available for test (multiple-choice) olympiads.", type: "error" });
+      e.target.value = "";
+      return;
+    }
+    const allowed = [".xlsx", ".xls", ".csv"];
+    const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+    if (!allowed.includes(ext)) {
+      setNotification({ message: "Please choose an .xlsx, .xls, or .csv file.", type: "error" });
+      e.target.value = "";
+      return;
+    }
+    setImportingExcel(true);
+    try {
+      const { questions: parsed, errors } = await parseQuestionsFromExcelFile(file);
+      if (parsed.length === 0) {
+        setNotification({
+          message: errors.length ? errors[0] : "No valid questions found in the file.",
+          type: "error",
+        });
+        e.target.value = "";
+        return;
+      }
+      const existingOrders = (questions || []).map((q) => (q.order != null ? q.order : 0));
+      const startOrder = existingOrders.length ? Math.max(0, ...existingOrders) + 1 : 0;
+      for (let i = 0; i < parsed.length; i++) {
+        await adminAPI.addQuestion({
+          olympiadId: olympiad._id,
+          ...parsed[i],
+          order: startOrder + i,
+        });
+      }
+      await fetchQuestions();
+      const warn = errors.length ? ` ${errors.length} row(s) skipped.` : "";
+      setNotification({ message: `Imported ${parsed.length} question(s).${warn}`, type: "success" });
+    } catch (err) {
+      setNotification({
+        message: err?.message || "Failed to import file. Check the format.",
+        type: "error",
+      });
+    } finally {
+      setImportingExcel(false);
+      e.target.value = "";
+    }
   };
 
   const handleAddQuestion = async (e) => {
@@ -1918,18 +1970,48 @@ const QuestionManager = ({ olympiad, onClose }) => {
         <div className="modal-body">
           <div className="questions-header">
             <h3>Questions ({Array.isArray(questions) ? questions.length : 0})</h3>
-            <button
-              className="button-primary"
-              onClick={() => {
-                if (showAddForm) {
-                  handleCancelEdit();
-                } else {
-                  setShowAddForm(true);
-                }
-              }}
-            >
-              {showAddForm ? "Cancel" : "+ Add Question"}
-            </button>
+            <div className="questions-header-actions">
+              {olympiad.type === "test" && (
+                <>
+                  <input
+                    ref={excelInputRef}
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden-file-input"
+                    onChange={handleExcelImport}
+                    disabled={importingExcel}
+                  />
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={() => excelInputRef.current?.click()}
+                    disabled={importingExcel}
+                  >
+                    {importingExcel ? "Importing…" : "Import from Excel"}
+                  </button>
+                  <a
+                    href="/questions-import-template.xlsx"
+                    download="questions-import-template.xlsx"
+                    className="button-secondary"
+                    style={{ textDecoration: "none" }}
+                  >
+                    Download template
+                  </a>
+                </>
+              )}
+              <button
+                className="button-primary"
+                onClick={() => {
+                  if (showAddForm) {
+                    handleCancelEdit();
+                  } else {
+                    setShowAddForm(true);
+                  }
+                }}
+              >
+                {showAddForm ? "Cancel" : "+ Add Question"}
+              </button>
+            </div>
           </div>
 
           {showAddForm && (
