@@ -1,0 +1,64 @@
+/* One resolved color mode covers explicit Dark and OS-driven System. */
+html[data-color-mode="dark"] { --go-ink:#f4f0fa; --go-paper:#171530; --go-muted:#c8c2d7; --go-line:#443d59; --go-lilac:#49395c; --go-blue:#2b3d52; --go-yellow:#51452a; --go-peach:#47343d; --shadow-sm:0 4px 16px #0002; --shadow-lg:0 14px 40px #0004; }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] { --panel-ink:#f4f0fa; --panel-muted:#c8c2d7; --panel-line:#443d59; --panel-paper:#171530; --panel-lilac:#49395c; --panel-blue:#2b3d52; --panel-yellow:#51452a; --panel-peach:#47343d; --bg-primary:#171530; --bg-secondary:#23203a; --bg-tertiary:#302b48; --text-primary:#f4f0fa; --text-secondary:#c8c2d7; --text-tertiary:#a49bb6; --accent:#dfcff5; --accent-dark:#c8ace8; --border:#443d59; --border-hover:#a48cc6; --card-bg:#23203a; --text-color:#f4f0fa; --primary-color:#dfcff5; --hover-bg:#302b48; }
+body[data-color-mode="dark"] .navbar-logo-image,body[data-color-mode="dark"] .go-brand img { filter:brightness(0) invert(1); }
+body[data-color-mode="dark"] :is(.results-page,.start-olympiad-page,.test-olympiad-page,.essay-olympiad-page,.schools-page,.universities-page) { background:var(--bg-primary); color:var(--text-primary); }
+body[data-color-mode="dark"] :is(.results-page,.start-olympiad-page,.test-olympiad-page,.essay-olympiad-page) :is(.card,.empty-state,.no-results,.summary-item,.result-item-card,.top-three-card,.monitoring-card,.question-card,.modal-content,.answers-panel,.essay-editor) { background:var(--bg-secondary); border-color:var(--border); color:var(--text-primary); }
+body[data-color-mode="dark"] :is(.results-page,.start-olympiad-page,.test-olympiad-page,.essay-olympiad-page) :is(h1,h2,h3,h4,.score-value,.time-value,.meta-value,.result-item-title,.pending-results-title,.info-value,.question-text) { color:var(--text-primary); }
+body[data-color-mode="dark"] :is(.results-page,.start-olympiad-page,.test-olympiad-page,.essay-olympiad-page) :is(p,.summary-label,.meta-label,.info-label,.results-subtitle,.pending-results-message) { color:var(--text-secondary); }
+body[data-color-mode="dark"] :is(.result-item-badge,.status-badge,.instruction-item,.proctoring-notice,.rules-section,.answer-option,.question-option,.essay-question) { background:var(--bg-tertiary); border-color:var(--border); color:var(--text-primary); }
+body[data-color-mode="dark"] .dashboard-page .dashboard-header { background:var(--go-blue); border-color:#425774; color:var(--text-primary); }
+body[data-color-mode="dark"] .dashboard-page :is(.dashboard-subtitle,.go-account-eyebrow) { color:#d3ddec; }
+body[data-color-mode="dark"] .dashboard-page .dashboard-overview span { background:#ffffff08; border-color:#ffffff26; }
+body[data-color-mode="dark"] .dashboard-page :is(.status-active,.status-published) { background:#314c5b; color:#d1edf4; }
+body[data-color-mode="dark"] .dashboard-page .status-upcoming { background:#51452a; color:#faeaa8; }
+body[data-color-mode="dark"] .dashboard-page .status-ended { background:#3e354e; color:#ddd1ed; }
+body[data-color-mode="dark"] .app .button-primary,body[data-color-mode="dark"] .dashboard-tour .button-primary { background:#dfcff5; border-color:#dfcff5; color:#171530; }
+body[data-color-mode="dark"] .app .button-primary:hover:not(:disabled),body[data-color-mode="dark"] .dashboard-tour .button-primary:hover:not(:disabled) { background:#c9b1e6; color:#171530; }
+body[data-color-mode="dark"] .app .button-secondary { color:var(--text-primary); border-color:var(--border); }
+body[data-color-mode="dark"] .dashboard-tour { background:#23203a; border-color:#655278; color:#f4f0fa; }
+body[data-color-mode="dark"] .dashboard-tour :is(.dashboard-tour-heading,.dashboard-tour-description,.dashboard-tour-skip) { color:#c8c2d7; }
+body[data-color-mode="dark"] .dashboard-tour-heading button { background:#49395c; color:#f4f0fa; }
+body[data-color-mode="dark"] .dashboard-tour-badge { color:#c8b4df; }
+body[data-color-mode="dark"] .profile-completion-notice { background:#403722; border-color:#76643b; color:#f9edca; }
+body[data-color-mode="dark"] .profile-completion-notice p { color:#e1d3af; }
+body[data-color-mode="dark"] .go-home { --go-ink:#f4f0fa; --go-muted:#c8c2d7; --go-paper:#171530; --go-line:#443d59; --go-lilac:#49395c; --go-blue:#2b3d52; --go-yellow:#51452a; background:#11101f; }
+body[data-color-mode="dark"] .go-home :is(.go-hero-label,.go-login,.go-menu-toggle,.go-button-outline,.go-step-number,.go-partner-tag) { border-color:#655278; }
+body[data-color-mode="dark"] .go-home :is(.go-mobile-nav,.go-card-arrow,.go-hero-portrait span) { background:#23203a; color:#f4f0fa; border-color:#655278; }
+body[data-color-mode="dark"] .go-home .go-button-dark { background:#dfcff5; color:#171530; }
+body[data-color-mode="dark"] .go-home .go-button-dark:hover { background:#c9b1e6; }
+body[data-color-mode="dark"] .go-home .go-hero-title,body[data-color-mode="dark"] .go-home .go-hero-description { color:#f4f0fa; }
+body[data-color-mode="dark"] .go-auth-page { --auth-ink:#f4f0fa; --auth-muted:#c8c2d7; --auth-line:#443d59; --auth-paper:#23203a; }
+body[data-color-mode="dark"] .go-auth-shade { background:#080a1470; }
+body[data-color-mode="dark"] .go-auth-tabs { background:#302b48; border-color:#443d59; }
+body[data-color-mode="dark"] .go-auth-tabs::before { background:#dfcff5; }
+body[data-color-mode="dark"] .go-auth-tabs button { color:#c8c2d7; }
+body[data-color-mode="dark"] .go-auth-tabs button.is-active { color:#171530; }
+body[data-color-mode="dark"] .go-auth-card :is(input,.go-auth-input-wrap) { background:#302b48; border-color:#443d59; color:#f4f0fa; }
+body[data-color-mode="dark"] .go-auth-submit { background:#dfcff5; color:#171530; }
+body[data-color-mode="dark"] .go-auth-submit:hover { background:#c9b1e6; }
+body[data-color-mode="dark"] .go-auth-card :is(.go-auth-forgot,.go-auth-back,.go-auth-bottom button) { color:#dfcff5; }
+body[data-color-mode="dark"] .go-auth-card :is(.go-auth-notice,.go-auth-notice.error) { background:#4b2838; color:#ffc4d0; border-color:#795066; }
+body[data-color-mode="dark"] :is(.notification-toast,.cookie-consent-modal,.confirm-dialog,.virtual-assistant .assistant-bubble,.virtual-assistant .assistant-window) { background:#23203a; border-color:#443d59; color:#f4f0fa; }
+body[data-color-mode="dark"] :is(.cookie-consent-modal,.confirm-dialog) :is(h1,h2,h3,p,label) { color:var(--text-primary); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(thead,th,.table-header,.modal-header,.form-section,.filters-container,.question-item,.olympiad-info,.status-filter) { background:var(--bg-tertiary); color:var(--text-primary); border-color:var(--border); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(h1,h2,h3,h4,.section-title,.olympiad-title,.modal-title,.stat-value,label) { color:var(--text-primary); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(.section-description,.stat-label,.meta-label,p) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(.status-badge.published,.status-badge.active) { background:#244c40; color:#bde8d8; border-color:#3d7161; }
+body[data-color-mode="dark"] .results-page :is(.score-divider,.score-total,.score-percentage,.score-max,.detail-label,.email-cell,.time-cell) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .results-page :is(.action-text,.detail-value,.user-rank-badge,.user-score-large,.user-percentage-large,.top-three-name,.position-name,.position-rank) { color:var(--text-primary); }
+body[data-color-mode="dark"] .results-page :is(.results-header,.result-item-action,.table-row,.modal-header,.modal-actions) { border-color:var(--border); }
+body[data-color-mode="dark"] .results-page :is(.user-result-main,.detail-item,.table-header,.table-row.current-user-row,.table-row.top-three,.modal-close) { background:var(--bg-tertiary); color:var(--text-primary); border-color:var(--border); }
+body[data-color-mode="dark"] .results-page .table-row:hover { background:var(--bg-tertiary); }
+body[data-color-mode="dark"] .start-olympiad-page :is(.start-header,.info-item,.proctoring-note,.consent-hint) { background:var(--bg-tertiary); border-color:var(--border); }
+body[data-color-mode="dark"] .start-olympiad-page :is(.time-label,.proctoring-list li,.rules-list li,.consent-text,.proctoring-warning) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .start-olympiad-page .consent-checkbox input:checked + .consent-text { color:var(--text-primary); }
+body[data-color-mode="dark"] .app .button-secondary:hover { background:var(--bg-tertiary); color:var(--text-primary); }
+
+/* Layout wrappers inherit their card surface; only actual inset panels are filled. */
+body[data-color-mode="dark"] :is(.result-item-meta,.result-item-content,.result-item-header,.result-item-score,.result-item-action,.info-grid,.question-header,.monitoring-grid) { background:transparent; }
+body[data-color-mode="dark"] .results-page :is(.action-text,.score-divider,.score-total,.score-percentage) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .go-home .go-security { background:var(--bg-secondary); color:var(--text-primary); }
+body[data-color-mode="dark"] .go-home .go-security :is(h2,li) { color:var(--text-primary); }
+body[data-color-mode="dark"] .go-home .go-security p:not(.go-eyebrow) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .go-home .go-security .go-eyebrow { color:#f9e78f; }

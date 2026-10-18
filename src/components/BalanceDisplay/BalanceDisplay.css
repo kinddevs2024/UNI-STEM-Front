@@ -12,6 +12,9 @@
 }
 
 .balance-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
   font-size: 16px;
   line-height: 1;
 }
@@ -20,8 +23,13 @@
   color: var(--accent);
 }
 
+.balance-icon img { display:block; width:25px; height:25px; object-fit:contain; }
+
 .balance-label {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
 }
+.balance-display { text-decoration:none; cursor:pointer; }
+.balance-display:focus-visible { outline:3px solid var(--border-hover); outline-offset:3px; }
+.balance-display:hover { filter:brightness(.96); }

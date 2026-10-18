@@ -1,2 +1,5 @@
-export { default } from './Results';
+import Results from './Results';
+export default function ResultsPage() {
+  return <Results />;
+}
 

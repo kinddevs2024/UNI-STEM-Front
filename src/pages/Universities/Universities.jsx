@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import NotificationToast from "../../components/NotificationToast";
 import { formatDate } from "../../utils/helpers";
 import "./Universities.css";
+import "../AdminPanel/PanelRedesign.css";
 
 const Universities = () => {
   const { user } = useAuth();
@@ -143,7 +144,7 @@ const Universities = () => {
 
   if (loading) {
     return (
-      <div className="universities-page">
+      <div className="universities-page brand-panel" data-brand-panel="universities">
         <div className="container">
           <div className="loading-spinner"></div>
         </div>
@@ -152,7 +153,7 @@ const Universities = () => {
   }
 
   return (
-    <div className="universities-page">
+    <div className="universities-page brand-panel" data-brand-panel="universities">
       <div className="container">
         <div className="universities-header">
           <h1 className="universities-title text-glow">Universities Management</h1>

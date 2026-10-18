@@ -1,11 +1,12 @@
 import { useAuth } from "../../context/AuthContext";
 import "./CheckerPanel.css";
+import "../AdminPanel/PanelRedesign.css";
 
 const CheckerPanel = () => {
   const { user } = useAuth();
 
   return (
-    <div className="checker-panel-page">
+    <div className="checker-panel-page brand-panel" data-brand-panel="checker">
       <div className="container">
         <div className="checker-header">
           <h1 className="checker-title text-glow">Portfolio Verification</h1>

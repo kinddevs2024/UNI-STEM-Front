@@ -8,7 +8,9 @@ import NotificationToast from '../../components/NotificationToast';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
+import '../TestOlympiad/TestOlympiad.css';
 import './EssayOlympiad.css';
+import { useDurableAnswers } from '../../hooks/useDurableAnswers';
 
 const EssayOlympiad = () => {
   const { id } = useParams();
@@ -18,7 +20,7 @@ const EssayOlympiad = () => {
   
   const [olympiad, setOlympiad] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const { answers, setAnswers, clearAnswers } = useDurableAnswers(id, user?._id, localStorage.getItem(`olympiad_${id}_attemptId`), 'essay_answers');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -78,72 +80,6 @@ const EssayOlympiad = () => {
 
     return () => clearInterval(interval);
   }, [olympiad, id, submitted]);
-
-  // Load saved draft from server on mount
-  useEffect(() => {
-    const loadDraft = async () => {
-      if (id && user) {
-        try {
-          const response = await olympiadAPI.getDraft(id);
-          if (response.data.success && response.data.draft && response.data.draft.answers) {
-            setAnswers(response.data.draft.answers);
-            setNotification({ 
-              message: 'Your previous essay has been loaded', 
-              type: 'success' 
-            });
-            setTimeout(() => setNotification(null), 3000);
-          }
-        } catch (error) {
-          console.error('Error loading draft:', error);
-          // Fallback to localStorage if server draft fails
-          const savedAnswers = localStorage.getItem(`olympiad_${id}_essay_answers`);
-          if (savedAnswers) {
-            try {
-              const parsedAnswers = JSON.parse(savedAnswers);
-              setAnswers(parsedAnswers);
-            } catch (e) {
-              console.error('Error loading saved answers from localStorage:', e);
-            }
-          }
-        }
-      }
-    };
-    loadDraft();
-  }, [id, user]);
-
-  // Auto-save answers to server in real-time with debouncing
-  useEffect(() => {
-    if (id && user && Object.keys(answers).length > 0 && !submitted) {
-      // Clear existing timeout
-      if (draftSaveTimeoutRef.current) {
-        clearTimeout(draftSaveTimeoutRef.current);
-      }
-
-      // Also save to localStorage as backup
-      localStorage.setItem(`olympiad_${id}_essay_answers`, JSON.stringify(answers));
-
-      // Set new timeout to save to server after 2 seconds of no changes
-      draftSaveTimeoutRef.current = setTimeout(async () => {
-        try {
-          setSavingDraft(true);
-          await olympiadAPI.saveDraft(id, answers);
-          // Silently save - don't show notification for every save
-        } catch (error) {
-          console.error('Error saving draft:', error);
-          // Don't show error notification for draft saves to avoid annoying users
-        } finally {
-          setSavingDraft(false);
-        }
-      }, 2000); // 2 second debounce
-    }
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (draftSaveTimeoutRef.current) {
-        clearTimeout(draftSaveTimeoutRef.current);
-      }
-    };
-  }, [answers, id, user, submitted]);
 
   const fetchOlympiad = async () => {
     try {
@@ -227,7 +163,7 @@ const EssayOlympiad = () => {
       await olympiadAPI.submit(id, { answers });
       setSubmitted(true);
       // Clear saved answers and draft after successful submission
-      localStorage.removeItem(`olympiad_${id}_essay_answers`);
+      clearAnswers();
       if (draftSaveTimeoutRef.current) {
         clearTimeout(draftSaveTimeoutRef.current);
       }
@@ -236,9 +172,13 @@ const EssayOlympiad = () => {
         navigate(`/olympiad/${id}/results`);
       }, 2000);
     } catch (error) {
-      setNotification({ 
-        message: error.response?.data?.message || 'Submission failed', 
-        type: 'error' 
+      const response = error.response?.data;
+      const existingSubmission = response?.code === 'OLYMPIAD_ALREADY_SUBMITTED';
+      setNotification({
+        message: response?.message || 'Submission failed. Your answers are still saved on this device. Please try again.',
+        type: 'error',
+        duration: existingSubmission ? null : 6000,
+        action: existingSubmission ? { label: 'View saved result →', to: `/olympiad/${id}/results` } : undefined,
       });
     }
   };
@@ -294,7 +234,7 @@ const EssayOlympiad = () => {
           <div className="recording-block-overlay">
             <div className="blocking-message card">
               <h2>⏸️ Recording Not Active</h2>
-              <p>Please wait for camera and screen recording to start.</p>
+              <p>Please wait for monitoring to start.</p>
               <p className="blocking-hint">
                 You cannot answer questions until recording is active.
               </p>
@@ -330,7 +270,7 @@ const EssayOlympiad = () => {
           </div>
           <div className="progress-text">
             Question {currentQuestionIndex + 1} of {questions.length}
-            {savingDraft && <span style={{ marginLeft: '10px', color: '#666', fontSize: '0.9em' }}>💾 Saving...</span>}
+            {savingDraft && <span className="exam-saving-status">💾 Saving...</span>}
           </div>
         </div>
 
@@ -410,6 +350,8 @@ const EssayOlympiad = () => {
         <NotificationToast
           message={notification.message}
           type={notification.type}
+          action={notification.action}
+          duration={notification.duration}
           onClose={() => setNotification(null)}
         />
       )}

@@ -1,0 +1,174 @@
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowUpRight, Eye, EyeSlash, EnvelopeSimple, LockKey, Sparkle, CheckCircle, WarningCircle } from "@phosphor-icons/react";
+import "@fontsource-variable/golos-text";
+import "@fontsource/cormorant-garamond/600-italic.css";
+import { useAuth } from "../../context/AuthContext";
+import api, { authAPI } from "../../services/api";
+import { getAuthDestination } from "../../utils/authDestination";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
+import "./AuthRedesign.css";
+import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
+
+const emptyForm = {email:"",password:"",confirmPassword:"",firstName:"",secondName:"",gradeCategory:""};
+const titles = {
+  "activate-account":["Make this account yours.","Choose your own password to finish your first sign-in."],
+  login:["Welcome back.", "Sign in and continue your journey to new achievements."],
+  register:["It starts here.", "Create an account and take your first step towards success."],
+  "verify-email":["Check your inbox.", "Enter the six-digit code from your email to verify your address."],
+  "forgot-request":["Let us get you back in.", "Enter your account email to receive a recovery code."],
+  "forgot-verify":["Your code is on its way.", "Enter the six-digit code we sent to your email."],
+  "forgot-reset":["New password. Fresh start.", "Choose a password with at least 6 characters."],
+};
+function errorMessage(error, fallback) { return error?.response?.data?.message || fallback; }
+
+function PasswordField({id,label,value,onChange,autoComplete="new-password",minLength=6}) {
+  const [visible,setVisible] = useState(false);
+  return <div className="go-auth-field"><label htmlFor={id}>{label}</label><div className="go-auth-input-wrap"><LockKey size={19} aria-hidden="true" /><input id={id} name={id} type={visible ? "text" : "password"} value={value} onChange={onChange} autoComplete={autoComplete} minLength={minLength} required placeholder={autoComplete === "current-password" ? "Your password" : `At least ${minLength} characters`} /><button type="button" className="go-auth-password-toggle" aria-label={visible ? "Hide password" : "Show password"} aria-pressed={visible} onClick={()=>setVisible(!visible)}>{visible ? <EyeSlash size={20} /> : <Eye size={20} />}</button></div></div>;
+}
+
+export default function AuthRedesign() {
+  const [view,setView] = useState("login");
+  const [form,setForm] = useState(emptyForm);
+  const [busy,setBusy] = useState(false);
+  const [googleBusy,setGoogleBusy] = useState(false);
+  const [notice,setNotice] = useState(null);
+  const [setupToken,setSetupToken] = useState("");
+  const [pendingEmail,setPendingEmail] = useState("");
+  const [code,setCode] = useState("");
+  const [newPassword,setNewPassword] = useState("");
+  const [confirmNewPassword,setConfirmNewPassword] = useState("");
+  const [resendCooldown,setResendCooldown] = useState(0);
+  const googleInFlight = useRef(false);
+  const submitInFlight = useRef(false);
+  const {login,register,loginWithGoogle,completeAuth} = useAuth();
+  const navigate = useNavigate();
+  const mainView = view === "login" || view === "register";
+  const disabled = busy || googleBusy;
+  const [title,description] = titles[view];
+
+  useEffect(()=> {
+    if (!resendCooldown) return;
+    const timer=setTimeout(()=>setResendCooldown(value=>Math.max(0,value-1)),1000);
+    return ()=>clearTimeout(timer);
+  },[resendCooldown]);
+
+  const change = event => setForm(prev=>({...prev,[event.target.name]:event.target.value}));
+  const showError = message => setNotice({type:"error",message});
+  const showInfo = message => setNotice({type:"info",message});
+  const changeView = next => {
+    setNotice(null); setCode(""); setNewPassword(""); setConfirmNewPassword("");
+    setForm(prev=>({...prev,password:"",confirmPassword:""}));
+    setView(next);
+  };
+
+  const handleGoogleSuccess = async ({credential}) => {
+    if (!credential || googleInFlight.current || submitInFlight.current) return;
+    googleInFlight.current=true; setGoogleBusy(true); setNotice(null);
+    try {
+      const result=await loginWithGoogle(credential,"id_token");
+      if (!result.success) { showError(result.error || "Google sign-in failed."); return; }
+      navigate(getAuthDestination(result.user),{replace:true});
+    } catch { showError("Could not complete sign-in. Please try again."); }
+    finally { googleInFlight.current=false; setGoogleBusy(false); }
+  };
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+    if (submitInFlight.current || googleInFlight.current) return;
+    setNotice(null);
+    if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) { showError("Enter your first and last name."); return; }
+    if (view === "register" && form.password !== form.confirmPassword) { showError("Passwords do not match."); return; }
+    if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) { showError("Passwords do not match."); return; }
+    submitInFlight.current=true; setBusy(true);
+    try {
+      if (mainView) {
+        const email=form.email.trim();
+        const result=view === "login" ? await login(email,form.password) : await register({
+          email,password:form.password,name:`${form.firstName.trim()} ${form.secondName.trim()}`.trim(),
+          firstName:form.firstName.trim(),secondName:form.secondName.trim(),phone:null,
+          gradeCategory:form.gradeCategory,
+        });
+        if (result.passwordChangeRequired) {
+          setSetupToken(result.setupToken);setPendingEmail(result.username);setView("activate-account");setNewPassword("");setConfirmNewPassword("");setForm(prev=>({...prev,password:""}));
+        } else if (result.emailVerificationRequired) {
+          setPendingEmail(email); setCode(""); setResendCooldown(60); setView("verify-email");
+          setForm(prev=>({...prev,password:"",confirmPassword:""}));
+          showInfo("Verification code sent. Check your inbox and spam folder.");
+        } else if (result.passwordResetRequired) {
+          setPendingEmail(email); setCode(""); setView("forgot-verify");
+          showInfo("A recovery code was sent to your email.");
+        } else if (result.success) {
+          navigate(result.user ? getAuthDestination(result.user) : "/",{replace:true});
+        } else { showError(result.error || "Could not sign in. Check your details and try again."); }
+      } else if (view === "activate-account") {
+        await api.post('/auth/activate-account',{setupToken,password:newPassword});
+        const result=await login(pendingEmail,newPassword);if(!result.success)throw new Error(result.error||'Sign in with your new password.');setSetupToken('');navigate('/profile',{replace:true});
+      } else if (view === "verify-email") {
+        const {data}=await authAPI.verifyEmail({email:pendingEmail.trim(),code});
+        if (!data?.success || !data.token || !data.user) throw new Error("Invalid verification response");
+        completeAuth(data.token,data.user);
+        navigate(getAuthDestination(data.user),{replace:true});
+      } else if (view === "forgot-request") {
+        await authAPI.requestPasswordResetCode({email:pendingEmail.trim()});
+        setCode(""); setResendCooldown(60); setView("forgot-verify"); showInfo("Code sent. Check your inbox and spam folder.");
+      } else if (view === "forgot-verify") {
+        const {data}=await authAPI.verifyPasswordResetCode({email:pendingEmail.trim(),code});
+        if (!data?.success) { showError(data?.message || "Could not verify the code."); return; }
+        setView("forgot-reset"); setNotice(null);
+      } else if (view === "forgot-reset") {
+        const {data}=await authAPI.resetPasswordWithCode({email:pendingEmail.trim(),code,password:newPassword});
+        if (!data?.success) { showError(data?.message || "Could not update the password."); return; }
+        setView("login"); setNewPassword(""); setConfirmNewPassword(""); setCode("");
+        setForm(prev=>({...prev,email:pendingEmail,password:"",confirmPassword:""}));
+        setNotice({type:"success",message:"Password updated. You can now sign in."});
+      }
+    } catch(error) { showError(errorMessage(error,"The request failed. Please try again.")); }
+    finally { submitInFlight.current=false; setBusy(false); }
+  };
+
+  const resendCode=async()=> {
+    if (submitInFlight.current || resendCooldown) return;
+    submitInFlight.current=true; setBusy(true); setNotice(null);
+    try {
+      if (view === "verify-email") await authAPI.resendVerificationCode({email:pendingEmail.trim()});
+      else await authAPI.requestPasswordResetCode({email:pendingEmail.trim()});
+      setResendCooldown(60); showInfo("A new code was sent to your email.");
+    } catch(error) { showError(errorMessage(error,"Could not send the code. Please try again.")); }
+    finally { submitInFlight.current=false; setBusy(false); }
+  };
+
+  return <div className="go-auth-page" data-translate="false">
+    <img src="/images/auth-landscape.webp" className="go-auth-backdrop" alt="" aria-hidden="true" fetchpriority="high" />
+    <div className="go-auth-shade" aria-hidden="true" />
+    <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link><Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link></header>
+    <div className="go-auth-layout">
+      <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
+      <section className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
+        {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
+        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
+        {mainView && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} /><div className="go-auth-divider"><span>or continue with email</span></div></>}
+        {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
+        <form className="go-auth-form" onSubmit={handleSubmit}>
+          <fieldset disabled={disabled}>
+            {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder="Your first name" /></div><div className="go-auth-field"><label htmlFor="secondName">Last name</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder="Your last name" /></div></div>}
+            {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label="Password" value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "register" && <PasswordField id="confirmPassword" label="Confirm password" value={form.confirmPassword} onChange={change} />}{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
+            {!mainView && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
+            {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">Email verification code</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="000000" /></div>}
+            {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label="New password" minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={e=>setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label="Confirm new password" minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={e=>setConfirmNewPassword(e.target.value)} /></>}
+            {view === "register" && <div className="go-auth-field"><label htmlFor="gradeCategory">School grade / education</label><select id="gradeCategory" name="gradeCategory" value={form.gradeCategory} onChange={change} required><option value="">Choose your class</option>{GRADE_CATEGORIES.map(grade => <option key={grade} value={grade}>{gradeLabel(grade)}</option>)}</select></div>}
+            <button type="submit" className="go-auth-submit">{busy ? "Please wait…" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : (view === "forgot-reset" || view === "activate-account") ? "Save password" : "Verify code"}<ArrowUpRight size={20} aria-hidden="true" /></button>
+            {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code"}</button>}
+          </fieldset>
+        </form>
+        <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>
+        
+      </section>
+    </div>
+    <footer className="go-auth-footer"><span>© {new Date().getFullYear()} Global Olympiad</span><a href="mailto:support@unistem.uz">Need help?<ArrowUpRight size={16} aria-hidden="true" /></a></footer>
+  </div>;
+}
+
+function GlobeNote() { return <CheckCircle size={17} aria-hidden="true" />; }
+
+

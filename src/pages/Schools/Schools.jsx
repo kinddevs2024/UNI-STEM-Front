@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import NotificationToast from "../../components/NotificationToast";
 import { formatDate } from "../../utils/helpers";
 import "./Schools.css";
+import "../AdminPanel/PanelRedesign.css";
 
 const Schools = () => {
   const { user } = useAuth();
@@ -174,7 +175,7 @@ const Schools = () => {
 
   if (loading) {
     return (
-      <div className="schools-page">
+      <div className="schools-page brand-panel" data-brand-panel="schools">
         <div className="container">
           <div className="loading-spinner"></div>
         </div>
@@ -183,7 +184,7 @@ const Schools = () => {
   }
 
   return (
-    <div className="schools-page">
+    <div className="schools-page brand-panel" data-brand-panel="schools">
       <div className="container">
         <div className="schools-header">
           <h1 className="schools-title text-glow">Schools Management</h1>

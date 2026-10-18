@@ -1,52 +1,8 @@
-.timer {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.timer-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-}
-
-.timer-display {
-  font-size: 32px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 2px;
-  transition: all 0.3s ease;
-}
-
-.timer-warning .timer-display {
-  color: var(--warning);
-  animation: timerPulse 1s ease-in-out infinite;
-}
-
-.timer-danger .timer-display {
-  color: var(--error);
-  animation: timerPulse 0.5s ease-in-out infinite;
-}
-
-.timer-expired {
-  border-color: var(--error);
-  box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-}
-
-.timer-expired .timer-display {
-  color: var(--error);
-}
-
-.timer-expired-message {
-  margin-top: 8px;
-  font-size: 14px;
-  color: var(--error);
-  font-weight: 600;
-  animation: pulse 1s ease-in-out infinite;
-}
-
+.timer { background:#dfcff5; color:#171530; border:1px solid #c9b6e3; border-radius:20px; padding:17px 22px; text-align:center; font-family:'Golos Text Variable',Arial,sans-serif; box-shadow:none; }
+.timer .timer-label { font-size:9px; color:#716076; text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+.timer .timer-display { font-size:30px; line-height:1.1; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:.025em; color:#171530; min-width:134px; }
+.timer.timer-warning { background:#fff6d9; border-color:#dec885; }
+.timer-warning .timer-display { color:#82611b; animation:none; }
+.timer.timer-danger,.timer.timer-expired { border-color:#d6939f; background:#fcecf0; box-shadow:none; }
+.timer-danger .timer-display,.timer-expired .timer-display { color:#a23f49; animation:none; }
+.timer .timer-expired-message { margin-top:9px; font-size:11px; color:#a23f49; font-weight:550; animation:none; }

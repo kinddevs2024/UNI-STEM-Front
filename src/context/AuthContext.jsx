@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { googleLogout } from "@react-oauth/google";
 import { authAPI } from "../services/api";
 import {
   getToken,
@@ -24,6 +25,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
+  const [oneTapSignedOut, setOneTapSignedOut] = useState(() => {
+    try { return sessionStorage.getItem('googleOneTapSignedOut') === '1'; }
+    catch { return false; }
+  });
 
   // Check cookie consent status from user object
   const checkCookieConsent = (userData) => {
@@ -71,6 +76,7 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
+      if (response.data.passwordChangeRequired) return {...response.data,success:false};
       const { token } = response.data;
 
       setToken(token);
@@ -203,11 +209,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (googleToken) => {
+  const loginWithGoogle = async (googleToken, tokenType = 'access_token') => {
     try {
-      const response = await authAPI.loginWithGoogle({
-        token: googleToken,
-      });
+      const response = await authAPI.loginWithGoogle(
+        tokenType === 'id_token' ? { credential: googleToken } : { token: googleToken }
+      );
       const { token } = response.data;
 
       setToken(token);
@@ -250,7 +256,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user };
       }
     } catch (error) {
-      console.error("Google login error:", error);
+      console.warn("Google sign-in could not be completed.");
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -265,6 +271,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    googleLogout();
+    setOneTapSignedOut(true);
+    try { sessionStorage.setItem('googleOneTapSignedOut', '1'); } catch { /* Storage may be unavailable. */ }
     removeToken();
     removeUser();
     setUserState(null);
@@ -305,7 +314,8 @@ export const AuthProvider = ({ children }) => {
       const res = await authAPI.getBalance();
       if (res.data?.success && typeof res.data.coins === "number") {
         setUserState((prev) => {
-          const updated = prev ? { ...prev, coins: res.data.coins } : null;
+          if (!prev || prev.coins === res.data.coins) return prev;
+          const updated = { ...prev, coins: res.data.coins };
           if (updated) setUser(updated);
           return updated;
         });
@@ -316,6 +326,15 @@ export const AuthProvider = ({ children }) => {
     }
     return null;
   };
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'student') return;
+    const refresh = () => refreshBalance();
+    refresh();
+    const timer = setInterval(refresh, 30000);
+    window.addEventListener('focus', refresh);
+    return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
+  }, [isAuthenticated, user?._id, user?.role]);
 
   const handleCookieConsent = async (consent) => {
     try {
@@ -363,6 +382,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    oneTapSignedOut,
     login,
     register,
     loginWithGoogle,

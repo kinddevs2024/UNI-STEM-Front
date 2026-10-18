@@ -80,7 +80,8 @@ const UpdatePassword = () => {
       <div className="update-password-container">
         <div className="update-password-card card">
           <div className="update-password-header">
-            <h1 className="update-password-title text-glow">Confirm Account & Set Password</h1>
+            <p className="go-account-eyebrow">A FRESH START</p>
+            <h1 className="update-password-title">Confirm Account &amp; <em>Set Password</em></h1>
             <p className="update-password-subtitle">
               Confirm your account and create a new password to access it.
             </p>

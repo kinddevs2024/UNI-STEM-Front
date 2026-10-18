@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Scene3D from "../../components/3D/Scene3D";
 import "./About.css";
+import "../PanelRedesign.css";
 
 const About = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="about-page">
+    <div className="about-page brand-panel" data-brand-panel="admin-about">
       {/* Hero Section */}
       <section className="hero-section h-svh ">
         <div className="hero-3d">

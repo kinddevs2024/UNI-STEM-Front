@@ -1,191 +1,39 @@
-.test-olympiad-page {
-  min-height: 100%;
-  padding: 20px;
-  background: var(--bg-primary);
-  padding-right: 240px;
-  /* Space for monitor */
-}
-
-.olympiad-loading,
-.olympiad-submitted {
-  min-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.submitted-card {
-  text-align: center;
-  max-width: 400px;
-}
-
-.submitted-card h2 {
-  font-size: 28px;
-  margin-bottom: 16px;
-  color: var(--success);
-}
-
-.olympiad-container {
-  max-width: 900px;
-  margin: 0 auto;
-  position: relative;
-}
-
-/* Blocking overlay when recording is not active */
-.recording-block-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  border-radius: 12px;
-  animation: fadeIn 0.3s ease;
-}
-
-.blocking-message {
-  text-align: center;
-  max-width: 500px;
-  padding: 40px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-}
-
-.blocking-message h2 {
-  font-size: 20px;
-  margin-bottom: 16px;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.blocking-message p {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  line-height: 1.6;
-}
-
-.blocking-hint {
-  color: var(--text-secondary);
-  font-weight: 400;
-  margin-top: 20px !important;
-  font-size: 14px;
-}
-
-.olympiad-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  gap: 24px;
-}
-
-.olympiad-title {
-  font-size: 32px;
-  font-weight: 700;
-}
-
-.olympiad-timer {
-  flex-shrink: 0;
-}
-
-.olympiad-progress {
-  margin-bottom: 24px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: var(--bg-secondary);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.3s ease;
-  box-shadow: 0 0 10px var(--glow);
-}
-
-.progress-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
-.questions-navigation {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
-
-.nav-button {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-}
-
-.nav-button:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-}
-
-.nav-button.active {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--bg-primary);
-  box-shadow: 0 0 15px var(--glow);
-}
-
-.nav-button.answered {
-  background: var(--success);
-  border-color: var(--success);
-  color: var(--bg-primary);
-}
-
-.nav-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.olympiad-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 32px;
-}
-
-.olympiad-actions button {
-  flex: 1;
-  padding: 14px 24px;
-  font-size: 16px;
-}
-
-@media (max-width: 1024px) {
-  .test-olympiad-page {
-    padding-right: 20px;
-  }
-
-  .olympiad-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
+:is(.test-olympiad-page,.essay-olympiad-page) { min-height:100%; padding:36px 254px 54px 28px; background:#fbf9f3; color:#171530; font-family:'Golos Text Variable',Arial,sans-serif; }
+:is(.olympiad-loading,.olympiad-submitted) { min-height:55vh; padding:24px; display:flex; align-items:center; justify-content:center; background:#fbf9f3; color:#171530; font-family:'Golos Text Variable',Arial,sans-serif; }
+.olympiad-submitted .submitted-card { text-align:center; max-width:480px; width:100%; padding:36px; border:1px solid #b8d7c6; background:#e9f6ef; border-radius:24px; box-shadow:none; transform:none; animation:none; }
+.olympiad-submitted .submitted-card h2 { font-size:28px; margin-bottom:16px; color:#3b785d; letter-spacing:-.035em; }
+.olympiad-submitted .submitted-card p { color:#716f7a; line-height:1.7; margin-bottom:24px; }
+.olympiad-submitted .button-primary { display:inline-flex; justify-content:center; align-items:center; background:#171530; color:#fff; padding:14px 24px; border:1px solid #171530; border-radius:50px; box-shadow:none; transform:none; font-size:13px; min-height:48px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-container { max-width:960px; margin:0 auto; position:relative; min-width:0; }
+:is(.test-olympiad-page,.essay-olympiad-page) .card { border:1px solid #dcd9d3; border-radius:24px; background:#fff; box-shadow:none; transform:none; animation:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .card:hover { border-color:#dcd9d3; box-shadow:none; transform:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .recording-block-overlay { position:absolute; inset:0; background:rgba(251,249,243,.94); display:flex; align-items:flex-start; justify-content:center; z-index:1000; border-radius:24px; padding:30px 16px; min-height:100%; }
+:is(.test-olympiad-page,.essay-olympiad-page) .blocking-message { text-align:center; max-width:520px; width:100%; padding:32px; border-color:#e4d7a2; background:#fff6d9; position:sticky; top:110px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .blocking-message h2 { font-size:22px; margin-bottom:16px; color:#82611b; font-weight:550; letter-spacing:-.03em; }
+:is(.test-olympiad-page,.essay-olympiad-page) .blocking-message p { font-size:14px; color:#716f7a; margin-bottom:12px; line-height:1.8; }
+:is(.test-olympiad-page,.essay-olympiad-page) .blocking-hint { color:#82611b!important; margin-top:18px!important; font-size:13px!important; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; gap:24px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-title { font-size:clamp(26px,3.5vw,40px); font-weight:600; line-height:1.2; letter-spacing:-.045em; color:#171530; overflow-wrap:anywhere; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-timer { flex-shrink:0; min-width:184px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-progress { margin-bottom:20px; padding:18px 22px; background:#c6def3; border:1px solid #b9cfdf; border-radius:18px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .progress-bar { width:100%; height:7px; background:rgba(255,255,255,.7); border-radius:50px; overflow:hidden; margin-bottom:11px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .progress-fill { height:100%; background:#171530; border-radius:50px; box-shadow:none; transition:width .2s ease; }
+:is(.test-olympiad-page,.essay-olympiad-page) .progress-text { font-size:12px; color:#384a5e; text-align:left; line-height:1.7; }
+:is(.test-olympiad-page,.essay-olympiad-page) .exam-saving-status { display:inline-block; margin-left:10px; color:#384a5e; font-size:12px; }
+:is(.test-olympiad-page,.essay-olympiad-page) .questions-navigation { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; padding:16px; background:#fff; border-radius:20px; border:1px solid #dcd9d3; }
+:is(.test-olympiad-page,.essay-olympiad-page) .nav-button { width:44px; height:44px; padding:0; border:1px solid #dcd9d3; background:#fbf9f3; color:#171530; border-radius:14px; cursor:pointer; font-size:13px; font-weight:550; position:relative; box-shadow:none; transform:none; transition:background-color .15s,border-color .15s; }
+:is(.test-olympiad-page,.essay-olympiad-page) .nav-button:hover { border-color:#9470b8; transform:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .nav-button.answered { background:#e9f6ef; border-color:#8cb99f; color:#3b785d; }
+:is(.test-olympiad-page,.essay-olympiad-page) .nav-button.active { border-color:#171530; background:#171530; color:#fff; box-shadow:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .nav-button.active.answered::after { content:''; width:5px; height:5px; border-radius:50%; background:#a8d9bf; position:absolute; right:5px; top:5px; }
+:is(.test-olympiad-page,.essay-olympiad-page) button:disabled { opacity:.45; cursor:not-allowed; }
+:is(.test-olympiad-page,.essay-olympiad-page) .olympiad-actions { display:flex; justify-content:flex-end; gap:14px; margin-top:24px; }
+:is(.test-olympiad-page,.essay-olympiad-page) :is(.button-primary,.button-secondary) { display:inline-flex; justify-content:center; align-items:center; min-height:50px; padding:14px 26px; font-size:13px; font-weight:500; font-family:inherit; border:1px solid #171530; border-radius:50px; box-shadow:none; transform:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .button-primary { background:#171530; color:#fff; }
+:is(.test-olympiad-page,.essay-olympiad-page) .button-secondary { background:#fff; color:#171530; }
+:is(.test-olympiad-page,.essay-olympiad-page) .button-primary:not(:disabled):hover { background:#393153; box-shadow:none; transform:none; }
+:is(.test-olympiad-page,.essay-olympiad-page) .button-secondary:not(:disabled):hover { background:#dfcff5; }
+:is(.test-olympiad-page,.essay-olympiad-page) :is(button,input,textarea):focus-visible { outline:3px solid #9470b8; outline-offset:3px; }
+@media(max-width:1050px) { :is(.test-olympiad-page,.essay-olympiad-page) { padding:24px 22px 44px; } :is(.test-olympiad-page,.essay-olympiad-page) .olympiad-header { align-items:flex-start; } }
+@media(max-width:650px) { :is(.test-olympiad-page,.essay-olympiad-page) { padding:18px 14px 32px; } :is(.test-olympiad-page,.essay-olympiad-page) .olympiad-header { flex-direction:column; gap:17px; } :is(.test-olympiad-page,.essay-olympiad-page) .olympiad-timer { width:100%; } :is(.test-olympiad-page,.essay-olympiad-page) .olympiad-actions { flex-wrap:wrap; } :is(.test-olympiad-page,.essay-olympiad-page) .olympiad-actions button { flex:1; } :is(.test-olympiad-page,.essay-olympiad-page) .blocking-message { padding:24px; top:90px; } }
+@media(prefers-reduced-motion:reduce) { :is(.test-olympiad-page,.essay-olympiad-page) .progress-fill { transition:none; } }

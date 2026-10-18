@@ -1,0 +1,60 @@
+.dashboard-tour { width:min(560px,calc(100% - 32px)); max-height:calc(100dvh - 32px); margin:auto; padding:28px; border:1px solid #d8c9e9; border-radius:28px; background:#fbf9f3; color:#171530; box-shadow:0 24px 100px #17153040; overflow:auto; }
+.dashboard-tour::backdrop { background:#171530a6; backdrop-filter:blur(3px); }
+.tour-stage { position:relative; z-index:1102; margin:32px auto; }
+.tour-blocker { position:fixed; inset:0; z-index:1100; }
+.tour-spotlight { position:fixed; z-index:1101; pointer-events:none; border:2px solid #dfcff5; border-radius:30px; box-shadow:0 0 0 9999px #171530a6; }
+.tour-coach-coins { position:fixed; width:min(400px,calc(100% - 32px)); margin:0; top:110px; left:16px; }
+.navbar-tour-mobile-balance { display:none; }
+.tour-replay-wrap { width:min(1320px,100%); padding:18px 32px 0; margin:auto; text-align:right; }
+.tour-replay { border:0; background:transparent; color:var(--text-secondary,#716f7a); cursor:pointer; font:inherit; font-size:12px; padding:8px; }
+.tour-replay:focus-visible { outline:2px solid #675776; outline-offset:3px; }
+.tutorial-grid-slot:empty { display:none; }
+body:has(.tour-blocker) .dashboard-page .empty-state,body:has(.tour-blocker) .results-page .empty-state { display:none; }
+.tutorial-grid-slot { min-width:0; scroll-margin-top:100px; }
+.tutorial-demo-card { position:relative; z-index:1102; height:100%; scroll-margin-top:100px; }
+.dashboard-page .tutorial-demo-card .olympiad-card-logo-container { height:110px; aspect-ratio:auto; margin-top:12px; }
+.dashboard-page .tutorial-demo-card .olympiad-card-logo { object-fit:contain; }
+.dashboard-page .tutorial-demo-card .olympiad-meta p { margin:0; font-size:12px; }
+.dashboard-page .tutorial-demo-card .olympiad-title { font-size:20px; }
+.dashboard-page .tutorial-demo-card .dashboard-tour-start { margin-top:auto; }
+.tutorial-demo-note { color:var(--text-secondary); font-size:12px; }
+.tour-coach { position:fixed; width:min(400px,calc(100% - 32px)); margin:0; }
+body .dashboard-tour.tour-coach .button-primary,body .tutorial-demo-card.card .button-primary { transition:background-color 200ms ease,box-shadow 200ms ease,opacity 200ms ease; transform:none; box-shadow:0 4px 6px -1px rgba(23,21,48,.12),0 2px 4px -2px rgba(23,21,48,.12); }
+body .dashboard-tour.tour-coach .button-primary:hover:not(:disabled),body .tutorial-demo-card.card .button-primary:hover:not(:disabled) { transform:none; box-shadow:0 10px 15px -3px rgba(23,21,48,.2),0 4px 6px -4px rgba(23,21,48,.16); background:#302a4b; color:#fbf9f3; }
+body .dashboard-tour.tour-coach .button-primary:active,body .tutorial-demo-card.card .button-primary:active { transform:none; background:#171530; }
+@media(prefers-reduced-motion:reduce) { body .dashboard-tour.tour-coach .button-primary,body .tutorial-demo-card.card .button-primary { transition:none; } }
+@media(max-width:759px) { .tour-coach { padding:18px; } .tour-coach h2 { font-size:21px; margin:12px 0 8px; } .tour-coach .dashboard-tour-description { font-size:12px; line-height:1.5; margin:0 0 12px; } .tour-coach .dashboard-tour-actions { margin-top:16px; } .tour-coach .dashboard-tour-footnote { margin-top:12px; } }
+@media(max-width:759px) { .dashboard-page .tutorial-demo-card { padding:18px; } .dashboard-page .tutorial-demo-card .olympiad-card-logo-container { height:80px; margin-bottom:14px; } .dashboard-page .tutorial-demo-card .olympiad-card-header { margin-bottom:12px; } }
+@media(max-width:900px) { body:has(.tour-blocker[data-step="2"]) .navbar-tour-mobile-balance { display:block; margin-left:auto; } body:has(.tour-blocker[data-step="2"]) .navbar-container { gap:10px; padding-left:16px; padding-right:16px; } }
+.dashboard-tour-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#675776; font-size:10px; letter-spacing:.1em; }
+.dashboard-tour-heading button { border:0; background:#eee5f7; color:#171530; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:24px; }
+.dashboard-tour h2 { font-size:28px; line-height:1.15; margin:22px 0 12px; }
+.dashboard-tour-description { color:#716f7a; font-size:14px; line-height:1.7; margin-bottom:24px; }
+.dashboard-tour-target { border:2px solid #ac89d7; border-radius:22px; padding:24px; background:#eee5f7; box-shadow:0 0 0 6px #dfcff550; }
+.dashboard-tour-badge { display:inline-block; font-size:9px; letter-spacing:.08em; font-weight:600; color:#675776; }
+.dashboard-tour-target h3 { font-size:23px; margin:16px 0; }
+.dashboard-tour-target p { font-size:12px; line-height:1.6; color:#675776; }
+.dashboard-tour-demo-heading { display:flex; align-items:center; gap:16px; justify-content:space-between; }
+.dashboard-tour-demo-heading img { object-fit:contain; }
+.dashboard-tour-start { width:100%; margin-top:12px; }
+.dashboard-tour-results { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:22px 0; }
+.dashboard-tour-results div { display:flex; flex-direction:column; gap:8px; padding:18px 12px; border-radius:16px; background:#fbf9f3; }
+.dashboard-tour-results strong { font-size:23px; }
+.dashboard-tour-results span { font-size:12px; color:#716f7a; }
+.dashboard-tour-coins { display:flex; flex-direction:column; align-items:center; padding:34px 20px; background:#f9e78f; border-color:#d6b953; box-shadow:0 0 0 6px #f9e78f50; }
+.dashboard-tour-actions { display:flex; justify-content:space-between; gap:12px; margin-top:28px; }
+.dashboard-tour-skip { border:0; background:transparent; color:#675776; font:inherit; font-size:13px; cursor:pointer; padding:12px; }
+.dashboard-tour-footnote { text-align:center; font-size:10px; color:#716f7a; margin:18px 0 0; }
+.dashboard-tour :is(button,a):focus-visible { outline:3px solid #675776; outline-offset:4px; }
+@media(max-width:480px) { .dashboard-tour { padding:22px; } .dashboard-tour h2 { font-size:25px; } .dashboard-tour-target { padding:20px; } .dashboard-tour-demo-heading img { width:75px; height:75px; } }
+.tour-coach { height:auto; min-height:310px; max-height:none; overflow:visible; display:flex; flex-direction:column; }
+.tour-coach .dashboard-tour-actions { margin-top:auto; }
+.tour-coach .dashboard-tour-step { animation:none; }
+.tour-coach :is(.dashboard-tour-step,.dashboard-tour-actions,.dashboard-tour-footnote) { transition:opacity 150ms ease; }
+.tour-coach:is(.tour-phase-leaving,.tour-phase-arriving) :is(.dashboard-tour-step,.dashboard-tour-actions,.dashboard-tour-footnote) { opacity:0; }
+.tutorial-demo-card { animation:none; }
+body:has(.tour-blocker) .main-content,body:has(.tour-blocker) .page-container { animation:none; }
+html:has(.tour-blocker) { scroll-behavior:auto; }
+@media(prefers-reduced-motion:no-preference) { .tour-coach { transition:top 420ms cubic-bezier(.22,1,.36,1),left 420ms cubic-bezier(.22,1,.36,1); } .tour-spotlight { transition:top 420ms cubic-bezier(.22,1,.36,1),left 420ms cubic-bezier(.22,1,.36,1),width 420ms cubic-bezier(.22,1,.36,1),height 420ms cubic-bezier(.22,1,.36,1); } }
+@media(max-width:759px) { .tour-coach { height:auto; min-height:260px; padding:18px; } .tour-coach h2 { font-size:21px; margin:12px 0 8px; } .tour-coach .dashboard-tour-description { font-size:12px; line-height:1.5; margin:0 0 12px; } .tour-coach .dashboard-tour-actions { margin-top:16px; } }
+@media(prefers-reduced-motion:reduce) { .tour-coach,.tour-spotlight,.tour-coach :is(.dashboard-tour-step,.dashboard-tour-actions,.dashboard-tour-footnote) { transition:none; } }

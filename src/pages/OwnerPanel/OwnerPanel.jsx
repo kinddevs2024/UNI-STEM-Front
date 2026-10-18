@@ -16,8 +16,26 @@ import {
   isOlympiadEnded,
 } from "../../utils/helpers";
 import "./OwnerPanel.css";
+import "../AdminPanel/PanelRedesign.css";
 
 const OwnerPanel = () => {
+  const [coinTarget, setCoinTarget] = useState(null);
+  const [coinAmount, setCoinAmount] = useState('100');
+  const [coinRequestId, setCoinRequestId] = useState('');
+  const [coinSaving, setCoinSaving] = useState(false);
+  const openCoinTopup = (student) => { setCoinTarget(student); setCoinAmount('100'); setCoinRequestId(crypto.randomUUID()); };
+  const addStudentCoins = async (event) => {
+    event.preventDefault();
+    const amount = Number(coinAmount);
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1000000) return;
+    setCoinSaving(true);
+    try {
+      const response = await ownerAPI.addStudentCoins(coinTarget._id, { amount, requestId: coinRequestId });
+      setNotification({ message: `Coins added. Student balance: ${response.data.coins} coins.`, type: 'success' });
+      setCoinTarget(null); fetchUsers();
+    } catch (error) { setNotification({ message: error.response?.data?.message || 'Could not add coins. Please try again.', type: 'error' }); }
+    finally { setCoinSaving(false); }
+  };
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
   const [olympiads, setOlympiads] = useState([]);
@@ -347,11 +365,11 @@ const OwnerPanel = () => {
         <div className="chart-body">
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={series}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-line)" />
               <XAxis dataKey="date" tickFormatter={(value) => value.slice(5)} />
               <YAxis />
               <Tooltip formatter={(value) => `${value}${valueSuffix}`} />
-              <Line type="monotone" dataKey="value" stroke="#38bdf8" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="value" stroke="#8e74b5" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -443,14 +461,14 @@ const OwnerPanel = () => {
 
   if (isInitialLoading) {
     return (
-      <div className="owner-loading">
+      <div className="owner-loading brand-panel" data-brand-panel="owner">
         <div className="loading-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="owner-panel-page">
+    <div className="owner-panel-page brand-panel" data-brand-panel="owner">
       <div className="container">
         <div className="owner-header">
           <h1 className="owner-title text-glow">Owner Panel</h1>
@@ -1059,6 +1077,7 @@ const OwnerPanel = () => {
               <div className="table-cell">Name</div>
               <div className="table-cell">Email</div>
               <div className="table-cell">Role</div>
+              <div className="table-cell">Coins</div>
               <div className="table-cell">Actions</div>
             </div>
             <div className="table-body">
@@ -1074,6 +1093,7 @@ const OwnerPanel = () => {
                     <div className="table-cell">
                       <span className="role-badge">{user.role}</span>
                     </div>
+                    <div className="table-cell">{user.role==='student'?<div className="owner-student-coins"><span>{user.coins ?? 100} coins</span><button type="button" className="button-secondary" onClick={()=>openCoinTopup(user)}>Add coins</button></div>:'—'}</div>
                     <div className="table-cell">
                       <select
                         value={user.role}
@@ -1284,6 +1304,7 @@ const OwnerPanel = () => {
         </div>
       )}
 
+      {coinTarget && <div className="owner-coin-overlay"><form className="owner-coin-dialog" role="dialog" aria-modal="true" aria-labelledby="owner-coin-title" onSubmit={addStudentCoins}><h2 id="owner-coin-title">Add student coins</h2><p>{coinTarget.name} · {coinTarget.email}</p><p>Current balance: {coinTarget.coins ?? 100} coins</p><label htmlFor="owner-coin-amount">Coins to add</label><input id="owner-coin-amount" type="number" min="1" max="1000000" step="1" required value={coinAmount} onChange={e=>setCoinAmount(e.target.value)}/><p>Confirm the student's payment separately before adding coins.</p><div className="owner-coin-actions"><button type="button" className="button-secondary" disabled={coinSaving} onClick={()=>setCoinTarget(null)}>Cancel</button><button type="submit" className="button-primary" disabled={coinSaving}>{coinSaving?'Adding…':'Add coins'}</button></div></form></div>}
       {notification && (
         <NotificationToast
           message={notification.message}

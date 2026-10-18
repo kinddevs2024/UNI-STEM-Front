@@ -1,0 +1,19 @@
+.answer-review { margin:28px 0; }
+.answer-review-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.answer-review h3 { margin:0 0 8px; font-size:25px; }
+.answer-review-heading p { margin:0; opacity:.75; line-height:1.6; }
+.answer-review-list { list-style:none; padding:0; margin:24px 0 0; display:grid; gap:20px; }
+.answer-review-question { border:1px solid currentColor; border-radius:18px; padding:20px; overflow-wrap:anywhere; }
+.answer-review-meta { display:flex; flex-wrap:wrap; align-items:center; gap:12px; font-size:13px; }
+.answer-review-meta > strong { border:1px solid currentColor; border-radius:20px; padding:5px 10px; }
+.answer-review-correct .answer-review-meta > strong { color:#24945a; }
+.answer-review-incorrect .answer-review-meta > strong { color:#de6767; }
+.answer-review-question h4 { margin:18px 0; font-size:18px; white-space:pre-wrap; }
+.answer-review-question p { white-space:pre-wrap; line-height:1.7; margin:12px 0 0; }
+.answer-review-options { list-style:none; display:grid; gap:8px; padding:0; }
+.answer-review-options li { display:flex; flex-wrap:wrap; gap:10px; padding:12px; border:1px solid #8885; border-radius:12px; }
+.answer-review-options li span { flex:1; min-width:100px; }
+.answer-review-options strong { font-size:12px; }
+.answer-review-options .is-correct { border-color:#24945a; background:#24945a15; }
+.answer-review-options .is-incorrect { border-color:#de6767; background:#de676715; }
+@media(max-width:600px) { .answer-review-heading { align-items:stretch; flex-direction:column; } .answer-review-question { padding:15px; } }

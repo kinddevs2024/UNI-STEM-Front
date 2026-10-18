@@ -68,7 +68,9 @@ const VerifyEmail = () => {
       <div className="verify-email-container">
         <div className="verify-email-card card">
           <div className="verify-email-header">
-            <h1 className="verify-email-title text-glow">Verify Email</h1>
+            <div className="verify-email-art"><img src={done ? "/images/trophy.webp" : "/images/student-girl.webp"} alt="" aria-hidden="true" width="132" height="132" /></div>
+            <p className="go-account-eyebrow">ONE STEP CLOSER</p>
+            <h1 className="verify-email-title">Verify <em>Email</em></h1>
             <p className="verify-email-subtitle">
               {loading
                 ? "Verifying your email..."

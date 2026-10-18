@@ -1,0 +1,8 @@
+[data-brand-panel="university-panel"] .admin-header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+[data-brand-panel="university-panel"] .admin-header-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+[data-brand-panel="university-panel"] .subject-management { background:#f5f1f8; border:1px solid #dedadf; border-radius:18px; padding:18px; }
+[data-brand-panel="university-panel"] .olympiad-actions { border-top:1px solid #dedadf; padding-top:18px; }
+@media (max-width:600px) {
+  [data-brand-panel="university-panel"] .admin-header-actions { width:100%; }
+  [data-brand-panel="university-panel"] .admin-header-actions > button { width:100%; }
+}

@@ -240,12 +240,15 @@ const CompleteProfile = () => {
     <div className="complete-profile-page">
       <div className="container">
         <div className="complete-profile-header">
-          <h1 className="complete-profile-title text-glow">
-            Complete Your Profile
+          <div><p className="go-account-eyebrow">A LITTLE ABOUT YOU</p>
+          <h1 className="complete-profile-title">
+            Complete Your <em>Profile</em>
           </h1>
           <p className="complete-profile-subtitle">
             Please provide the following information to continue
           </p>
+          </div>
+          <img className="complete-profile-art" src="/images/student-girl.webp" alt="" aria-hidden="true" width="156" height="156" />
         </div>
 
         <form onSubmit={handleSubmit} className="complete-profile-form card">

@@ -1,6 +1,6 @@
-const isMobileDevice = () => {
+export const isMobileDevice = () => {
   if (typeof navigator === 'undefined') return false;
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') || (/Macintosh/i.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
 };
 
 const getLegacyGetUserMedia = () => {
@@ -87,3 +87,13 @@ export const getMediaAccessErrorMessage = (error, { needsScreen = true } = {}) =
 
   return error?.message || 'Unable to access camera/screen sharing. Please try again.';
 };
+
+export const usesMobileCameraMode = () => isMobileDevice() && !navigator.mediaDevices?.getDisplayMedia && typeof navigator.getDisplayMedia !== 'function';
+export function createStreamRecorder(stream, onData) {
+  if (typeof MediaRecorder === 'undefined') throw new Error('Video recording is not supported in this browser.');
+  const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(type=>MediaRecorder.isTypeSupported(type));
+  const recorder = new MediaRecorder(stream, { ...(mimeType ? { mimeType } : {}), videoBitsPerSecond:2500000 });
+  recorder.ondataavailable = event => { if (event.data?.size > 0) onData(event.data); };
+  recorder.start(1000);
+  return recorder;
+}

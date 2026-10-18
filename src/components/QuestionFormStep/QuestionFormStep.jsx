@@ -179,7 +179,7 @@ const QuestionFormStep = ({
   };
 
   return (
-    <div className="step-content">
+    <div className="step-content question-form-step">
       <h2>Step 3: Add Questions</h2>
       <p className="step-description">
         Add questions to your {olympiadType === "test" ? "test" : "essay"}{" "}

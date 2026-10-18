@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useServerTimer } from '../../hooks/useServerTimer';
 import { useAttemptSession } from '../../hooks/useAttemptSession';
 import { useAntiCheat } from '../../hooks/useAntiCheat';
-import { saveAnswers, getSavedAnswers, deleteSavedAnswers } from '../../utils/indexeddb';
+import { useDurableAnswers } from '../../hooks/useDurableAnswers';
 import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/helpers';
 import { generateDeviceFingerprint } from '../../utils/device-fingerprint';
 import './TestOlympiad.css';
@@ -24,7 +24,7 @@ const TestOlympiad = () => {
   
   const [olympiad, setOlympiad] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -51,6 +51,8 @@ const TestOlympiad = () => {
   // Load attempt session
   const { attempt, loading: attemptLoading, error: attemptError, isActive, isExpired, isCompleted } = useAttemptSession(id);
   
+  const { answers, setAnswers, clearAnswers } = useDurableAnswers(id, user?._id, attempt?._id);
+
   // Set attempt ID when loaded
   useEffect(() => {
     if (attempt?._id) {
@@ -119,68 +121,6 @@ const TestOlympiad = () => {
         console.error('Error generating device fingerprint:', err);
       });
   }, [id]);
-
-  // Load saved draft from server on mount
-  useEffect(() => {
-    const loadDraft = async () => {
-      if (id && user) {
-        try {
-          const response = await olympiadAPI.getDraft(id);
-          if (response.data.success && response.data.draft && response.data.draft.answers) {
-            setAnswers(response.data.draft.answers);
-            setNotification({ 
-              message: 'Your previous answers have been loaded', 
-              type: 'success' 
-            });
-            setTimeout(() => setNotification(null), 3000);
-          }
-        } catch (error) {
-          console.error('Error loading draft:', error);
-          // Fallback to localStorage if server draft fails
-          const savedAnswers = localStorage.getItem(`olympiad_${id}_answers`);
-          if (savedAnswers) {
-            try {
-              const parsedAnswers = JSON.parse(savedAnswers);
-              setAnswers(parsedAnswers);
-            } catch (e) {
-              console.error('Error loading saved answers from localStorage:', e);
-            }
-          }
-        }
-      }
-    };
-    loadDraft();
-  }, [id, user]);
-
-  // Save answers to IndexedDB for offline recovery
-  useEffect(() => {
-    if (id && Object.keys(answers).length > 0 && !submitted) {
-      saveAnswers(id, answers).catch(error => {
-        console.error('Error saving answers to IndexedDB:', error);
-      });
-    }
-  }, [answers, id, submitted]);
-
-  // Handle tab close/refresh - skip current question
-  useEffect(() => {
-    const handleBeforeUnload = async () => {
-      if (attemptId && currentQuestionIndex >= 0 && !submitted) {
-        try {
-          // Use sendBeacon for reliable delivery during page unload
-          // Note: sendBeacon doesn't support custom headers, so we'll rely on API endpoint
-          // In production, you might want to use a different approach or store skip request in IndexedDB
-          olympiadAPI.skipQuestion(id, { reason: 'tab_close', deviceFingerprint }).catch(() => {
-            // Ignore errors during unload
-          });
-        } catch (error) {
-          // Ignore errors during unload
-        }
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [id, attemptId, currentQuestionIndex, submitted, deviceFingerprint]);
 
   // Load current question from server if missing or missing nonce
   useEffect(() => {
@@ -270,11 +210,7 @@ const TestOlympiad = () => {
       [questionId]: answer
     }));
 
-    // Save to IndexedDB for offline recovery (async, don't await)
-    if (id) {
-      const updatedAnswers = { ...answers, [questionId]: answer };
-      saveAnswers(id, updatedAnswers).catch(err => console.error('IndexedDB save error:', err));
-    }
+
   };
 
   const hasAnswerValue = (value) => {
@@ -463,7 +399,7 @@ const TestOlympiad = () => {
       await olympiadAPI.submit(id, { answers });
       setSubmitted(true);
       // Clear saved answers and draft after successful submission
-      localStorage.removeItem(`olympiad_${id}_answers`);
+      clearAnswers();
       if (draftSaveTimeoutRef.current) {
         clearTimeout(draftSaveTimeoutRef.current);
       }
@@ -472,9 +408,13 @@ const TestOlympiad = () => {
         navigate(`/olympiad/${id}/results`);
       }, 2000);
     } catch (error) {
-      setNotification({ 
-        message: error.response?.data?.message || 'Submission failed', 
-        type: 'error' 
+      const response = error.response?.data;
+      const existingSubmission = response?.code === 'OLYMPIAD_ALREADY_SUBMITTED';
+      setNotification({
+        message: response?.message || 'Submission failed. Your answers are still saved on this device. Please try again.',
+        type: 'error',
+        duration: existingSubmission ? null : 6000,
+        action: existingSubmission ? { label: 'View saved result →', to: `/olympiad/${id}/results` } : undefined,
       });
     } finally {
       setSubmitting(false);
@@ -588,7 +528,7 @@ const TestOlympiad = () => {
           <div className="recording-block-overlay">
             <div className="blocking-message card">
               <h2>⏸️ Recording Not Active</h2>
-              <p>Please wait for camera and screen recording to start.</p>
+              <p>Please wait for monitoring to start.</p>
               <p className="blocking-hint">
                 You cannot answer questions until recording is active.
               </p>
@@ -626,7 +566,7 @@ const TestOlympiad = () => {
           <div className="progress-text">
             Question {currentQuestionIndex + 1} of {questions.length} 
             ({answeredCount} answered)
-            {savingDraft && <span style={{ marginLeft: '10px', color: '#666', fontSize: '0.9em' }}>💾 Saving...</span>}
+            {savingDraft && <span className="exam-saving-status">💾 Saving...</span>}
           </div>
         </div>
 
@@ -685,6 +625,8 @@ const TestOlympiad = () => {
         <NotificationToast
           message={notification.message}
           type={notification.type}
+          action={notification.action}
+          duration={notification.duration}
           onClose={() => setNotification(null)}
         />
       )}

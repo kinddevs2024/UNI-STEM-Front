@@ -1,4 +1,49 @@
-/* Question Form Step Styles - Reuse AdminPanel styles */
-/* These styles are already defined globally in AdminPanel.css */
-/* This file exists for potential component-specific overrides */
-
+.question-form-step { color:#171530; font-family:'Golos Text Variable',Arial,sans-serif; }
+.question-form-step > h2 { font-size:30px; font-weight:550; letter-spacing:-.035em; margin-bottom:12px; color:#171530; }
+.question-form-step .step-description { color:#716f7a; font-size:13px; line-height:1.8; margin-bottom:28px; }
+.question-form-step .questions-list { margin-bottom:30px; }
+.question-form-step .questions-list > h3 { font-size:19px; font-weight:550; margin-bottom:18px; }
+.question-form-step .question-item.card { border:1px solid #dcd9d3; border-radius:24px; padding:24px; background:#fff; margin-bottom:16px; box-shadow:none; transform:none; }
+.question-form-step .question-item.card:hover { transform:none; box-shadow:none; }
+.question-form-step .question-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:15px; border-bottom:1px solid #dcd9d3; margin-bottom:18px; }
+.question-form-step .question-number { font-size:12px; color:#716f7a; }
+.question-form-step .question-points { background:#f9e78f; color:#171530; border:1px solid #e4d7a2; border-radius:50px; padding:6px 12px; font-size:11px; }
+.question-form-step .question-text { color:#171530; font-size:15px; line-height:1.8; margin-bottom:18px; }
+.question-form-step .question-options { display:flex; flex-direction:column; gap:8px; }
+.question-form-step .option { background:#fbf9f3; border:1px solid #dcd9d3; border-radius:13px; padding:11px 15px; color:#716f7a; font-size:13px; }
+.question-form-step .option.correct { background:#e9f6ef; border-color:#b8d7c6; color:#3b785d; }
+.question-form-step .question-form { background:#fbf9f3; padding:26px; border:1px solid #dcd9d3; border-radius:24px; }
+.question-form-step .form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:22px; }
+.question-form-step .form-group > label { color:#716f7a; font-size:12px; font-weight:500; }
+.question-form-step :is(input[type=text],input[type=number],textarea) { font-family:inherit; color:#171530; background:#fff; border:1px solid #dcd9d3; border-radius:14px; padding:13px 16px; font-size:14px; min-width:0; box-shadow:none; }
+.question-form-step :is(input[type=text],input[type=number],textarea):focus { border-color:#9470b8; outline:2px solid #dfcff5; outline-offset:2px; box-shadow:none; }
+.question-form-step textarea { width:100%; resize:vertical; line-height:1.8; }
+.question-form-step .form-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+.question-form-step :is(.button-primary,.button-secondary,.button-success,.button-danger) { display:inline-flex; align-items:center; justify-content:center; min-height:45px; padding:12px 21px; font-family:inherit; font-size:12px; font-weight:500; border-radius:50px; border:1px solid #171530; box-shadow:none; transform:none; }
+.question-form-step .button-primary { background:#171530; color:#fff; }
+.question-form-step .button-secondary { background:#fff; color:#171530; }
+.question-form-step .button-success { background:#e9f6ef; color:#3b785d; border-color:#b8d7c6; }
+.question-form-step .button-danger { background:#fcecf0; color:#a23f49; border-color:#e9bac2; }
+.question-form-step :is(.button-primary,.button-secondary,.button-success,.button-danger):hover { transform:none; box-shadow:none; filter:brightness(.97); }
+.question-form-step button:focus-visible { outline:3px solid #9470b8; outline-offset:3px; }
+.question-form-step .option-input-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; padding:12px; background:#fff; border:1px solid #dcd9d3; border-radius:17px; }
+.question-form-step .option-input-row.is-selected { background:#e9f6ef; border-color:#8cb99f; }
+.question-form-step .option-input-row > .option-label { flex:0 0 25px; display:block; padding:0; margin:0; border:none; background:transparent; color:#716f7a; font-size:12px; transform:none; }
+.question-form-step .option-input { flex:1; width:100%; }
+.question-form-step .option-select-control { display:flex; align-items:center; gap:7px; cursor:pointer; position:relative; flex-shrink:0; color:#716f7a; font-size:11px; }
+.question-form-step .option-select-input { position:absolute; opacity:0; width:22px; height:22px; }
+.question-form-step .option-select-indicator { display:flex; align-items:center; justify-content:center; width:22px; height:22px; border:1px solid #b6b0bd; border-radius:50%; background:#fff; color:#fff; }
+.question-form-step .option-select-indicator.is-checkbox { border-radius:6px; }
+.question-form-step .option-select-indicator.is-selected { border-color:#3b785d; background:#3b785d; }
+.question-form-step .option-select-indicator.is-radio.is-selected { box-shadow:inset 0 0 0 5px #fff; }
+.question-form-step .option-select-control:has(input:focus-visible) { outline:2px solid #9470b8; outline-offset:4px; border-radius:6px; }
+.question-form-step .option-select-control:has(input:disabled) { opacity:.45; cursor:not-allowed; }
+.question-form-step .answer-mode-toggle-wrapper { margin:4px 0 15px; }
+.question-form-step .answer-mode-toggle { display:flex; align-items:center; gap:11px; font-size:12px; color:#716f7a; cursor:pointer; position:relative; }
+.question-form-step .answer-mode-toggle-input { position:absolute; opacity:0; width:40px; height:24px; }
+.question-form-step .answer-mode-toggle-slider { width:40px; height:24px; background:#dcd9d3; border-radius:50px; position:relative; flex-shrink:0; }
+.question-form-step .answer-mode-toggle-slider::before { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; }
+.question-form-step .answer-mode-toggle-input:checked + .answer-mode-toggle-slider { background:#171530; }
+.question-form-step .answer-mode-toggle-input:checked + .answer-mode-toggle-slider::before { transform:translateX(16px); }
+.question-form-step .answer-mode-toggle-input:focus-visible + .answer-mode-toggle-slider { outline:2px solid #9470b8; outline-offset:4px; }
+@media(max-width:600px) { .question-form-step .question-form { padding:20px; } .question-form-step .option-input-row { flex-wrap:wrap; gap:8px; } .question-form-step .option-input { flex-basis:calc(100% - 34px); } .question-form-step .option-select-control { margin-left:33px; } .question-form-step :is(input[type=text],input[type=number],textarea) { font-size:16px; } .question-form-step .form-actions button { flex:1; } }

@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { olympiadAPI } from '../services/api';
 import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from '../utils/constants';
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
-import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from '../utils/mediaAccess';
+import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage, usesMobileCameraMode, createStreamRecorder } from '../utils/mediaAccess';
 import { consumePendingProctoringStreams } from '../utils/proctoringSession';
 import './ProctoringMonitor.css';
+import ProctoringStatus from './ProctoringStatus';
 
 const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {
+  const [mobileCameraOnly] = useState(()=>usesMobileCameraMode() || localStorage.getItem(`olympiad_${olympiadId}_proctoringMode`)==='mobile_camera');
   const cameraVideoRef = useRef(null);
   const screenVideoRef = useRef(null);
   
@@ -44,9 +46,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       setUploadStatus(`Uploading ${type} video...`);
 
       // Combine all chunks into a single blob
-      const videoBlob = new Blob(chunks, {
-        type: 'video/webm'
-      });
+      const mimeType = chunks[0]?.type || (type==='camera'?cameraRecorderRef.current?.mimeType:screenRecorderRef.current?.mimeType) || 'video/webm';
+      const videoBlob = new Blob(chunks, { type:mimeType });
 
       // Create File object from blob
       // Generate filename: {userId}_{date}_{olympiad-name}_{type}.webm
@@ -56,7 +57,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         type,
         new Date()
       );
-      const videoFile = new File([videoBlob], filename, { type: 'video/webm' });
+      const recordingFilename = mimeType.includes('mp4') ? filename.replace(/\.webm$/,'.mp4') : filename;
+      const videoFile = new File([videoBlob], recordingFilename, { type:mimeType });
 
       // Create FormData
       const formData = new FormData();
@@ -217,75 +219,20 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   };
 
   const startCameraRecording = () => {
-    const stream = cameraStreamRef.current;
-    if (!stream) return;
-
-    cameraChunksRef.current = [];
-
-    // Check if MediaRecorder is supported
-    if (!MediaRecorder.isTypeSupported('video/webm')) {
-      console.error('MediaRecorder with webm not supported');
-      return;
-    }
-
     try {
-      // Create MediaRecorder for camera stream
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 2500000 // 2.5 Mbps for 720p
-      });
-
-      cameraRecorderRef.current = mediaRecorder;
-
-      // Collect video chunks
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          cameraChunksRef.current.push(event.data);
-        }
-      };
-
-      // Start recording
-      mediaRecorder.start(1000); // Collect data every 1 second
-
-    } catch (error) {
-      console.error('Error starting camera MediaRecorder:', error);
-    }
+      cameraChunksRef.current = [];
+      cameraRecorderRef.current = createStreamRecorder(cameraStreamRef.current, chunk=>cameraChunksRef.current.push(chunk));
+      cameraRecorderRef.current.onerror = () => { setCameraError('Camera recording failed. Please check your camera.'); stopRecording(); };
+      return cameraRecorderRef.current.state === 'recording';
+    } catch(error) { setCameraError(error.message); return false; }
   };
-
   const startScreenRecording = () => {
-    const stream = screenStreamRef.current;
-    if (!stream) return;
-
-    screenChunksRef.current = [];
-
-    // Check if MediaRecorder is supported
-    if (!MediaRecorder.isTypeSupported('video/webm')) {
-      console.error('MediaRecorder with webm not supported');
-      return;
-    }
-
     try {
-      // Create MediaRecorder for screen stream
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 2500000 // 2.5 Mbps for 720p
-      });
-
-      screenRecorderRef.current = mediaRecorder;
-
-      // Collect video chunks
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          screenChunksRef.current.push(event.data);
-        }
-      };
-
-      // Start recording
-      mediaRecorder.start(1000); // Collect data every 1 second
-
-    } catch (error) {
-      console.error('Error starting screen MediaRecorder:', error);
-    }
+      screenChunksRef.current = [];
+      screenRecorderRef.current = createStreamRecorder(screenStreamRef.current, chunk=>screenChunksRef.current.push(chunk));
+      screenRecorderRef.current.onerror = () => { setScreenError('Screen recording failed. Please check screen sharing.'); stopRecording(); };
+      return screenRecorderRef.current.state === 'recording';
+    } catch(error) { setScreenError(error.message); return false; }
   };
 
   // Helper function to convert data URL to blob
@@ -394,7 +341,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         setCameraError('Camera access is not supported on this device/browser.');
       }
 
-      if ((!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) && typeof navigator.getDisplayMedia !== 'function') {
+      if (!mobileCameraOnly && (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) && typeof navigator.getDisplayMedia !== 'function') {
         setScreenError(getScreenShareSupportMessage());
       }
 
@@ -415,6 +362,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
           cameraVideoRef.current.srcObject = cameraStream;
           setCameraActive(true);
           setCameraError(null);
+          cameraStream.getVideoTracks()[0]?.addEventListener('ended',()=>{setCameraActive(false);setCameraError('Camera stopped. Keep camera monitoring active.');stopRecording();});
 
           if (onProctoringStatusChange) {
             onProctoringStatusChange({
@@ -430,7 +378,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         console.error('Camera error:', err);
       }
 
-      // Start screen capture (Entire Screen required)
+      // Desktop screen capture remains mandatory.
+      if (!mobileCameraOnly) {
       try {
         const screenResult = await requestEntireScreenStream(pendingStreams.screenStream || null);
         const screenStream = screenResult.stream;
@@ -475,6 +424,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         setScreenError(getMediaAccessErrorMessage(err, { needsScreen: true }));
         console.error('Screen error:', err);
       }
+      }
 
       // Wait for streams to initialize
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -484,16 +434,14 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       let screenRecordingStarted = false;
 
       if (cameraStreamRef.current) {
-        startCameraRecording();
-        cameraRecordingStarted = true;
+        cameraRecordingStarted = startCameraRecording();
       }
       if (screenStreamRef.current) {
-        startScreenRecording();
-        screenRecordingStarted = true;
+        screenRecordingStarted = startScreenRecording();
       }
 
       // Only start recording when BOTH camera and screen are active
-      if (cameraRecordingStarted && screenRecordingStarted) {
+      if (cameraRecordingStarted && (mobileCameraOnly || screenRecordingStarted)) {
         setIsRecording(true);
         // Notify parent that recording started
         if (onRecordingStatusChange) {
@@ -521,7 +469,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
     try {
       await startMonitoring();
-      if (!cameraStreamRef.current || !screenStreamRef.current) {
+      if (!cameraStreamRef.current || (!mobileCameraOnly && !screenStreamRef.current)) {
         monitoringStartedRef.current = false;
       }
     } catch (error) {
@@ -719,78 +667,6 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   useEffect(() => {
     if (!consentGiven) return;
 
-    const startCameraRecording = () => {
-      const stream = cameraStreamRef.current;
-      if (!stream) return;
-
-      cameraChunksRef.current = [];
-
-      // Check if MediaRecorder is supported
-      if (!MediaRecorder.isTypeSupported('video/webm')) {
-        console.error('MediaRecorder with webm not supported');
-        return;
-      }
-
-      try {
-        // Create MediaRecorder for camera stream
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/webm;codecs=vp9',
-          videoBitsPerSecond: 2500000 // 2.5 Mbps for 720p
-        });
-
-        cameraRecorderRef.current = mediaRecorder;
-
-        // Collect video chunks
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            cameraChunksRef.current.push(event.data);
-          }
-        };
-
-        // Start recording
-        mediaRecorder.start(1000); // Collect data every 1 second
-
-      } catch (error) {
-        console.error('Error starting camera MediaRecorder:', error);
-      }
-    };
-
-    const startScreenRecording = () => {
-      const stream = screenStreamRef.current;
-      if (!stream) return;
-
-      screenChunksRef.current = [];
-
-      // Check if MediaRecorder is supported
-      if (!MediaRecorder.isTypeSupported('video/webm')) {
-        console.error('MediaRecorder with webm not supported');
-        return;
-      }
-
-      try {
-        // Create MediaRecorder for screen stream
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/webm;codecs=vp9',
-          videoBitsPerSecond: 2500000 // 2.5 Mbps for 720p
-        });
-
-        screenRecorderRef.current = mediaRecorder;
-
-        // Collect video chunks
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            screenChunksRef.current.push(event.data);
-          }
-        };
-
-        // Start recording
-        mediaRecorder.start(1000); // Collect data every 1 second
-
-      } catch (error) {
-        console.error('Error starting screen MediaRecorder:', error);
-      }
-    };
-
     // Cleanup function
     return () => {
       stopRecording();
@@ -972,7 +848,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         )}
       </div>
 
-      <div className="monitor-screen">
+      {mobileCameraOnly ? <div className="monitor-mobile-mode"><strong>Mobile mode</strong><p>Camera only. Screen sharing is not supported by this mobile browser.</p></div> : <div className="monitor-screen">
         <div className="monitor-header">
           <span className="monitor-title">Screen</span>
           {screenActive && <div className="monitor-indicator" />}
@@ -995,16 +871,10 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         )}
       </div>
 
+      }
       <div className="monitor-stats">
         <div className="monitor-status-row">
-          <div className="monitor-status-card">
-            <span className="monitor-status-label">Status</span>
-            <div className={`monitor-status-badge ${isRecording ? 'active' : 'stopped'}`}>
-              <span className="monitor-status-dot" aria-hidden="true" />
-              <span className="monitor-status-icon" aria-hidden="true">{isRecording ? '🎥' : '⏸'}</span>
-              <span className="monitor-status-text">{isRecording ? 'Recording' : 'Stopped'}</span>
-            </div>
-          </div>
+          <ProctoringStatus mobileCameraOnly={mobileCameraOnly} isRecording={isRecording} cameraActive={cameraActive} screenActive={screenActive} cameraError={cameraError} screenError={screenError} />
 
           {isUploading && (
             <div className="monitor-upload-inline">

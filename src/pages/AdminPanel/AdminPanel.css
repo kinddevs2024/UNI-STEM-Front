@@ -1,17 +1,17 @@
-.admin-panel-page {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]).admin-panel-page {
   min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
-.admin-loading {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]).admin-loading {
   min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.admin-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
   align-items: center;
@@ -21,18 +21,18 @@
 }
 
 @media (max-width: 768px) {
-  .admin-header {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header {
     grid-template-columns: 1fr;
     align-items: flex-start;
   }
 
-  .admin-header-actions {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header-actions {
     width: 100%;
     justify-content: flex-start;
   }
 }
 
-.admin-header-actions {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header-actions {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -42,11 +42,11 @@
   max-width: 100%;
 }
 
-.status-filter {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-filter {
   padding: 10px 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
@@ -64,8 +64,8 @@
   padding-right: 36px;
 }
 
-.admin-header-actions .button-primary,
-.header-create-button {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header-actions .button-primary,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .header-create-button {
   white-space: nowrap;
   flex-shrink: 0;
   padding: 10px 24px;
@@ -79,106 +79,106 @@
   background: transparent;
   color: var(--text-primary);
   transition: all 0.3s ease;
-  border-radius: 8px;
+  border-radius: 14px;
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.admin-header-actions .button-primary:hover,
-.header-create-button:hover {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header-actions .button-primary:hover,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .header-create-button:hover {
   background: var(--accent);
   color: var(--bg-primary);
-  box-shadow: 0 0 25px var(--glow);
+  box-shadow: none;
   transform: translateY(-2px);
 }
 
-.header-create-button {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .header-create-button {
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
-.status-filter:focus {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-filter:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 20px var(--glow);
+  box-shadow: none;
 }
 
-.admin-title {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-title {
   font-size: 48px;
   font-weight: 700;
   letter-spacing: -2px;
 }
 
-.create-form {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .create-form {
   margin-bottom: 40px;
   animation: fadeIn 0.5s ease;
 }
 
-.create-form h2 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .create-form h2 {
   font-size: 24px;
   margin-bottom: 24px;
 }
 
-.form-row {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
 }
 
-.form-group {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.form-group label {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-group label {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.subject-management {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-management {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.subject-add-toggle {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-add-toggle {
   width: fit-content;
   padding: 8px 12px;
   font-size: 13px;
 }
 
-.subject-add-row {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-add-row {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-.subject-add-row input {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-add-row input {
   flex: 1;
 }
 
 @media (max-width: 768px) {
-  .subject-add-row {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-add-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .subject-add-row .button-primary {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .subject-add-row .button-primary {
     width: 100%;
   }
 }
 
-.admin-olympiads {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-olympiads {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
   align-items: start;
 }
 
-.admin-olympiad-card {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-olympiad-card {
   display: flex;
   flex-direction: column;
   padding: 24px;
@@ -186,17 +186,17 @@
   gap: 16px;
 }
 
-.olympiad-card-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-card-header {
   display: flex;
   gap: 16px;
   align-items: flex-start;
 }
 
-.olympiad-logo-container {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-logo-container {
   flex-shrink: 0;
   width: 80px;
   height: 80px;
-  border-radius: 12px;
+  border-radius: 24px;
   overflow: hidden;
   background: var(--bg-secondary);
   border: 2px solid var(--border);
@@ -205,14 +205,14 @@
   justify-content: center;
 }
 
-.olympiad-logo {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-logo {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.logo-placeholder {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .logo-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -223,59 +223,59 @@
   background: var(--bg-tertiary);
 }
 
-.olympiad-title-row {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-title-row {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
 }
 
-.olympiad-info {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-info {
   flex: 1;
   min-width: 0;
   /* Allow text to wrap */
 }
 
-.olympiad-info h3 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-info h3 {
   font-size: 20px;
   margin: 0;
 }
 
-.status-badge {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-badge {
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 24px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.status-published {
-  background: rgba(0, 255, 0, 0.2);
-  color: #00ff00;
-  border: 1px solid #00ff00;
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-published {
+  background: #e6f1e8;
+  color: #356e59;
+  border: 1px solid #356e59;
 }
 
-.status-unpublished {
-  background: rgba(255, 0, 0, 0.2);
-  color: #ff0000;
-  border: 1px solid #ff0000;
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-unpublished {
+  background: #fae9ed;
+  color: #a84550;
+  border: 1px solid #a84550;
 }
 
-.status-draft {
-  background: rgba(255, 255, 255, 0.2);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-draft {
+  background: #f5f1f8;
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
 
-.olympiad-meta {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-meta {
   display: flex;
   gap: 8px;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.olympiad-actions {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -283,60 +283,60 @@
 }
 
 @media (max-width: 1024px) {
-  .admin-olympiads {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-olympiads {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
-  .admin-header {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header {
     grid-template-columns: 1fr;
     gap: 16px;
     align-items: flex-start;
   }
 
-  .admin-title {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-title {
     font-size: 32px;
   }
 
-  .admin-header-actions {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-header-actions {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
   }
 
-  .status-filter {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .status-filter {
     font-size: 13px;
     padding: 8px 12px;
   }
 
-  .admin-olympiads {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-olympiads {
     grid-template-columns: 1fr;
   }
 
-  .admin-olympiad-card {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .admin-olympiad-card {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
 
-  .olympiad-logo-container {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-logo-container {
     width: 60px;
     height: 60px;
   }
 
-  .olympiad-actions {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-actions {
     width: 100%;
     flex-direction: column;
   }
 
-  .olympiad-actions button {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .olympiad-actions button {
     width: 100%;
   }
 }
 
 /* Step Indicator */
-.step-indicator {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -346,18 +346,18 @@
   gap: 0;
 }
 
-.step-indicator::before {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator::before {
   content: '';
   position: absolute;
   top: 30px;
   left: 6%;
   right: 6%;
   height: 2px;
-  background: rgba(255, 255, 255, 0.18);
+  background: #f5f1f8;
   z-index: 0;
 }
 
-.step-indicator .step {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -367,12 +367,12 @@
   flex: 1;
 }
 
-.step-indicator .step-number {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step-number {
   width: 12px;
   height: 12px;
   border-radius: 999px;
   background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,53 +381,53 @@
   transition: all 0.3s ease;
 }
 
-.step-indicator .step.active .step-number {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step.active .step-number {
   background: var(--text-primary);
   border-color: var(--text-primary);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+  box-shadow: none;
 }
 
-.step-indicator .step.completed .step-number {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.6);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step.completed .step-number {
+  background: #f5f1f8;
+  border-color: var(--border);
 }
 
-.step-indicator .step-label {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-secondary);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   font-weight: 600;
 }
 
-.step-indicator .step.active .step-label {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step.active .step-label {
   color: var(--text-primary);
 }
 
 /* Step Content */
-.step-content {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-content {
   animation: fadeIn 0.3s ease;
 }
 
-.step-description {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-description {
   color: var(--text-secondary);
   margin-bottom: 24px;
   font-size: 14px;
 }
 
 /* Type Selection */
-.type-selection {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-selection {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 32px;
 }
 
-.type-card {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-card {
   background: var(--bg-secondary);
   border: 2px solid var(--border);
-  border-radius: 12px;
+  border-radius: 24px;
   padding: 32px 24px;
   text-align: center;
   cursor: pointer;
@@ -438,37 +438,37 @@
   gap: 12px;
 }
 
-.type-card:hover {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-card:hover {
   border-color: var(--accent);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
 
-.type-card.selected {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-card.selected {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 30px var(--glow);
+  background: #f5f1f8;
+  box-shadow: none;
 }
 
-.type-icon {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-icon {
   font-size: 48px;
   margin-bottom: 8px;
 }
 
-.type-card h3 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-card h3 {
   font-size: 20px;
   margin: 0;
   color: var(--text-primary);
 }
 
-.type-card p {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-card p {
   font-size: 14px;
   color: var(--text-secondary);
   margin: 0;
 }
 
 /* Form Actions */
-.form-actions {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -478,85 +478,85 @@
 }
 
 /* Question Form */
-.question-form {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form {
   margin-top: 32px;
 }
 
-.question-form textarea,
-.question-form input[type="text"],
-.question-form input[type="number"] {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form textarea,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form input[type="text"],
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form input[type="number"] {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   color: var(--text-primary);
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: 14px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.question-form textarea::placeholder,
-.question-form input[type="text"]::placeholder {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form textarea::placeholder,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form input[type="text"]::placeholder {
   color: var(--text-secondary);
 }
 
-.question-form textarea:focus,
-.question-form input[type="text"]:focus,
-.question-form input[type="number"]:focus {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form textarea:focus,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form input[type="text"]:focus,
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-form input[type="number"]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
-.questions-list {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .questions-list {
   margin-bottom: 32px;
 }
 
-.questions-list h3 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .questions-list h3 {
   font-size: 18px;
   margin-bottom: 16px;
   color: var(--text-primary);
 }
 
-.question-item {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-item {
   padding: 20px;
   margin-bottom: 16px;
   border-left: 3px solid var(--accent);
 }
 
-.question-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.question-number {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-number {
   font-weight: 600;
   color: var(--accent);
   font-size: 16px;
 }
 
-.question-points {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-points {
   font-size: 14px;
   color: var(--text-secondary);
   background: var(--bg-secondary);
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 24px;
 }
 
-.question-text {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-text {
   margin-bottom: 12px;
   color: var(--text-primary);
   line-height: 1.6;
 }
 
-.question-options {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-options {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
 }
 
-.option {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option {
   padding: 8px 12px;
   background: var(--bg-secondary);
   border-radius: 6px;
@@ -564,14 +564,14 @@
   color: var(--text-secondary);
 }
 
-.option.correct {
-  background: rgba(255, 255, 255, 0.2);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option.correct {
+  background: #f5f1f8;
   color: var(--accent);
   border: 1px solid var(--accent);
   font-weight: 500;
 }
 
-.option-input-row {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-input-row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -579,22 +579,22 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 14px;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.option-input-row.is-selected {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-input-row.is-selected {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.08);
+  background: #f5f1f8;
 }
 
-.option-label {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-label {
   font-weight: 600;
   color: var(--text-primary);
   min-width: 24px;
 }
 
-.option-input {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-input {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -604,28 +604,28 @@
   opacity: 1;
 }
 
-.option-input:focus {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-input:focus {
   outline: none;
 }
 
-.answer-mode-toggle-wrapper {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-wrapper {
   margin-bottom: 12px;
 }
 
-.answer-mode-toggle {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
 }
 
-.answer-mode-toggle-input {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-.answer-mode-toggle-slider {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-slider {
   width: 34px;
   height: 20px;
   border-radius: 999px;
@@ -635,7 +635,7 @@
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.answer-mode-toggle-slider::after {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-slider::after {
   content: "";
   position: absolute;
   top: 2px;
@@ -647,22 +647,22 @@
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.answer-mode-toggle-input:checked+.answer-mode-toggle-slider {
-  background: rgba(255, 255, 255, 0.16);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-input:checked+.answer-mode-toggle-slider {
+  background: #f5f1f8;
   border-color: var(--accent);
 }
 
-.answer-mode-toggle-input:checked+.answer-mode-toggle-slider::after {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-input:checked+.answer-mode-toggle-slider::after {
   transform: translateX(14px);
   background: var(--accent);
 }
 
-.answer-mode-toggle-text {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .answer-mode-toggle-text {
   font-size: 13px;
   color: var(--text-secondary);
 }
 
-.option-select-control {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-control {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -670,13 +670,13 @@
   user-select: none;
 }
 
-.option-select-input {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-.option-select-indicator {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-indicator {
   width: 18px;
   height: 18px;
   border: 1px solid var(--border);
@@ -690,72 +690,72 @@
   transition: all 0.2s ease;
 }
 
-.option-select-indicator.is-radio {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-indicator.is-radio {
   border-radius: 50%;
 }
 
-.option-select-indicator.is-checkbox {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-indicator.is-checkbox {
   border-radius: 5px;
 }
 
-.option-select-indicator.is-selected {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-indicator.is-selected {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--bg-primary);
 }
 
-.option-select-text {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .option-select-text {
   font-size: 12px;
   color: var(--text-secondary);
   font-weight: 600;
 }
 
-.button-success {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .button-success {
   background: var(--accent);
   color: var(--bg-primary);
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.button-success:hover {
-  box-shadow: 0 0 20px var(--glow);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .button-success:hover {
+  box-shadow: none;
   transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-  .step-indicator {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator {
     padding: 4px 6px 0;
   }
 
-  .step-indicator .step-label {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step-label {
     font-size: 10px;
     letter-spacing: 0.4px;
   }
 
-  .step-indicator .step-number {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .step-indicator .step-number {
     width: 10px;
     height: 10px;
   }
 
-  .type-selection {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .type-selection {
     grid-template-columns: 1fr;
   }
 
-  .form-actions {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-actions {
     flex-direction: column;
   }
 
-  .form-actions button {
+  :where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .form-actions button {
     width: 100%;
   }
 }
 
 /* Modal Styles */
-.modal-overlay {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -770,19 +770,19 @@
   animation: fadeIn 0.3s ease;
 }
 
-.modal-content {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-content {
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 24px;
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: scaleIn 0.3s ease;
+  box-shadow: none;
+  animation: panel-admin-scaleIn 0.3s ease;
 }
 
-.modal-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -790,12 +790,12 @@
   border-bottom: 1px solid var(--border);
 }
 
-.modal-header h2 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-header h2 {
   margin: 0;
   font-size: 24px;
 }
 
-.modal-close {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-close {
   background: none;
   border: none;
   color: var(--text-primary);
@@ -811,96 +811,95 @@
   transition: all 0.3s ease;
 }
 
-.modal-close:hover {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-close:hover {
   background: var(--bg-secondary);
   color: var(--accent);
 }
 
-.modal-body {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .modal-body {
   padding: 24px;
 }
 
-.question-manager {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager {
   max-width: 1000px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: 22px;
   overflow: hidden;
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.28),
-    0 24px 70px rgba(0, 0, 0, 0.4);
+    none;
 }
 
-.question-manager .modal-header {
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .modal-header {
+  background: var(--panel-lilac);
   border-bottom: 1px solid var(--border);
   padding: 22px 24px;
 }
 
-.question-manager .modal-header h2 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .modal-header h2 {
   color: var(--text-primary);
   font-size: 38px;
   line-height: 1.15;
 }
 
-.question-manager .modal-close {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .modal-close {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   color: var(--text-primary);
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
-.question-manager .modal-body {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .modal-body {
   background: var(--bg-primary);
   border-top: none;
   padding: 22px 24px 24px;
 }
 
-.question-manager .questions-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .questions-header {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 24px;
   padding: 14px 16px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  box-shadow: none;
 }
 
-.question-manager .questions-list {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .questions-list {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 16px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: none;
 }
 
-.question-manager .question-item {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .question-item {
   border-radius: 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
 }
 
-.questions-header {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .questions-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.questions-header h3 {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .questions-header h3 {
   margin: 0;
   font-size: 20px;
 }
 
-.questions-header-actions {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .questions-header-actions {
   display: flex;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.question-manager .hidden-file-input {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .question-manager .hidden-file-input {
   position: absolute;
   width: 0.1px;
   height: 0.1px;
@@ -909,17 +908,17 @@
   z-index: -1;
 }
 
-.empty-state {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: var(--text-secondary);
 }
 
-.empty-state p {
+:where([data-brand-panel="admin"],[data-brand-panel="university-panel"],[data-brand-panel="university-dashboard"]) .empty-state p {
   font-size: 16px;
 }
 
-@keyframes scaleIn {
+@keyframes panel-admin-scaleIn {
   from {
     transform: scale(0.9);
     opacity: 0;

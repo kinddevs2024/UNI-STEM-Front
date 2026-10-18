@@ -1,45 +1,45 @@
-.university-dashboard-page {
+:where([data-brand-panel="university-dashboard"]).university-dashboard-page {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.university-loading {
+:where([data-brand-panel="university-dashboard"]) .university-loading {
   min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.university-header {
+:where([data-brand-panel="university-dashboard"]) .university-header {
   text-align: center;
   margin-bottom: var(--spacing-xl);
 }
 
-.university-title {
+:where([data-brand-panel="university-dashboard"]) .university-title {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
   letter-spacing: -1px;
   margin-bottom: var(--spacing-base);
 }
 
-.university-subtitle {
+:where([data-brand-panel="university-dashboard"]) .university-subtitle {
   font-size: var(--font-size-lg);
   color: var(--text-secondary);
 }
 
 /* Tab Navigation */
-.dashboard-filters {
+:where([data-brand-panel="university-dashboard"]) .dashboard-filters {
   display: flex;
   gap: var(--spacing-base);
   margin-bottom: var(--spacing-base);
 }
 
-.dashboard-filters.with-margin {
+:where([data-brand-panel="university-dashboard"]) .dashboard-filters.with-margin {
   margin-bottom: var(--spacing-base);
 }
 
-.dashboard-filters .filter-button {
+:where([data-brand-panel="university-dashboard"]) .dashboard-filters .filter-button {
   padding: var(--spacing-sm) var(--spacing-lg);
   border: 2px solid var(--border);
   background: var(--bg-secondary);
@@ -51,83 +51,83 @@
   font-weight: var(--font-weight-medium);
 }
 
-.dashboard-filters .filter-button:hover {
+:where([data-brand-panel="university-dashboard"]) .dashboard-filters .filter-button:hover {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.05);
+  background: #f5f1f8;
   color: white;
 }
 
-.dashboard-filters .filter-button.active {
+:where([data-brand-panel="university-dashboard"]) .dashboard-filters .filter-button.active {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--bg-primary);
-  box-shadow: 0 0 20px var(--glow);
+  box-shadow: none;
 }
 
 /* Olympiad Management Styles */
-.university-header-actions {
+:where([data-brand-panel="university-dashboard"]) .university-header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-base);
 }
 
-.university-header-actions h2 {
+:where([data-brand-panel="university-dashboard"]) .university-header-actions h2 {
   margin: 0;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
 }
 
-.olympiads-grid {
+:where([data-brand-panel="university-dashboard"]) .olympiads-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--spacing-lg);
   margin-top: var(--spacing-base);
 }
 
-.olympiad-card {
+:where([data-brand-panel="university-dashboard"]) .olympiad-card {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-base);
 }
 
-.olympiad-card-header {
+:where([data-brand-panel="university-dashboard"]) .olympiad-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--spacing-base);
 }
 
-.olympiad-title {
+:where([data-brand-panel="university-dashboard"]) .olympiad-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   flex: 1;
 }
 
-.olympiad-meta {
+:where([data-brand-panel="university-dashboard"]) .olympiad-meta {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   font-size: var(--font-size-sm);
 }
 
-.olympiad-meta-item {
+:where([data-brand-panel="university-dashboard"]) .olympiad-meta-item {
   display: flex;
   gap: var(--spacing-sm);
 }
 
-.meta-label {
+:where([data-brand-panel="university-dashboard"]) .meta-label {
   color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
-.meta-value {
+:where([data-brand-panel="university-dashboard"]) .meta-value {
   color: var(--text-primary);
 }
 
-.olympiad-card-actions {
+:where([data-brand-panel="university-dashboard"]) .olympiad-card-actions {
   margin-top: auto;
   padding-top: var(--spacing-base);
   border-top: 1px solid var(--border);
@@ -136,7 +136,7 @@
   flex-wrap: wrap;
 }
 
-.olympiad-card-actions a {
+:where([data-brand-panel="university-dashboard"]) .olympiad-card-actions a {
   flex: 1;
   min-width: 120px;
   text-align: center;
@@ -144,7 +144,7 @@
   display: inline-block;
 }
 
-.view-mode-toggle {
+:where([data-brand-panel="university-dashboard"]) .view-mode-toggle {
   display: flex;
   gap: var(--spacing-xs);
   background: var(--bg-secondary);
@@ -153,7 +153,7 @@
   border: 1px solid var(--border);
 }
 
-.view-mode-button {
+:where([data-brand-panel="university-dashboard"]) .view-mode-button {
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -168,22 +168,22 @@
   min-width: var(--spacing-2xl);
 }
 
-.view-mode-button:hover {
+:where([data-brand-panel="university-dashboard"]) .view-mode-button:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   transform: translateY(-1px);
 }
 
-.view-mode-button:active {
+:where([data-brand-panel="university-dashboard"]) .view-mode-button:active {
   transform: translateY(0);
 }
 
-.view-mode-button.active {
+:where([data-brand-panel="university-dashboard"]) .view-mode-button.active {
   background: var(--accent);
   color: var(--bg-primary);
 }
 
-.filter-input {
+:where([data-brand-panel="university-dashboard"]) .filter-input {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -195,18 +195,18 @@
   font-family: inherit;
 }
 
-.filter-input:focus {
+:where([data-brand-panel="university-dashboard"]) .filter-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--glow);
+  box-shadow: none;
 }
 
-.filter-input::placeholder {
+:where([data-brand-panel="university-dashboard"]) .filter-input::placeholder {
   color: var(--text-tertiary);
 }
 
 /* Filters Panel */
-.resolter-filters {
+:where([data-brand-panel="university-dashboard"]) .resolter-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-base);
@@ -217,19 +217,19 @@
   border: 1px solid var(--border);
 }
 
-.filter-group {
+:where([data-brand-panel="university-dashboard"]) .filter-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
-.filter-group label {
+:where([data-brand-panel="university-dashboard"]) .filter-group label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
 }
 
-.filter-select {
+:where([data-brand-panel="university-dashboard"]) .filter-select {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
@@ -242,27 +242,27 @@
   cursor: pointer;
 }
 
-.filter-select:focus {
+:where([data-brand-panel="university-dashboard"]) .filter-select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--glow);
+  box-shadow: none;
 }
 
 /* Results Container */
-.resolter-results {
+:where([data-brand-panel="university-dashboard"]) .resolter-results {
   padding: var(--spacing-lg);
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
 }
 
-.results-header {
+:where([data-brand-panel="university-dashboard"]) .results-header {
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-base);
   border-bottom: 1px solid var(--border);
 }
 
-.results-title {
+:where([data-brand-panel="university-dashboard"]) .results-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
@@ -270,7 +270,7 @@
 }
 
 /* Create Form */
-.create-form {
+:where([data-brand-panel="university-dashboard"]) .create-form {
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-base);
 }
@@ -278,48 +278,48 @@
 /* Empty State - uses global .empty-state */
 
 /* Button States */
-.button-primary:disabled,
-.button-secondary:disabled {
+:where([data-brand-panel="university-dashboard"]) .button-primary:disabled,
+:where([data-brand-panel="university-dashboard"]) .button-secondary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.button-primary:active,
-.button-secondary:active {
+:where([data-brand-panel="university-dashboard"]) .button-primary:active,
+:where([data-brand-panel="university-dashboard"]) .button-secondary:active {
   transform: translateY(0);
 }
 
-.button-primary:hover {
+:where([data-brand-panel="university-dashboard"]) .button-primary:hover {
   transform: translateY(calc(-1 * var(--spacing-xs)));
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
 }
 
-.button-secondary:hover {
+:where([data-brand-panel="university-dashboard"]) .button-secondary:hover {
   transform: translateY(calc(-1 * var(--spacing-xs)));
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 /* Visual Hierarchy - Student Name (Primary) */
-.portfolio-card-title,
-.table-cell:first-child {
+:where([data-brand-panel="university-dashboard"]) .portfolio-card-title,
+:where([data-brand-panel="university-dashboard"]) .table-cell:first-child {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
 }
 
 /* Visual Hierarchy - Rating/ILS (Secondary Highlight) */
-.rating-value,
-.score-value,
-.metric-value.rating-value {
+:where([data-brand-panel="university-dashboard"]) .rating-value,
+:where([data-brand-panel="university-dashboard"]) .score-value,
+:where([data-brand-panel="university-dashboard"]) .metric-value.rating-value {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--accent);
 }
 
 /* Visual Hierarchy - Verification Badge */
-.status-badge,
-.status-value {
+:where([data-brand-panel="university-dashboard"]) .status-badge,
+:where([data-brand-panel="university-dashboard"]) .status-value {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -328,33 +328,33 @@
   letter-spacing: 0.5px;
 }
 
-.status-badge.status-verified,
-.status-value.verified {
+:where([data-brand-panel="university-dashboard"]) .status-badge.status-verified,
+:where([data-brand-panel="university-dashboard"]) .status-value.verified {
   background: var(--success);
   color: var(--bg-primary);
 }
 
-.status-badge.status-pending,
-.status-value.pending {
+:where([data-brand-panel="university-dashboard"]) .status-badge.status-pending,
+:where([data-brand-panel="university-dashboard"]) .status-value.pending {
   background: var(--warning);
   color: var(--bg-primary);
 }
 
-.status-badge.status-unverified,
-.status-value.unverified {
+:where([data-brand-panel="university-dashboard"]) .status-badge.status-unverified,
+:where([data-brand-panel="university-dashboard"]) .status-value.unverified {
   background: var(--text-tertiary);
   color: var(--text-primary);
 }
 
-.status-badge.status-rejected,
-.status-value.rejected {
+:where([data-brand-panel="university-dashboard"]) .status-badge.status-rejected,
+:where([data-brand-panel="university-dashboard"]) .status-value.rejected {
   background: var(--error);
   color: var(--text-primary);
 }
 
 /* CTAs - Clear, Consistent Buttons */
-.portfolio-card-button-primary,
-.button-primary {
+:where([data-brand-panel="university-dashboard"]) .portfolio-card-button-primary,
+:where([data-brand-panel="university-dashboard"]) .button-primary {
   background: var(--accent);
   color: var(--bg-primary);
   border: none;
@@ -366,8 +366,8 @@
   transition: all var(--transition-base);
 }
 
-.portfolio-card-button-secondary,
-.button-secondary {
+:where([data-brand-panel="university-dashboard"]) .portfolio-card-button-secondary,
+:where([data-brand-panel="university-dashboard"]) .button-secondary {
   background: transparent;
   color: var(--text-primary);
   border: 1px solid var(--border);
@@ -380,13 +380,13 @@
 }
 
 /* Card Hover States - using global .card class */
-.portfolio-card:active,
-.olympiad-card:active {
+:where([data-brand-panel="university-dashboard"]) .portfolio-card:active,
+:where([data-brand-panel="university-dashboard"]) .olympiad-card:active {
   transform: translateY(0);
 }
 
 /* Loading States */
-.university-loading {
+:where([data-brand-panel="university-dashboard"]) .university-loading {
   min-height: 100%;
   display: flex;
   align-items: center;
@@ -395,25 +395,25 @@
 
 /* Responsive Grid */
 @media (max-width: 768px) {
-  .resolter-filters {
+  :where([data-brand-panel="university-dashboard"]) .resolter-filters {
     grid-template-columns: 1fr;
   }
 
-  .olympiads-grid {
+  :where([data-brand-panel="university-dashboard"]) .olympiads-grid {
     grid-template-columns: 1fr;
   }
 
-  .olympiad-card-actions {
+  :where([data-brand-panel="university-dashboard"]) .olympiad-card-actions {
     flex-direction: column;
   }
 
-  .olympiad-card-actions a {
+  :where([data-brand-panel="university-dashboard"]) .olympiad-card-actions a {
     width: 100%;
   }
 }
 
 @media (min-width: 1200px) {
-  .olympiads-grid {
+  :where([data-brand-panel="university-dashboard"]) .olympiads-grid {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }

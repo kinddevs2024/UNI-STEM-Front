@@ -5,6 +5,15 @@ export const DEFAULT_OLYMPIAD_SUBJECTS = [
   "Science",
   "Physics",
   "Chemistry",
+  "IT",
+  "AI",
+  "Russian",
+  "Literature",
+  "Biology",
+  "Geography",
+  "History",
+  "Economics",
+  "Astronomy",
 ];
 
 export const DEFAULT_OLYMPIAD_SUBJECT = DEFAULT_OLYMPIAD_SUBJECTS[0];

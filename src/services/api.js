@@ -120,7 +120,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && error.config?.url !== '/auth/google') {
       removeToken();
       removeUser();
       // Only redirect if we're not already on an auth page
@@ -195,6 +195,8 @@ export const olympiadAPI = {
   submitAnswer: (id, data) => api.post(`/olympiads/${id}/answer`, data),
   skipQuestion: (id, data) => api.post(`/olympiads/${id}/skip`, data),
   reportViolation: (id, data) => api.post(`/olympiads/${id}/violation`, data),
+  getLeaderboard: (id, page = 1) => api.get(`/olympiads/${id}/leaderboard`, { params: { page, limit: 50 } }),
+  getResultDetails: (olympiadId) => api.get(`/olympiads/${olympiadId}/results`),
   getResults: (olympiadId, userId = null) => {
     // Backend expects /api/olympiads/results?olympiadId=...
     const params = new URLSearchParams();
@@ -370,6 +372,7 @@ export const adminAPI = {
 
 // Owner endpoints
 export const ownerAPI = {
+  addStudentCoins: (userId, data) => api.post(`/owner/users/${userId}/coins`, data),
   getDashboardSummary: () => api.get("/owner/dashboard"),
   getMetrics: (params = {}) => {
     const query = new URLSearchParams();
@@ -459,10 +462,12 @@ export const resolterAPI = {
   },
 
   // View all results across all olympiads
-  getAllResults: (olympiadId = null, userId = null) => {
+  getAllResults: (olympiadId = null, userId = null, { page = 1, limit = 50 } = {}) => {
     const params = new URLSearchParams();
     if (olympiadId) params.append("olympiadId", olympiadId);
     if (userId) params.append("userId", userId);
+    params.set('page', String(page));
+    params.set('limit', String(limit));
     const query = params.toString();
     return api.get(`/resolter/all-results${query ? `?${query}` : ""}`);
   },

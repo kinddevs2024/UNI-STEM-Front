@@ -1,3 +1,4 @@
+import { getEntryFee } from '../../utils/coinEntry';
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { olympiadAPI, adminAPI } from "../../services/api";
@@ -10,9 +11,13 @@ import {
 import { USER_ROLES } from "../../utils/constants";
 import { useAuth } from "../../context/AuthContext";
 import "./Dashboard.css";
+import Pagination from '../../components/Pagination';
+import { useTheme } from '../../context/ThemeContext';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { itemsPerPage } = useTheme();
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const [olympiads, setOlympiads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +32,7 @@ const Dashboard = () => {
 
   // Students default to seeing active olympiads (null = active), admins/owners see all
   const [filter, setFilter] = useState(isAdminOrOwner ? "all" : null);
+  useEffect(() => { setCurrentPage(1); }, [filter]);
 
   const fetchOlympiads = useCallback(async () => {
     try {
@@ -245,7 +251,7 @@ const Dashboard = () => {
           {isAdminOrOwner ? (
             <span className="action-text">View Details →</span>
           ) : isOlympiadActive(olympiad.startTime, olympiad.endTime) ? (
-            <span className="action-text">Start Now →</span>
+            <span className="button-primary olympiad-start-button">Start · {getEntryFee(olympiad)} coins →</span>
           ) : isOlympiadUpcoming(olympiad.startTime) ? (
             <span className="action-text">Coming Soon</span>
           ) : (
@@ -309,6 +315,9 @@ const Dashboard = () => {
   const activeOlympiads = getActiveOlympiads;
   const upcomingOlympiads = getUpcomingOlympiads;
   const endedOlympiads = getEndedOlympiads;
+  const pageItems = isStudent ? filter === 'upcoming' ? upcomingOlympiads : filter === 'ended' ? endedOlympiads : activeOlympiads : getFilteredOlympiads;
+  const totalPages = Math.max(1, Math.ceil(pageItems.length / itemsPerPage));
+  const displayedPage = Math.min(currentPage, totalPages);
 
   if (loading) {
     return (
@@ -322,7 +331,9 @@ const Dashboard = () => {
     <div className="dashboard-page page-container">
       <div>
         <div className="dashboard-header">
-          <h1 className="dashboard-title text-glow">Olympiad Dashboard</h1>
+          <div className="dashboard-welcome-copy">
+          <p className="go-account-eyebrow">YOUR NEXT CHAPTER</p>
+          <h1 className="dashboard-title">Olympiad <em>Dashboard</em></h1>
           <p className="dashboard-subtitle">
             {isStudent
               ? filter === null
@@ -332,6 +343,15 @@ const Dashboard = () => {
                 : "Finished olympiads you have completed"
               : "Select an olympiad to manage"}
           </p>
+          <div className="dashboard-overview" aria-label="Olympiad overview">
+            <span><strong>{activeOlympiads.length}</strong> Active</span>
+            <span><strong>{upcomingOlympiads.length}</strong> Upcoming</span>
+            <span><strong>{endedOlympiads.length}</strong> Ended</span>
+          </div>
+          </div>
+          <picture className="dashboard-welcome-art" aria-hidden="true">
+            <img src="/images/fair-play-student.webp" alt="" width="640" height="480" />
+          </picture>
         </div>
 
         {isStudent ? (
@@ -341,6 +361,7 @@ const Dashboard = () => {
               <button
                 className={`filter-button ${filter === null ? "active" : ""}`}
                 onClick={() => setFilter(null)}
+                aria-pressed={filter === null}
               >
                 Active
               </button>
@@ -349,6 +370,7 @@ const Dashboard = () => {
                   filter === "upcoming" ? "active" : ""
                 }`}
                 onClick={() => setFilter("upcoming")}
+                aria-pressed={filter === "upcoming"}
               >
                 Upcoming
               </button>
@@ -357,12 +379,14 @@ const Dashboard = () => {
                   filter === "ended" ? "active" : ""
                 }`}
                 onClick={() => setFilter("ended")}
+                aria-pressed={filter === "ended"}
               >
                 Ended
               </button>
             </div>
 
             <div className="olympiads-grid">
+              <div id="tutorial-dashboard-slot" className="tutorial-grid-slot" />
               {(() => {
                 let displayOlympiads = [];
                 let emptyMessage = "";
@@ -370,28 +394,28 @@ const Dashboard = () => {
                 if (filter === null) {
                   // Show active olympiads (default)
                   displayOlympiads = activeOlympiads;
-                  emptyMessage = "No active olympiads available at this time.";
+                  emptyMessage = "New olympiads will appear here. Check back soon.";
                 } else if (filter === "upcoming") {
                   // Show upcoming olympiads
                   displayOlympiads = upcomingOlympiads;
-                  emptyMessage = "No upcoming olympiads.";
+                  emptyMessage = "No olympiads are scheduled yet. Stay tuned for updates.";
                 } else if (filter === "ended") {
                   // Show ended olympiads
                   displayOlympiads = endedOlympiads;
-                  emptyMessage = "No finished olympiads.";
+                  emptyMessage = "Completed olympiads will appear here.";
                 }
 
                 if (displayOlympiads.length === 0) {
                   return (
                     <div className="empty-state">
-                      <div className="empty-icon">📚</div>
-                      <h3>No olympiads found</h3>
+                      <div className="empty-icon"><img src="/images/empty-olympiads-generated.webp" alt="" width="180" height="180" /></div>
+                      <h3>No olympiads yet</h3>
                       <p>{emptyMessage}</p>
                     </div>
                   );
                 }
 
-                return (displayOlympiads || []).map((olympiad) =>
+                return (displayOlympiads || []).slice((displayedPage - 1) * itemsPerPage, displayedPage * itemsPerPage).map((olympiad) =>
                   renderOlympiadCard(olympiad)
                 );
               })()}
@@ -404,6 +428,7 @@ const Dashboard = () => {
               <button
                 className={`filter-button ${filter === "all" ? "active" : ""}`}
                 onClick={() => setFilter("all")}
+                aria-pressed={filter === "all"}
               >
                 All
               </button>
@@ -412,6 +437,7 @@ const Dashboard = () => {
                   filter === "active" ? "active" : ""
                 }`}
                 onClick={() => setFilter("active")}
+                aria-pressed={filter === "active"}
               >
                 Active
               </button>
@@ -420,6 +446,7 @@ const Dashboard = () => {
                   filter === "upcoming" ? "active" : ""
                 }`}
                 onClick={() => setFilter("upcoming")}
+                aria-pressed={filter === "upcoming"}
               >
                 Upcoming
               </button>
@@ -428,6 +455,7 @@ const Dashboard = () => {
                   filter === "ended" ? "active" : ""
                 }`}
                 onClick={() => setFilter("ended")}
+                aria-pressed={filter === "ended"}
               >
                 Ended
               </button>
@@ -436,12 +464,12 @@ const Dashboard = () => {
             <div className="olympiads-grid">
               {filteredOlympiads.length === 0 ? (
                 <div className="empty-state">
-                  <div className="empty-icon">📚</div>
-                  <h3>No olympiads found</h3>
+                  <div className="empty-icon"><img src="/images/empty-olympiads-generated.webp" alt="" width="180" height="180" /></div>
+                  <h3>No olympiads yet</h3>
                   <p>There are no olympiads matching your filter.</p>
                 </div>
               ) : (
-                filteredOlympiads.map((olympiad) =>
+                filteredOlympiads.slice((displayedPage - 1) * itemsPerPage, displayedPage * itemsPerPage).map((olympiad) =>
                   renderOlympiadCard(olympiad)
                 )
               )}
@@ -449,6 +477,7 @@ const Dashboard = () => {
           </>
         )}
 
+        {totalPages > 1 && <Pagination currentPage={displayedPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
         {/* Olympiad Details Modal for Admins/Owners */}
         {isAdminOrOwner && selectedOlympiad && (
           <div className="modal-overlay" onClick={handleCloseModal}>

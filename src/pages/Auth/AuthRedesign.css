@@ -1,0 +1,114 @@
+.go-auth-page { --auth-ink:#171530; --auth-muted:#767581; --auth-line:#e6e3e9; --auth-paper:#fcfbf8; color:var(--auth-ink); font-family:'Golos Text Variable',Arial,sans-serif; min-height:100svh; background:#324451; position:relative; isolation:isolate; display:flex; flex-direction:column; padding:0 54px; line-height:1.5; }
+.go-auth-page * { box-sizing:border-box; }
+.go-auth-page a { color:inherit; text-decoration:none; text-shadow:none; }
+.go-auth-page button,.go-auth-page input { font-family:inherit; }
+.go-auth-page h1,.go-auth-page h2,.go-auth-page p { color:inherit; margin:0; }
+.go-auth-page a:focus-visible,.go-auth-page button:focus-visible { outline:3px solid #ad93e6; outline-offset:4px; }
+.go-auth-backdrop { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; z-index:-2; }
+.go-auth-shade { position:absolute; inset:0; background:rgba(12,23,34,.25); z-index:-1; }
+.go-auth-header { display:flex; align-items:center; justify-content:space-between; color:white; min-height:80px; gap:20px; width:min(1360px,100%); margin:0 auto; }
+.go-auth-brand { display:inline-flex; align-items:center; gap:11px; }
+.go-auth-brand img { object-fit:contain; filter:brightness(0) invert(1); }
+.go-auth-brand > span { font-size:22px; font-weight:750; letter-spacing:-.055em; line-height:.98; }
+.go-auth-brand > span > span { display:block; }
+.go-auth-home-link { display:inline-flex; align-items:center; justify-content:center; gap:10px; font-size:12px; border:1px solid rgba(255,255,255,.55); border-radius:30px; min-height:42px; padding:10px 19px; backdrop-filter:blur(12px); background:rgba(15,25,38,.12); }
+.go-auth-home-link:hover { background:rgba(255,255,255,.16); }
+.go-auth-layout { width:min(1250px,100%); flex:1; margin:0 auto; display:grid; grid-template-columns:1fr 428px; align-items:center; gap:80px; padding:10px 0; }
+.go-auth-story { color:white; max-width:640px; padding-bottom:20px; text-shadow:0 2px 30px rgba(0,0,0,.15); }
+.go-auth-story-tag { display:inline-flex; align-items:center; gap:9px; font-size:9px; letter-spacing:.12em; border:1px solid rgba(255,255,255,.55); border-radius:40px; padding:8px 14px; backdrop-filter:blur(8px); background:rgba(15,25,38,.12); }
+.go-auth-story h2 { font-size:clamp(42px,4.55vw,70px); font-weight:550; letter-spacing:-.055em; line-height:1.1; margin:29px 0 24px; }
+.go-auth-story h2 em { font-family:'Cormorant Garamond',Georgia,serif; font-weight:600; font-size:1.22em; }
+.go-auth-story > p { font-size:14px; line-height:1.85; color:rgba(255,255,255,.88); }
+.go-auth-story-note { margin-top:45px; display:flex; align-items:center; gap:8px; font-size:10px; color:rgba(255,255,255,.8); }
+.go-auth-card { width:100%; border-radius:29px; background:var(--auth-paper); padding:26px 34px 22px; box-shadow:0 22px 70px rgba(14,21,43,.14); }
+.go-auth-tabs { position:relative; isolation:isolate; display:flex; padding:4px; background:#efedf2; border:1px solid #e8e5ee; border-radius:50px; margin-bottom:20px; gap:4px; }
+.go-auth-tabs::before { content:""; position:absolute; top:4px; bottom:4px; left:4px; width:calc(50% - 6px); border-radius:50px; background:var(--auth-ink); pointer-events:none; transform:translateX(0); }
+.go-auth-tabs[data-active="register"]::before { transform:translateX(calc(100% + 4px)); }
+.go-auth-tabs button { position:relative; z-index:1; flex:1; display:flex; align-items:center; justify-content:center; background:transparent; color:#757180; border-radius:50px; font-size:12px; font-weight:500; min-height:37px; padding:9px 12px; border:0; }
+.go-auth-tabs button.is-active { color:white; }
+.go-auth-tabs button:not(.is-active):hover { color:var(--auth-ink); }
+.go-auth-heading { margin-bottom:18px; }
+.go-auth-card-kicker { display:block; font-size:8px; letter-spacing:.16em; font-weight:550; color:#918797; margin-bottom:12px; }
+.go-auth-heading h1 { font-size:29px; line-height:1.12; letter-spacing:-.047em; font-weight:600; max-width:360px; }
+.go-auth-heading > p { font-size:12px; line-height:1.7; color:var(--auth-muted); margin-top:13px; max-width:340px; }
+.go-auth-google { min-height:40px; }
+.go-auth-google.is-busy { opacity:.65; pointer-events:none; }
+.go-auth-google-wait { display:flex; align-items:center; justify-content:center; min-height:40px; border:1px solid #dadce0; border-radius:50px; font-size:12px; color:var(--auth-muted); }
+.go-auth-google-status { color:var(--auth-muted); text-align:center; font-size:11px; margin-top:10px!important; }
+.go-auth-divider { display:flex; align-items:center; gap:13px; color:#92909a; font-size:10px; margin:17px 0 14px; }
+.go-auth-divider::before,.go-auth-divider::after { content:""; flex:1; height:1px; background:var(--auth-line); }
+.go-auth-form fieldset { padding:0; margin:0; border:0; min-width:0; display:flex; flex-direction:column; gap:12px; }
+.go-auth-form fieldset:disabled { opacity:.65; }
+.go-auth-field { min-width:0; }
+.go-auth-field label { display:block; font-size:11px; font-weight:500; margin-bottom:7px; color:#4c485b; }
+.go-auth-field input { font-size:12px; line-height:1.5; width:100%; background:#f2f0f4!important; color:var(--auth-ink)!important; border:1px solid #e9e5ee!important; min-height:49px; border-radius:13px; padding:13px 15px; box-shadow:none!important; }
+.go-auth-field input::placeholder { color:#a39baa; opacity:1; }
+.go-auth-field input:focus { outline:2px solid #bca9d9; outline-offset:1px; border-color:#bca9d9!important; }
+.go-auth-field input[readonly] { color:#686071!important; background:#f7f5f8!important; }
+.go-auth-input-wrap { display:flex; position:relative; align-items:center; }
+.go-auth-input-wrap > svg { position:absolute; left:15px; color:#9b8ea9; pointer-events:none; }
+.go-auth-input-wrap > input { padding-left:44px; padding-right:46px; }
+.go-auth-input-wrap > input[type=email] { padding-right:15px; }
+.go-auth-password-toggle { position:absolute; right:4px; top:3px; width:44px; height:43px; display:flex; align-items:center; justify-content:center; border:0; border-radius:10px; background:transparent; color:#82758f; }
+.go-auth-password-toggle:hover { background:#e7e1ed; }
+.go-auth-name-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.go-auth-forgot { background:transparent; color:#74618c; align-self:end; padding:0; font-size:10px; margin-top:-5px; min-height:21px; }
+.go-auth-forgot:hover,.go-auth-bottom button:hover,.go-auth-resend:hover,.go-auth-back:hover { text-decoration:underline; }
+.go-auth-submit { display:flex; align-items:center; justify-content:center; gap:24px; border:0; border-radius:50px; min-height:49px; padding:13px 18px; background:var(--auth-ink); color:white; font-size:12px; font-weight:500; margin-top:4px; }
+.go-auth-submit:hover { background:#393153; }
+.go-auth-submit:disabled { cursor:wait; }
+.go-auth-bottom { text-align:center; font-size:10px; color:var(--auth-muted)!important; margin-top:18px!important; line-height:1.7; }
+.go-auth-bottom button { background:transparent; color:var(--auth-ink); font-size:inherit; padding:5px 2px; font-weight:550; }
+.go-auth-trust { display:flex; justify-content:center; align-items:center; gap:7px; border-top:1px solid var(--auth-line); padding-top:18px; margin-top:20px; font-size:8px; color:#a299ab; text-align:center; }
+.go-auth-back { display:inline-flex; align-items:center; gap:10px; border:0; background:transparent; font-size:11px; color:#77658d; min-height:38px; padding:0; margin-bottom:23px; }
+.go-auth-resend { border:0; background:transparent; color:#74618c; font-size:11px; min-height:37px; margin:0; }
+.go-auth-resend:disabled { color:#a49eaf; cursor:default; text-decoration:none; }
+.go-auth-code { font-size:21px!important; letter-spacing:.35em; text-align:center; }
+.go-auth-notice { display:flex; align-items:start; gap:9px; font-size:11px; line-height:1.6; border-radius:12px; padding:12px 14px; margin-bottom:18px; }
+.go-auth-notice svg { flex-shrink:0; margin-top:1px; }
+.go-auth-notice.error { color:#a23f49; background:#fcecf0; }
+.go-auth-notice.info { color:#59698b; background:#edf0fc; }
+.go-auth-notice.success { color:#3b785d; background:#e9f6ef; }
+.go-auth-footer { min-height:45px; display:flex; align-items:center; justify-content:space-between; gap:20px; color:rgba(255,255,255,.75); width:min(1360px,100%); margin:0 auto; font-size:9px; }
+.go-auth-footer a { display:flex; align-items:center; gap:8px; min-height:35px; }
+.go-auth-footer a:hover { color:white; }
+@media (max-width:1200px) { .go-auth-page { padding:0 36px; } .go-auth-layout { gap:45px; grid-template-columns:1fr 410px; } .go-auth-story h2 { font-size:52px; } .go-auth-card { padding:29px 31px 25px; } }
+@media (max-width:950px) { .go-auth-page { padding:0 28px; } .go-auth-layout { grid-template-columns:1fr 390px; gap:30px; } .go-auth-story h2 { font-size:43px; } .go-auth-story > p { font-size:12px; } .go-auth-story-note { font-size:9px; flex-wrap:wrap; max-width:240px; } .go-auth-card { padding:27px 27px 24px; } }
+@media (max-width:800px) { .go-auth-page { padding:0 25px; } .go-auth-header { min-height:90px; } .go-auth-layout { display:flex; justify-content:center; padding-top:18px; padding-bottom:26px; } .go-auth-story { display:none; } .go-auth-card { max-width:430px; padding:31px 34px 27px; } .go-auth-backdrop { object-position:37% center; } .go-auth-footer { min-height:57px; } }
+@media (max-width:480px) { .go-auth-page { padding:0 18px; min-height:100svh; } .go-auth-header { min-height:83px; gap:12px; } .go-auth-brand { gap:8px; } .go-auth-brand img { width:34px; height:34px; } .go-auth-brand > span { font-size:19px; } .go-auth-home-link { font-size:10px; padding:9px 13px; gap:7px; min-height:38px; } .go-auth-layout { padding-top:10px; padding-bottom:18px; align-items:center; } .go-auth-card { padding:25px 25px 24px; border-radius:25px; } .go-auth-heading h1 { font-size:27px; } .go-auth-heading > p { font-size:11px; } .go-auth-tabs { margin-bottom:26px; } .go-auth-tabs button { font-size:11px; } .go-auth-field input { font-size:16px; padding-top:12px; padding-bottom:12px; } .go-auth-field label { font-size:11px; } .go-auth-name-row input { font-size:14px; padding-left:12px; padding-right:10px; } .go-auth-card-kicker { font-size:7px; } .go-auth-trust { font-size:7px; gap:6px; } .go-auth-footer { font-size:8px; min-height:51px; } .go-auth-bottom { font-size:10px; } .go-auth-story-tag { font-size:8px; } }
+@media (max-width:360px) { .go-auth-page { padding:0 12px; } .go-auth-card { padding:23px 19px; } .go-auth-brand > span { font-size:17px; } .go-auth-home-link { font-size:9px; padding:8px 10px; } .go-auth-heading h1 { font-size:25px; } .go-auth-name-row { gap:9px; } .go-auth-trust { font-size:6.5px; } }
+@media (prefers-reduced-motion:no-preference) {
+  .go-auth-tabs::before { transition:transform 320ms cubic-bezier(.22,.61,.36,1); }
+  .go-auth-story { animation:go-auth-enter 560ms cubic-bezier(.2,.7,.2,1) both; }
+  .go-auth-card { animation:go-auth-enter 560ms 70ms cubic-bezier(.2,.7,.2,1) both; }
+  .go-auth-heading { animation:go-auth-state-enter 260ms cubic-bezier(.2,.7,.2,1) both; }
+  .go-auth-name-row,.go-auth-notice { animation:go-auth-state-enter 240ms cubic-bezier(.2,.7,.2,1) both; }
+  .go-auth-google,.go-auth-form fieldset { transition:opacity 180ms ease; }
+  .go-auth-field input { transition:border-color 160ms ease; }
+  .go-auth-tabs button,.go-auth-submit,.go-auth-password-toggle,.go-auth-home-link,.go-auth-back,.go-auth-resend,.go-auth-bottom button,.go-auth-footer a {
+    transition:background-color 160ms ease,color 160ms ease,box-shadow 160ms ease,transform 160ms ease;
+  }
+  .go-auth-submit > svg,.go-auth-home-link > svg,.go-auth-back > svg,.go-auth-footer a > svg,.go-auth-password-toggle > svg {
+    transition:transform 160ms ease;
+  }
+  .go-auth-input-wrap > svg { transition:color 160ms ease; }
+  .go-auth-input-wrap:focus-within > svg { color:#74618c; }
+  .go-auth-submit:not(:disabled):is(:hover,:focus-visible) { transform:translateY(-1px); box-shadow:0 5px 14px rgba(23,21,48,.16); }
+  .go-auth-submit:not(:disabled):is(:hover,:focus-visible) > svg,.go-auth-footer a:is(:hover,:focus-visible) > svg { transform:translate(2px,-2px); }
+  .go-auth-home-link:is(:hover,:focus-visible) > svg,.go-auth-back:not(:disabled):is(:hover,:focus-visible) > svg { transform:translateX(-2px); }
+  .go-auth-password-toggle:not(:disabled):is(:hover,:focus-visible) > svg { transform:scale(1.05); }
+  .go-auth-submit:not(:disabled):active { transform:translateY(0); box-shadow:none; }
+  @keyframes go-auth-enter {
+    from { opacity:0; transform:translateY(12px); }
+    to { opacity:1; transform:none; }
+  }
+  @keyframes go-auth-state-enter {
+    from { opacity:.4; transform:translateY(5px); }
+    to { opacity:1; transform:none; }
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .go-auth-tabs::before { transition:none; }
+  .go-auth-page * { animation:none!important; transition:none!important; }
+}
+.go-auth-field select{width:100%;min-height:52px;padding:12px 16px;border:1px solid var(--auth-border,#ddd8e6);border-radius:14px;background:var(--auth-input-bg,#f2eff5);color:var(--auth-ink,#17132f);font:inherit}

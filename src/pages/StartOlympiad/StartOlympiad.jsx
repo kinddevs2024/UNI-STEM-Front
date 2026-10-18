@@ -1,6 +1,8 @@
+import { getEntryFee } from '../../utils/coinEntry';
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { olympiadAPI } from "../../services/api";
+import { olympiadAPI, authAPI } from "../../services/api";
+import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
 import {
   formatDate,
   isOlympiadActive,
@@ -13,14 +15,26 @@ import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import { generateDeviceFingerprint } from "../../utils/device-fingerprint";
-import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage } from "../../utils/mediaAccess";
+import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage, usesMobileCameraMode } from "../../utils/mediaAccess";
 import { setPendingProctoringStreams, clearPendingProctoringStreams } from "../../utils/proctoringSession";
 import "./StartOlympiad.css";
 
 const StartOlympiad = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser, balance, refreshBalance } = useAuth();
+  const [savingGrade, setSavingGrade] = useState(false);
+  const changeGrade = async gradeCategory => {
+    if (!gradeCategory || savingGrade) return;
+    setSavingGrade(true);
+    try {
+      const response = await authAPI.updateProfile({ gradeCategory });
+      setUser(response.data.user);
+      const details = await olympiadAPI.getById(id);
+      setOlympiad(details.data);
+    } catch (error) { setNotification({ type: 'error', message: error?.response?.data?.message || 'Could not save your class.' }); }
+    finally { setSavingGrade(false); }
+  };
   const [olympiad, setOlympiad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
@@ -31,6 +45,8 @@ const StartOlympiad = () => {
   const [nextAvailableDate, setNextAvailableDate] = useState(null);
   const [proctoringStatus, setProctoringStatus] = useState(null);
   const [deviceFingerprint, setDeviceFingerprint] = useState(null);
+
+  const mobileCameraOnly = usesMobileCameraMode();
 
   const getDisplaySurfaceFromStream = (stream) => {
     const track = stream?.getVideoTracks?.()[0];
@@ -195,17 +211,24 @@ const StartOlympiad = () => {
     }
 
     let cameraStream = null;
+    if (savingGrade || (olympiad.requiresGrade && !olympiad.gradeCategory)) {
+      setNotification({ type: 'error', message: 'Choose your school grade or Student before starting.' });
+      return;
+    }
     let screenStream = null;
     let sharedDisplaySurface = null;
     try {
       clearPendingProctoringStreams();
+      if (typeof MediaRecorder === 'undefined') throw new Error('Video recording is not supported. Please update your browser before starting.');
 
-      cameraStream = await requestCameraStream({ video: true, audio: false });
-      const screenResult = await requestEntireScreenStream();
-      screenStream = screenResult.stream;
-      sharedDisplaySurface = screenResult.displaySurface;
+      cameraStream = await requestCameraStream({ video: { facingMode:'user' }, audio: false });
+      if (!mobileCameraOnly) {
+        const screenResult = await requestEntireScreenStream();
+        screenStream = screenResult.stream;
+        sharedDisplaySurface = screenResult.displaySurface;
+      }
 
-      setPendingProctoringStreams({ cameraStream, screenStream });
+      setPendingProctoringStreams({ cameraStream, screenStream, mode:mobileCameraOnly?'mobile_camera':'desktop' });
     } catch (permissionError) {
       if (cameraStream) {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -293,12 +316,12 @@ const StartOlympiad = () => {
       // Check proctoring status before starting
       // Note: In a full implementation, proctoring should be set up before this point
       // For now, we'll require basic proctoring status (this would be enhanced with actual camera/screen checks)
-      // BYPASS: Sending valid proctoring status to allow start without actual devices for testing
-      const proctoringReady = proctoringStatus || {
-        frontCameraActive: true, 
+      const proctoringReady = {
+        frontCameraActive: Boolean(cameraStream?.getVideoTracks().some(track=>track.readyState==='live')),
         backCameraActive: false,
-        screenShareActive: true,
-        displaySurface: sharedDisplaySurface || getDisplaySurfaceFromStream(screenStream) || 'monitor'
+        screenShareActive: Boolean(screenStream?.getVideoTracks().some(track=>track.readyState==='live')),
+        displaySurface: sharedDisplaySurface || getDisplaySurfaceFromStream(screenStream),
+        mode: mobileCameraOnly ? 'mobile_camera' : 'desktop',
       };
 
       // Generate device fingerprint if not already done
@@ -311,6 +334,7 @@ const StartOlympiad = () => {
 
       // Start attempt via API (creates attempt record with server-authoritative timer)
       const startResponse = await olympiadAPI.startAttempt(id, {
+        expectedEntryFeeCoins: getEntryFee(olympiad),
         proctoringStatus: proctoringReady,
         deviceFingerprint: fingerprint
       });
@@ -319,7 +343,9 @@ const StartOlympiad = () => {
         throw new Error(startResponse.data.message || 'Failed to start attempt');
       }
 
+      await refreshBalance?.();
       const attempt = startResponse.data.attempt;
+      localStorage.setItem(`olympiad_${id}_proctoringMode`, attempt.proctoringMode || proctoringReady.mode);
 
       // Store attempt information in localStorage for compatibility
       localStorage.setItem(`olympiad_${id}_started`, "true");
@@ -345,7 +371,36 @@ const StartOlympiad = () => {
     } catch (error) {
       console.error("❌ Error starting olympiad:", error);
       clearPendingProctoringStreams();
+      if (typeof MediaRecorder === 'undefined') throw new Error('Video recording is not supported. Please update your browser before starting.');
       const errorMessage = error?.response?.data?.message || error?.message;
+      if (error?.response?.data?.code === 'ENTRY_FEE_CHANGED') {
+        setOlympiad(prev=>({...prev,entryFeeCoins:error.response.data.entryFeeCoins}));
+        setNotification({message:error.response.data.message,type:'warning',duration:null});
+        setStarting(false);
+        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        return;
+      }
+      if (error?.response?.data?.code === 'INSUFFICIENT_COINS') {
+        setNotification({message:error.response.data.message,type:'warning',duration:null,action:{label:'Top up coins →',to:'/buy-coins'}});
+        await refreshBalance?.();
+        setStarting(false);
+        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        return;
+      }
+      if (error?.response?.data?.code === 'OLYMPIAD_ALREADY_SUBMITTED') {
+        setNotification({ message: error.response.data.message, type: 'warning', duration: null, action: { label: 'View saved result →', to: `/olympiad/${id}/results` } });
+        setStarting(false);
+        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        return;
+      }
+      if (error?.response?.data?.code === "PROFILE_INCOMPLETE") {
+        setNotification({ message:"Complete your profile before starting this olympiad. Save your details to return here.", type:"error", duration:null, action:{ label:"Complete profile →", to:"/profile/edit", state:{ returnTo:`/olympiad/${id}/start` } } });
+        setStarting(false);
+        if (document.fullscreenElement && document.exitFullscreen) {
+          try { await document.exitFullscreen(); } catch { /* The profile link remains available. */ }
+        }
+        return;
+      }
       setNotification({
         message: errorMessage 
           ? `Unable to start olympiad: ${errorMessage}` 
@@ -403,8 +458,10 @@ const StartOlympiad = () => {
         <div className="start-olympiad-content">
           {/* Header */}
           <div className="start-header card">
-            <h1 className="start-title text-glow">{olympiad.title}</h1>
+            <h1 className="start-title">{olympiad.title}</h1>
             <p className="start-subtitle">{olympiad.description}</p>
+            {user?.role === 'student' && <div className="form-group"><label htmlFor="olympiad-grade">School grade / education</label><select id="olympiad-grade" value={olympiad.gradeCategory || user.gradeCategory || ''} disabled={savingGrade || olympiad.hasAttempt} onChange={e => changeGrade(e.target.value)}><option value="">Choose your class</option>{GRADE_CATEGORIES.map(grade => <option key={grade} value={grade}>{gradeLabel(grade)}</option>)}</select>{olympiad.hasAttempt && <small>Your class is fixed for this attempt.</small>}</div>}
+            {(olympiad.gradePrizes || []).some(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)) && <section className="grade-prizes"><h2>Prizes · {gradeLabel(olympiad.gradeCategory || user?.gradeCategory)}</h2><div className="olympiad-info-grid">{olympiad.gradePrizes.filter(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)).sort((a,b) => a.place - b.place).map(prize => <article className="card" key={prize.place} style={{ padding: 16 }}>{prize.photo && <img src={getImageUrl(prize.photo)} alt={prize.name} style={{ width: '100%', maxHeight: 160, objectFit: 'contain' }} />}<strong>Place {prize.place}</strong><p>{prize.name}</p></article>)}</div></section>}
 
             {olympiadLogoUrl && (
               <div className="olympiad-hero-image-wrap">
@@ -416,6 +473,7 @@ const StartOlympiad = () => {
               </div>
             )}
 
+          {user?.role==='student'&&<div className="coin-entry-notice"><p><strong>Entry: {getEntryFee(olympiad)} coins</strong> · Your balance: {balance ?? 0} coins</p><p>Charged once when you start. Resuming is free. First place earns 100 coins after the olympiad closes and results are checked.</p><Link to="/buy-coins">Need more coins? Top up →</Link></div>}
             <div className="olympiad-info-grid">
               <div className="info-item">
                 <span className="info-label">Subject</span>
@@ -586,7 +644,7 @@ const StartOlympiad = () => {
                   </p>
                   <ul className="proctoring-list">
                     <li>✓ Your camera will be monitored during the exam</li>
-                    <li>✓ Your screen activity will be recorded</li>
+                    <li>{mobileCameraOnly ? '✓ Mobile mode: camera monitoring only; screen sharing is unavailable in this browser' : '✓ Your screen activity will be recorded'}</li>
                     <li>✓ Periodic screenshots will be taken automatically</li>
                     <li>✓ All monitoring data is securely stored</li>
                   </ul>
@@ -648,7 +706,7 @@ const StartOlympiad = () => {
                     ? "Starting..."
                     : !consentGiven
                     ? "Accept Terms to Start →"
-                    : "Start Olympiad →"}
+                    : user?.role === "student" ? `Start Olympiad · ${getEntryFee(olympiad)} coins →` : "Start Olympiad →"}
                 </button>
               </div>
             </>
@@ -660,6 +718,8 @@ const StartOlympiad = () => {
         <NotificationToast
           message={notification.message}
           type={notification.type}
+          action={notification.action}
+          duration={notification.duration}
           onClose={() => setNotification(null)}
         />
       )}

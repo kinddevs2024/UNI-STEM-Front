@@ -1,96 +1,15 @@
-.attempt-recovery-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.attempt-recovery-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 500px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.recovery-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.attempt-recovery-card h2 {
-  margin: 0 0 1rem 0;
-  color: #333;
-  font-size: 1.5rem;
-}
-
-.recovery-message {
-  color: #666;
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.recovery-warning {
-  color: #d32f2f;
-  font-weight: bold;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background: #ffebee;
-  border-radius: 8px;
-  border-left: 4px solid #d32f2f;
-}
-
-.recovery-instruction {
-  color: #555;
-  margin: 1rem 0 0 0;
-  font-size: 0.9rem;
-}
-
-.recovery-button {
-  margin-top: 1.5rem;
-  padding: 0.75rem 2rem;
-  background: #43a806;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.recovery-button:hover:not(:disabled) {
-  background: #216e1a;
-}
-
-.recovery-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.recovery-spinner {
-  margin: 1.5rem auto;
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #43a806;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
+.attempt-recovery-overlay { position:fixed; inset:0; background:rgba(23,21,48,.5); display:flex; align-items:center; justify-content:center; z-index:9999; padding:20px; font-family:'Golos Text Variable',Arial,sans-serif; color:#171530; }
+.attempt-recovery-card { background:#fbf9f3; border:1px solid #dcd9d3; border-radius:24px; padding:34px; max-width:500px; width:100%; max-height:calc(100svh - 40px); overflow-y:auto; text-align:center; box-shadow:0 16px 48px rgba(23,21,48,.12); }
+.attempt-recovery-card .recovery-icon { font-size:40px; margin-bottom:20px; }
+.attempt-recovery-card h2 { margin:0 0 16px; color:#171530; font-size:27px; font-weight:550; letter-spacing:-.035em; }
+.attempt-recovery-card .recovery-message { color:#716f7a; margin:10px 0; font-size:14px; line-height:1.8; }
+.attempt-recovery-card .recovery-warning { color:#a23f49; margin:22px 0; padding:17px; background:#fcecf0; border-radius:16px; border:1px solid #e9bac2; font-size:13px; line-height:1.7; }
+.attempt-recovery-card .recovery-instruction { color:#716f7a; margin:20px 0 0; font-size:12px; line-height:1.8; }
+.attempt-recovery-card .recovery-button { margin-top:24px; padding:14px 26px; min-height:48px; background:#171530; color:white; border:1px solid #171530; border-radius:50px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:background-color .15s; }
+.attempt-recovery-card .recovery-button:hover:not(:disabled) { background:#393153; }
+.attempt-recovery-card .recovery-button:disabled { opacity:.45; cursor:not-allowed; }
+.attempt-recovery-card .recovery-button:focus-visible { outline:3px solid #9470b8; outline-offset:4px; }
+.attempt-recovery-card .recovery-spinner { margin:24px auto; width:36px; height:36px; border:3px solid #dfcff5; border-top-color:#171530; border-radius:50%; animation:recovery-spin 1s linear infinite; }
+@keyframes recovery-spin { to { transform:rotate(360deg); } }
+@media(max-width:480px) { .attempt-recovery-overlay { padding:14px; } .attempt-recovery-card { padding:27px 23px; } }
+@media(prefers-reduced-motion:reduce) { .attempt-recovery-card .recovery-spinner { animation:none; } }

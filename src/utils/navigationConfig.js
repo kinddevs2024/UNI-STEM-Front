@@ -12,7 +12,6 @@ export const ROLE_NAVIGATION_CONFIG = {
   // 🟢 STUDENT
   [USER_ROLES.STUDENT]: [
     { label: "Dashboard", path: "/dashboard" },
-    { label: "Portfolio (Beta)", path: "/dashboard/portfolio" },
     { label: "Results", path: "/results" },
     { label: "Profile", path: "/profile" },
   ],
@@ -48,7 +47,7 @@ export const ROLE_NAVIGATION_CONFIG = {
   [USER_ROLES.UNIVERSITY]: [
     { label: "Dashboard (University)", path: "/university" },
     { label: "Students Portfolios", path: "/university-panel" },
-    { label: "Buy Coins", path: "/buy-coins" },
+
     { label: "Profile", path: "/profile" },
   ],
 
@@ -61,6 +60,9 @@ export const ROLE_NAVIGATION_CONFIG = {
   // 🔴 ADMIN
   [USER_ROLES.ADMIN]: [
     { label: "Dashboard (Admin)", path: "/admin" },
+    { label: "Users", path: "/admin/users" },
+    { label: "Tickets", path: "/admin/tickets" },
+    { label: "Recordings", path: "/admin/recordings" },
     { label: "Universities", path: "/universities" },
     { label: "Schools", path: "/schools" },
     { label: "Results", path: "/results" },
@@ -70,6 +72,9 @@ export const ROLE_NAVIGATION_CONFIG = {
   // ⚫ OWNER
   [USER_ROLES.OWNER]: [
     { label: "Dashboard (Owner)", path: "/owner" },
+    { label: "Users", path: "/admin/users" },
+    { label: "Tickets", path: "/admin/tickets" },
+    { label: "Recordings", path: "/admin/recordings" },
     { label: "Olympiads", path: "/admin" },
     { label: "Universities", path: "/universities" },
     { label: "Schools", path: "/schools" },
@@ -160,7 +165,7 @@ export const isActiveRoute = (menuPath, currentPath) => {
   }
   
   // Handle admin panel routes
-  if (menuPath === "/admin" && currentPath.startsWith("/admin")) {
+  if (menuPath === "/admin" && currentPath.startsWith("/admin") && !currentPath.startsWith("/admin/users") && !currentPath.startsWith("/admin/tickets") && !currentPath.startsWith("/admin/recordings")) {
     return true;
   }
   

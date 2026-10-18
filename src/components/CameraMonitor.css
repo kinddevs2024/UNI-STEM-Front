@@ -1,122 +1,14 @@
-.camera-monitor {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 180px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  z-index: 1000;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.5s ease;
-  backdrop-filter: blur(10px);
-}
-
-.camera-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border);
-}
-
-.camera-title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-}
-
-.camera-indicator {
-  width: 8px;
-  height: 8px;
-  background: var(--success);
-  border-radius: 50%;
-  animation: glowPulse 2s ease-in-out infinite;
-  box-shadow: 0 0 10px var(--success);
-}
-
-.camera-preview-container {
-  position: relative;
-  width: 100%;
-  height: 240px;
-  background: var(--bg-primary);
-  overflow: hidden;
-}
-
-.camera-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1); /* Mirror effect for selfie view */
-}
-
-.camera-capture-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-}
-
-.capture-pulse {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--accent);
-  border-radius: 50%;
-  animation: capturePulse 0.5s ease-out;
-}
-
-@keyframes capturePulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-}
-
-.camera-error {
-  padding: 20px 12px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  min-height: 240px;
-  justify-content: center;
-}
-
-.camera-error-icon {
-  font-size: 32px;
-  opacity: 0.5;
-}
-
-.camera-error-text {
-  font-size: 11px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-@media (max-width: 768px) {
-  .camera-monitor {
-    width: 150px;
-    top: 10px;
-    right: 10px;
-  }
-  
-  .camera-preview-container {
-    height: 200px;
-  }
-}
-
+.camera-monitor { position:fixed; top:104px; right:24px; width:200px; background:#fff; color:#171530; border:1px solid #dcd9d3; border-radius:18px; overflow:hidden; z-index:900; box-shadow:none; animation:none; font-family:'Golos Text Variable',Arial,sans-serif; }
+.camera-monitor .camera-header { display:flex; justify-content:space-between; align-items:center; padding:11px 13px; background:#dfcff5; border-bottom:1px solid #c9b6e3; }
+.camera-monitor .camera-title { font-size:9px; font-weight:550; text-transform:uppercase; letter-spacing:.07em; color:#51485e; }
+.camera-monitor .camera-indicator { width:7px; height:7px; background:#3b785d; border-radius:50%; animation:none; box-shadow:none; }
+.camera-monitor .camera-preview-container { position:relative; width:100%; height:230px; background:#171530; overflow:hidden; }
+.camera-monitor .camera-preview { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); display:block; }
+.camera-monitor .camera-capture-indicator { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(23,21,48,.25); pointer-events:none; }
+.camera-monitor .capture-pulse { width:36px; height:36px; border:2px solid #f9e78f; border-radius:50%; animation:camera-capture-pulse .5s ease-out; }
+@keyframes camera-capture-pulse { from { transform:scale(.85); opacity:1; } to { transform:scale(1.4); opacity:0; } }
+.camera-monitor .camera-error { padding:20px 14px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; min-height:230px; justify-content:center; background:#fcecf0; color:#a23f49; }
+.camera-monitor .camera-error-icon { font-size:30px; }
+.camera-monitor .camera-error-text { font-size:11px; color:#a23f49; line-height:1.6; }
+@media(max-width:1050px) { .camera-monitor { position:static; width:200px; max-width:100%; margin:0 auto 22px; } .camera-monitor .camera-preview-container,.camera-monitor .camera-error { height:150px; min-height:150px; } }
+@media(prefers-reduced-motion:reduce) { .camera-monitor .capture-pulse { animation:none; } }

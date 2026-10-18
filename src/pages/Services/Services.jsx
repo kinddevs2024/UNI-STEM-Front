@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import Scene3D from "../../components/3D/Scene3D";
 import "./Services.css";
 
 const Services = () => {
@@ -54,23 +53,19 @@ const Services = () => {
   return (
     <div className="services-page">
       {/* Hero Section */}
-      <section className="hero-section h-svh ">
-        <div className="hero-3d">
-          <Scene3D subject="math" />
-        </div>
+      <section className="hero-section">
         <div className="hero-content">
+          <p className="go-public-eyebrow">A PLACE TO GO FURTHER</p>
           <h1 className="hero-title">
-            <span className="text-glow">Our Services</span>
+            Our <em>Services</em>
           </h1>
           <p className="hero-subtitle">Everything you need to excel</p>
         </div>
+        <div className="public-hero-art"><img src="/images/student-boy.webp" alt="" aria-hidden="true" width="260" height="280" /></div>
       </section>
 
       {/* Services Grid */}
       <section className="info-section">
-        <div className="section-3d">
-          <Scene3D subject="physics" />
-        </div>
         <div className="section-content">
           <div className="container">
             <h2 className="section-title">What We Offer</h2>
@@ -89,9 +84,6 @@ const Services = () => {
 
       {/* Features Section */}
       <section className="info-section">
-        <div className="section-3d">
-          <Scene3D subject="chemistry" />
-        </div>
         <div className="section-content">
           <div className="container">
             <h2 className="section-title">Key Features</h2>
@@ -143,10 +135,7 @@ const Services = () => {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="info-section">
-          <div className="section-3d">
-            <Scene3D subject="science" />
-          </div>
+        <section className="info-section services-cta">
           <div className="section-content">
             <div className="container">
               <h2 className="section-title">Ready to Get Started?</h2>
@@ -166,13 +155,14 @@ const Services = () => {
               </div>
             </div>
           </div>
+          <img className="services-cta-art" src="/images/trophy.webp" alt="" aria-hidden="true" width="170" height="170" />
         </section>
       )}
 
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 Global Olympiads. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Global Olympiads. All rights reserved.</p>
         </div>
       </footer>
     </div>

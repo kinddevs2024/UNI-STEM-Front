@@ -22,57 +22,46 @@ const getSystemTheme = () => {
 
 const SYSTEM_DARK_THEME = {
   name: "system",
-  bgPrimary: "#000000",
-  bgSecondary: "#0a0a0a",
-  bgTertiary: "#141414",
-  textPrimary: "#ffffff",
-  textSecondary: "#a0a0a0",
-  textTertiary: "#666666",
-  accent: "#ffffff",
-  border: "rgba(255, 255, 255, 0.1)",
-  borderHover: "rgba(255, 255, 255, 0.3)",
-  glow: "rgba(255, 255, 255, 0.3)",
-  glowStrong: "rgba(255, 255, 255, 0.5)",
-  success: "#00ff00",
-  error: "#ff0000",
-  warning: "#ffff00",
+  bgPrimary: "#171530",
+  bgSecondary: "#23203a",
+  bgTertiary: "#302b48",
+  textPrimary: "#fbf9f3",
+  textSecondary: "#c8c2d7",
+  textTertiary: "#a49bb6",
+  accent: "#dfcff5",
+  border: "#443d59",
+  borderHover: "#a48cc6",
+  glow: "rgba(0, 0, 0, 0.08)",
+  glowStrong: "rgba(0, 0, 0, 0.12)",
+  success: "#77c6a4",
+  error: "#f095a5",
+  warning: "#f9e78f",
 };
 
 const SYSTEM_LIGHT_THEME = {
   name: "system",
-  bgPrimary: "#ffffff",
-  bgSecondary: "#f5f5f5",
-  bgTertiary: "#e8e8e8",
-  textPrimary: "#000000",
-  textSecondary: "#4a4a4a",
-  textTertiary: "#888888",
-  accent: "#000000",
-  border: "rgba(0, 0, 0, 0.1)",
-  borderHover: "rgba(0, 0, 0, 0.3)",
-  glow: "rgba(0, 0, 0, 0.1)",
-  glowStrong: "rgba(0, 0, 0, 0.2)",
-  success: "#00aa00",
-  error: "#cc0000",
-  warning: "#ccaa00",
+  bgPrimary: "#fbf9f3",
+  bgSecondary: "#ffffff",
+  bgTertiary: "#f1edf5",
+  textPrimary: "#171530",
+  textSecondary: "#716f7a",
+  textTertiary: "#898392",
+  accent: "#171530",
+  border: "#ded9e2",
+  borderHover: "#b6a3d0",
+  glow: "rgba(23, 21, 48, 0.06)",
+  glowStrong: "rgba(23, 21, 48, 0.12)",
+  success: "#287657",
+  error: "#b74355",
+  warning: "#94661f",
 };
 
 const THEMES = {
+  light: { ...SYSTEM_LIGHT_THEME, name:"light" },
+  dark: { ...SYSTEM_DARK_THEME, name:"dark" },
   "kid-friendly": {
+    ...SYSTEM_LIGHT_THEME,
     name: "kid-friendly",
-    bgPrimary: "#F6F4F4",
-    bgSecondary: "#EBE7E8",
-    bgTertiary: "#D5D1D2",
-    textPrimary: "#216E1A",
-    textSecondary: "#3B6F2F",
-    textTertiary: "#6B8A63",
-    accent: "#43A806",
-    border: "rgba(67, 168, 6, 0.26)",
-    borderHover: "rgba(67, 168, 6, 0.46)",
-    glow: "rgba(67, 168, 6, 0.3)",
-    glowStrong: "rgba(67, 168, 6, 0.5)",
-    success: "#43A806",
-    error: "#EF5350",
-    warning: "#F0BA00",
   },
 };
 
@@ -101,9 +90,12 @@ const STORAGE_KEYS = {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState("kid-friendly");
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    try { const saved=localStorage.getItem(STORAGE_KEYS.theme); return saved === "kid-friendly" ? "light" : ["light","dark","system"].includes(saved) ? saved : "system"; }
+    catch { return "system"; }
+  });
   const [customTheme, setCustomTheme] = useState(DEFAULT_CUSTOM_THEME);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const itemsPerPage = 10;
   const [systemPreference, setSystemPreference] = useState(getSystemTheme());
 
   // Listen to system theme changes
@@ -131,16 +123,15 @@ export const ThemeProvider = ({ children }) => {
   // Load settings from localStorage on mount
   useEffect(() => {
     const savedTheme =
-      localStorage.getItem(STORAGE_KEYS.theme) || "kid-friendly";
+      localStorage.getItem(STORAGE_KEYS.theme) || "system";
     const savedCustomTheme = localStorage.getItem(STORAGE_KEYS.customTheme);
-    const savedItemsPerPage = localStorage.getItem(STORAGE_KEYS.itemsPerPage);
 
-    // Migrate old dark/light themes to system
-    if (savedTheme === "dark" || savedTheme === "light") {
-      localStorage.setItem(STORAGE_KEYS.theme, "system");
-      setCurrentTheme("system");
+    // Preserve explicit light/dark choices; migrate the previous brand-light label.
+    if (savedTheme === "kid-friendly") {
+      localStorage.setItem(STORAGE_KEYS.theme, "light");
+      setCurrentTheme("light");
     } else {
-      setCurrentTheme(savedTheme);
+      setCurrentTheme(["light","dark","system"].includes(savedTheme) ? savedTheme : "system");
     }
 
     if (savedCustomTheme) {
@@ -151,12 +142,6 @@ export const ThemeProvider = ({ children }) => {
       }
     }
 
-    if (savedItemsPerPage) {
-      const parsed = parseInt(savedItemsPerPage, 10);
-      if (!isNaN(parsed) && parsed > 0) {
-        setItemsPerPage(parsed);
-      }
-    }
   }, []);
 
   // Apply theme to CSS variables
@@ -176,6 +161,11 @@ export const ThemeProvider = ({ children }) => {
     if (theme) {
       const root = document.documentElement;
       const body = document.body;
+      const resolvedMode = currentTheme === "system" ? systemPreference : currentTheme === "dark" ? "dark" : currentTheme === "custom" ? (parseInt(theme.bgPrimary.replace('#','').slice(0,2),16) < 128 ? "dark" : "light") : "light";
+      root.dataset.colorMode = resolvedMode;
+      root.style.colorScheme = resolvedMode;
+      const browserTheme = document.querySelector('meta[name="theme-color"]');
+      if (browserTheme) browserTheme.setAttribute('content', resolvedMode==='dark' ? '#171530' : '#dfcff5');
 
       // Set CSS variables
       root.style.setProperty("--bg-primary", theme.bgPrimary);
@@ -185,6 +175,10 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty("--text-secondary", theme.textSecondary);
       root.style.setProperty("--text-tertiary", theme.textTertiary);
       root.style.setProperty("--accent", theme.accent);
+      root.style.setProperty("--accent-dark", theme.accentDark || theme.accent);
+      root.style.setProperty("--accent-light", theme.accentLight || "#dfcff5");
+      root.style.setProperty("--accent-green", theme.accent);
+      root.style.setProperty("--secondary-yellow", "#f9e78f");
       root.style.setProperty("--border", theme.border);
       root.style.setProperty("--border-hover", theme.borderHover);
       root.style.setProperty("--glow", theme.glow);
@@ -195,17 +189,14 @@ export const ThemeProvider = ({ children }) => {
 
       // Set data-theme attribute for conditional styling
       if (body) {
-        if (currentTheme === "kid-friendly") {
-          body.setAttribute("data-theme", "kid-friendly");
-        } else {
-          body.removeAttribute("data-theme");
-        }
+        body.setAttribute("data-theme", currentTheme);
+        body.dataset.colorMode = resolvedMode;
       }
     }
   }, [currentTheme, customTheme, systemPreference]);
 
   const changeTheme = (themeName) => {
-    if (THEMES[themeName] || themeName === "custom" || themeName === "system") {
+    if (["light","dark","system"].includes(themeName)) {
       setCurrentTheme(themeName);
       localStorage.setItem(STORAGE_KEYS.theme, themeName);
     }
@@ -222,13 +213,6 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
-  const updateItemsPerPage = (count) => {
-    const num = parseInt(count, 10);
-    if (!isNaN(num) && num > 0) {
-      setItemsPerPage(num);
-      localStorage.setItem(STORAGE_KEYS.itemsPerPage, num.toString());
-    }
-  };
 
   const resetCustomTheme = () => {
     setCustomTheme(DEFAULT_CUSTOM_THEME);
@@ -247,9 +231,8 @@ export const ThemeProvider = ({ children }) => {
     itemsPerPage,
     changeTheme,
     updateCustomTheme,
-    updateItemsPerPage,
     resetCustomTheme,
-    availableThemes: Object.keys(THEMES).concat("system", "custom"),
+    availableThemes: ["light", "dark", "system"],
   };
 
   return (

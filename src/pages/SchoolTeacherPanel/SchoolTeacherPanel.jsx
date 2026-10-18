@@ -5,6 +5,7 @@ import { formatDate } from '../../utils/helpers';
 import NotificationToast from '../../components/NotificationToast';
 import RealTimeCaptureViewer from '../../components/RealTimeCaptureViewer';
 import './SchoolTeacherPanel.css';
+import "../AdminPanel/PanelRedesign.css";
 
 const SchoolTeacherPanel = () => {
   const { user } = useAuth();
@@ -137,7 +138,7 @@ const SchoolTeacherPanel = () => {
 
   if (loading && results.length === 0 && activeStudents.length === 0) {
     return (
-      <div className="school-teacher-panel-page">
+      <div className="school-teacher-panel-page brand-panel" data-brand-panel="teacher">
         <div className="container">
           <div className="teacher-loading">
             <div className="loading-spinner"></div>
@@ -148,7 +149,7 @@ const SchoolTeacherPanel = () => {
   }
 
   return (
-    <div className="school-teacher-panel-page">
+    <div className="school-teacher-panel-page brand-panel" data-brand-panel="teacher">
       <div className="container">
         <div className="teacher-header">
           <h1 className="teacher-title text-glow">School Teacher Panel</h1>

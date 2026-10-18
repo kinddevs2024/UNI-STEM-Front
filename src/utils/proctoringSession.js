@@ -1,9 +1,10 @@
 let pendingStreams = null;
 
-export const setPendingProctoringStreams = ({ cameraStream, screenStream }) => {
+export const setPendingProctoringStreams = ({ cameraStream, screenStream, mode }) => {
   pendingStreams = {
     cameraStream: cameraStream || null,
     screenStream: screenStream || null,
+    mode: mode || 'desktop',
   };
 };
 

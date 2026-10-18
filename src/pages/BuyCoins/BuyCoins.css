@@ -1,264 +1,40 @@
-.buy-coins-page {
-  min-height: 100%;
-  padding: 40px 20px;
-  background: var(--bg-primary);
-  animation: fadeIn 0.5s ease;
-}
+@import "../Profile/AccountBrand.css";
+.buy-coins-page .buy-coins-header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:32px 38px; border:1px solid #e8d786; background:var(--go-yellow,#f9e78f); color:var(--go-ink,#171530); border-radius:28px; margin-bottom:30px; }
+.buy-coins-page .buy-coins-header .go-account-eyebrow { color:#746b46; }
+.buy-coins-page .buy-coins-subtitle { font-size:14px; line-height:1.8; color:#655e43; max-width:590px; margin:0; }
+.buy-coins-page .buy-coins-balance { display:inline-flex; gap:10px; align-items:center; padding:8px 16px; border:1px solid rgba(23,21,48,.18); background:rgba(255,255,255,.35); border-radius:50px; margin-top:21px; font-size:12px; }
+.buy-coins-page .buy-coins-art { width:180px; height:180px; object-fit:contain; flex-shrink:0; }
+.buy-coins-page .buy-coins-content { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:24px; align-items:start; }
+.buy-coins-page :is(.buy-coins-card,.buy-coins-info) { padding:28px; min-width:0; }
+.buy-coins-page .coin-packages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:24px; }
+.buy-coins-page .coin-package { position:relative; display:flex; flex-direction:column; justify-content:center; align-items:start; gap:9px; min-height:164px; padding:25px 20px; border:1px solid var(--account-line); border-radius:20px; background:var(--account-paper); color:var(--text-primary,#171530); font:inherit; text-align:start; cursor:pointer; box-shadow:none; }
+.buy-coins-page .coin-package.popular { background:var(--bg-tertiary,#f0eaf8); }
+.buy-coins-page .coin-package.selected { border:2px solid var(--go-ink,#171530); padding:24px 19px; box-shadow:none; }
+.buy-coins-page .coin-package:hover { border-color:#a88ccf; box-shadow:none; }
+.buy-coins-page .package-recommended { position:absolute; top:10px; right:10px; font-size:8px; letter-spacing:.04em; padding:4px 8px; border:1px solid var(--account-line); border-radius:50px; }
+.buy-coins-page .package-coins { font-size:26px; font-weight:550; letter-spacing:-.045em; padding-top:10px; }
+.buy-coins-page .package-price { font-size:13px; color:var(--text-secondary,#716f7a); }
+.buy-coins-page .package-save { display:inline-flex; font-size:10px; padding:3px 9px; border-radius:50px; background:#f9e78f; color:#171530; }
+.buy-coins-page .custom-amount-row { padding:18px; border:1px solid var(--account-line); border-radius:18px; background:var(--account-paper); }
+.buy-coins-page .buy-coins-form-section { border-top:1px solid var(--account-line); padding-top:25px; }
+.buy-coins-page .buy-coins-form-section h3 { font-size:20px; letter-spacing:-.035em; margin:0 0 8px; font-weight:550; }
+.buy-coins-page .form-description { font-size:12px; color:var(--text-secondary,#716f7a); line-height:1.8; margin:0 0 20px; }
+.buy-coins-page .payme-section { padding:21px; border:1px solid var(--account-line); border-radius:20px; background:var(--account-paper); }
+.buy-coins-page .payme-summary { display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap; padding-bottom:20px; font-size:13px; }
+.buy-coins-page .payme-amount { font-size:19px; font-weight:550; letter-spacing:-.04em; }
+.buy-coins-page .payment-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+.buy-coins-page .payment-btn { flex:1 1 150px; }
+.buy-coins-page .click-btn { background:var(--go-blue,#c6def3); color:var(--go-ink,#171530); border-color:#c6def3; }
+.buy-coins-page .click-btn:hover { background:#aacbe8; border-color:#aacbe8; }
+.buy-coins-page .payme-error { padding:13px 15px; background:#fcecf0; border-radius:13px; color:#a23f49; font-size:12px; line-height:1.7; margin:15px 0 0; }
+.buy-coins-page .buy-coins-info { background:var(--go-peach,#f5e3d7); color:var(--go-ink,#171530); border-color:#e6d2c4; }
+.buy-coins-page .buy-coins-info h3 { font-size:23px; letter-spacing:-.045em; font-weight:550; margin:0 0 17px; }
+.buy-coins-page .buy-coins-info ul { padding-left:18px; margin:0 0 23px; font-size:12px; line-height:1.9; }
+.buy-coins-page .buy-coins-info li + li { margin-top:10px; }
+.buy-coins-page .buy-coins-info .button-secondary { color:#171530; border-color:rgba(23,21,48,.22); }
+@media(max-width:960px) { .buy-coins-page .buy-coins-content { grid-template-columns:1fr; } }
+@media(max-width:580px) { .buy-coins-page .buy-coins-header { padding:25px 22px; position:relative; } .buy-coins-page .buy-coins-art { width:70px; height:90px; position:absolute; right:17px; top:18px; } .buy-coins-page .buy-coins-title { padding-right:65px; } .buy-coins-page .buy-coins-header .go-account-eyebrow { max-width:calc(100% - 75px); } .buy-coins-page :is(.buy-coins-card,.buy-coins-info) { padding:22px; } .buy-coins-page .coin-packages { gap:10px; } .buy-coins-page .coin-package { padding:22px 15px; } .buy-coins-page .coin-package.selected { padding:21px 14px; } .buy-coins-page .package-coins { font-size:22px; } .buy-coins-page .package-recommended { font-size:7px; top:8px; right:8px; } .buy-coins-page .payme-section { padding:17px; } }
 
-.buy-coins-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.buy-coins-title {
-  font-size: 36px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: var(--text-primary);
-}
-
-.buy-coins-subtitle {
-  font-size: 16px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
-
-.buy-coins-balance {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-size: 16px;
-}
-
-.buy-coins-balance .balance-icon {
-  font-size: 24px;
-}
-
-.buy-coins-balance strong {
-  color: var(--accent);
-}
-
-.buy-coins-content {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.buy-coins-card .section-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.buy-coins-card .section-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
-
-.coin-packages {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  margin-bottom: 40px;
-}
-
-.coin-package {
-  position: relative;
-  padding: 24px 16px;
-  background: var(--bg-tertiary);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-family: inherit;
-  color: inherit;
-}
-
-.coin-package:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(67, 168, 6, 0.25);
-}
-
-.coin-package.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
-  background: rgba(67, 168, 6, 0.18);
-}
-
-.custom-amount-row {
-  margin-bottom: 24px;
-}
-
-.custom-amount-row input {
-  max-width: 200px;
-}
-
-.form-amount-summary .amount-summary {
-  margin: 8px 0 0 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.coin-package.popular {
-  border-color: var(--accent);
-  background: rgba(67, 168, 6, 0.1);
-}
-
-.package-recommended {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.package-coins {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.package-price {
-  font-size: 18px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.package-save {
-  display: block;
-  font-size: 12px;
-  color: var(--success, #43a806);
-  margin-top: 8px;
-}
-
-.payme-section {
-  margin-bottom: 32px;
-  padding: 24px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-.payme-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  font-size: 18px;
-}
-
-.payme-amount {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.payment-buttons {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.payment-btn {
-  flex: 1;
-  min-width: 140px;
-}
-
-.payme-btn {
-  background: linear-gradient(135deg, #43a806 0%, #216e1a 100%);
-}
-
-.click-btn {
-  background: linear-gradient(135deg, #43a806 0%, #216e1a 100%);
-}
-
-.payme-error {
-  margin: 12px 0 0 0;
-  color: var(--error, #ff4444);
-  font-size: 14px;
-}
-
-.buy-coins-form-section {
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-
-.buy-coins-form-section h3 {
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-.form-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
-
-.buy-coins-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.buy-coins-form .form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.buy-coins-form input,
-.buy-coins-form select,
-.buy-coins-form textarea {
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 15px;
-}
-
-.buy-coins-success {
-  padding: 32px;
-  text-align: center;
-  background: rgba(67, 168, 6, 0.1);
-  border: 1px solid var(--success, #43a806);
-  border-radius: 12px;
-}
-
-.buy-coins-success h4 {
-  margin: 0 0 8px 0;
-  color: var(--success);
-}
-
-.buy-coins-success p {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-.buy-coins-info h3 {
-  font-size: 18px;
-  margin-bottom: 16px;
-}
-
-.buy-coins-info ul {
-  margin: 0 0 24px 0;
-  padding-left: 24px;
-  color: var(--text-secondary);
-  line-height: 1.8;
-}
-
-.buy-coins-info .button-secondary {
-  display: inline-block;
-}
+.buy-coins-page .buy-coins-balance { display:flex; align-items:center; gap:10px; }
+body[data-color-mode="dark"] .buy-coins-page :is(.buy-coins-subtitle,.buy-coins-header .go-account-eyebrow) { color:var(--text-secondary); }
+body[data-color-mode="dark"] .buy-coins-page .buy-coins-info .button-secondary { color:var(--text-primary); border-color:var(--border); }

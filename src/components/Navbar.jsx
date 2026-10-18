@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { List, X, ArrowUpRight } from "@phosphor-icons/react";
 import { useAuth } from "../context/AuthContext";
 import { getNavigationItems, isActiveRoute } from "../utils/navigationConfig";
 import { getImageUrl } from "../utils/helpers";
@@ -12,6 +13,21 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const [activePill, setActivePill] = useState(null);
+  useLayoutEffect(() => {
+    const menu = menuRef.current;
+    if (!menu) return;
+    const measure = () => {
+      const link = menu.querySelector('.navbar-link.active');
+      setActivePill(link ? { left:link.offsetLeft, top:link.offsetTop, width:link.offsetWidth, height:link.offsetHeight } : null);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(menu);
+    document.fonts?.ready.then(measure);
+    return () => observer.disconnect();
+  }, [location.pathname, isAuthenticated, user?.role]);
 
   const handleLogout = () => {
     logout();
@@ -54,7 +70,7 @@ const Navbar = () => {
       <div className="navbar-account-group">
         <BalanceDisplay />
 
-        <Link to="/profile" className="navbar-user">
+        <Link to="/profile" className="navbar-user" aria-label="Profile">
           {user?.userLogo ? (
             <img
               src={getImageUrl(user.userLogo)}
@@ -75,19 +91,22 @@ const Navbar = () => {
         onClick={handleLogout}
         className="button-secondary navbar-logout"
       >
-        Logout
+        Sign out <ArrowUpRight size={16} aria-hidden="true" />
       </button>
     </>
   );
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" aria-label="Platform navigation">
       <div className="navbar-container">
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="navbar-logo">
           <img src={logoPath} alt="Global Olympiads logo" className="navbar-logo-image" />
+          <span className="navbar-logo-text">global<span>olympiad</span></span>
         </Link>
 
-        <div className="navbar-menu navbar-menu-desktop">
+        <div className="navbar-tour-mobile-balance"><BalanceDisplay /></div>
+        <div className="navbar-menu navbar-menu-desktop" ref={menuRef}>
+          {activePill && <span className="navbar-active-pill" aria-hidden="true" style={activePill} />}
           {isAuthenticated ? (
             renderAuthLinks()
           ) : (
@@ -100,23 +119,12 @@ const Navbar = () => {
         <button
           type="button"
           className={`navbar-mobile-toggle ${mobileMenuOpen ? "open" : ""}`}
-          aria-label="Toggle menu"
+          aria-label="Menu"
           aria-expanded={mobileMenuOpen}
+          aria-controls="platform-mobile-menu"
           onClick={() => setMobileMenuOpen((open) => !open)}
         >
-          <span className="navbar-mobile-toggle-icon">
-            <span className="navbar-mobile-toggle-dots">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </span>
-          </span>
+          {mobileMenuOpen ? <X size={23} aria-hidden="true" /> : <List size={23} aria-hidden="true" />}
         </button>
       </div>
 
@@ -126,7 +134,7 @@ const Navbar = () => {
         aria-hidden={!mobileMenuOpen}
       />
 
-      <div className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
+      <div id="platform-mobile-menu" className={`navbar-mobile-menu ${mobileMenuOpen ? "open" : ""}`} inert={mobileMenuOpen ? undefined : ""} aria-hidden={!mobileMenuOpen}>
         {isAuthenticated ? (
           renderAuthLinks()
         ) : (

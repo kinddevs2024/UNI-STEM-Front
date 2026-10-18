@@ -13,6 +13,8 @@ import {
   saveCustomSubjects,
 } from "../../utils/olympiadSubjects";
 import "../AdminPanel/AdminPanel.css";
+import "../AdminPanel/PanelRedesign.css";
+import "./UniversityPanel.css";
 
 const CUSTOM_SUBJECTS_STORAGE_KEY = "universityCustomOlympiadSubjects";
 
@@ -514,7 +516,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
                       ))}
                     </div>
                   )}
-                  <div className="form-actions" style={{ justifyContent: "flex-end" }}>
+                  <div className="form-actions align-end">
                     <button
                       type="button"
                       className="button-secondary"
@@ -1158,14 +1160,14 @@ const UniversityPanel = () => {
 
   if (loading) {
     return (
-      <div className="admin-loading">
+      <div className="admin-loading brand-panel" data-brand-panel="university-panel">
         <div className="loading-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="admin-panel-page">
+    <div className="admin-panel-page brand-panel" data-brand-panel="university-panel">
       <div className="container">
         <div className="admin-header">
           <h1 className="admin-title text-glow">University Panel</h1>
@@ -1384,7 +1386,7 @@ const UniversityPanel = () => {
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group" style={{ width: "100%" }}>
+                    <div className="form-group is-full">
                       <label>Description</label>
                       <textarea
                         value={formData.description}
@@ -1402,7 +1404,7 @@ const UniversityPanel = () => {
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group" style={{ width: "100%" }}>
+                    <div className="form-group is-full">
                       <label>University Name</label>
                       <input
                         type="text"
@@ -1420,7 +1422,7 @@ const UniversityPanel = () => {
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group" style={{ width: "100%" }}>
+                    <div className="form-group is-full">
                       <label>Olympiad Logo</label>
                       <input
                         type="file"
@@ -1435,19 +1437,12 @@ const UniversityPanel = () => {
                       />
                       {formData.olympiadLogo && (
                         <div
-                          className="file-preview"
-                          style={{ marginTop: "12px" }}
+                          className="file-preview panel-preview"
                         >
                           <img
                             src={URL.createObjectURL(formData.olympiadLogo)}
                             alt="Logo preview"
-                            style={{
-                              maxWidth: "200px",
-                              maxHeight: "200px",
-                              borderRadius: "8px",
-                              border: "2px solid var(--border)",
-                              objectFit: "cover",
-                            }}
+                            className="panel-preview-image"
                           />
                         </div>
                       )}
@@ -1470,7 +1465,7 @@ const UniversityPanel = () => {
                         min="1"
                         placeholder="60"
                       />
-                      <small style={{ color: "#888", fontSize: "12px" }}>
+                      <small className="panel-field-hint">
                         Will be converted to seconds ({(Number(formData.duration) || 60) * 60}s)
                       </small>
                     </div>

@@ -6,6 +6,7 @@ import { formatDate } from "../../utils/helpers";
 import QuestionFormStep from "../../components/QuestionFormStep/QuestionFormStep";
 import "../AdminPanel/AdminPanel.css";
 import "./UniversityDashboard.css";
+import "../AdminPanel/PanelRedesign.css";
 
 const UniversityDashboard = () => {
   const { user } = useAuth();
@@ -187,7 +188,7 @@ const UniversityDashboard = () => {
   };
 
   return (
-    <div className="university-dashboard-page page-container">
+    <div className="university-dashboard-page page-container brand-panel" data-brand-panel="university-dashboard">
       <div>
         <div className="university-header">
           <h1 className="university-title text-glow">University Dashboard</h1>

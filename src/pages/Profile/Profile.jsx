@@ -25,7 +25,7 @@ const Profile = () => {
     <div className="profile-page page-container">
       <div>
         <div className="profile-header">
-          <h1 className="profile-title text-glow">My Profile</h1>
+          <div><p className="go-account-eyebrow">YOUR STORY, IN ONE PLACE</p><h1 className="profile-title">My <em>Profile</em></h1></div>
           <div className="profile-actions">
             <Link to="/profile/edit" className="button-primary">
               Edit Profile
@@ -158,15 +158,15 @@ const Profile = () => {
                       {user.userBan ? "Banned" : "Active"}
                     </span>
                   </div>
-                  <div className="detail-item full-width profile-coins-row">
+                  {user?.role === "student" && (<div className="detail-item full-width profile-coins-row">
                     <span className="detail-label">Coins</span>
                     <span className="detail-value">
-                      <span className="profile-balance">💰 {balance ?? 0} coins</span>
+                      <span className="profile-balance"><img src="/images/coins-generated.webp" width="25" height="25" alt="" /> {balance ?? 0} coins</span>
                       <Link to="/buy-coins" className="profile-get-more">
                         Get more
                       </Link>
                     </span>
-                  </div>
+                  </div>)}
                 </div>
               </div>
             </div>

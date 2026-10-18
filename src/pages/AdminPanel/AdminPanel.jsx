@@ -1,3 +1,4 @@
+import { getEntryFee } from '../../utils/coinEntry';
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { adminAPI } from "../../services/api";
@@ -13,7 +14,11 @@ import {
   saveCustomSubjects,
 } from "../../utils/olympiadSubjects";
 import { parseQuestionsFromExcelFile } from "../../utils/parseQuestionsFromExcel";
+import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
+import { downloadQuestionWorkbook } from '../../utils/questionWorkbook';
+import GradePrizesEditor from '../../components/GradePrizesEditor';
 import "./AdminPanel.css";
+import "./PanelRedesign.css";
 
 const CUSTOM_SUBJECTS_STORAGE_KEY = "adminCustomOlympiadSubjects";
 
@@ -21,11 +26,13 @@ const CUSTOM_SUBJECTS_STORAGE_KEY = "adminCustomOlympiadSubjects";
 const QuestionFormStep = ({
   olympiadId,
   olympiadType,
-  questions,
+  questions: allQuestions,
   onAddQuestion,
   onFinish,
   onBack,
 }) => {
+  const [gradeCategory, setGradeCategory] = useState('5');
+  const questions = allQuestions.filter(question => question.gradeCategory === gradeCategory);
   const [questionForm, setQuestionForm] = useState({
     question: "",
     type: olympiadType === "test" ? "multiple-choice" : "essay",
@@ -63,6 +70,7 @@ const QuestionFormStep = ({
       }
 
       onAddQuestion({
+        gradeCategory,
         question: questionForm.question,
         type: "multiple-choice",
         options: validOptions,
@@ -78,6 +86,7 @@ const QuestionFormStep = ({
       }
 
       onAddQuestion({
+        gradeCategory,
         question: questionForm.question,
         type: "essay",
         points: Number(questionForm.points) || 10,
@@ -125,6 +134,8 @@ const QuestionFormStep = ({
   return (
     <div className="step-content">
       <h2>Step 3: Add Questions</h2>
+      {olympiadId && <GradePrizesEditor olympiad={{ _id: olympiadId, gradePrizes: [] }} gradeCategory={gradeCategory} />}
+      <label>School grade / education<select value={gradeCategory} onChange={e => setGradeCategory(e.target.value)}>{GRADE_CATEGORIES.map(grade => <option value={grade} key={grade}>{gradeLabel(grade)}</option>)}</select></label>
       <p className="step-description">
         Add questions to your {olympiadType === "test" ? "test" : "essay"}{" "}
         olympiad
@@ -356,6 +367,7 @@ const AdminPanel = () => {
     type: "", // Will be set in step 1
     startTime: "",
     endTime: "",
+    entryFeeCoins: 50,
     duration: 60, // in minutes - will convert to seconds
     status: "draft", // draft, published, unpublished
     olympiadLogo: null, // Logo file
@@ -508,6 +520,7 @@ const AdminPanel = () => {
         title: formData.title,
         description: formData.description,
         type: formData.type,
+        entryFeeCoins: Number(formData.entryFeeCoins ?? 50),
         subject: formData.subject,
         startTime: formatDateTime(formData.startTime),
         endTime: formatDateTime(formData.endTime),
@@ -668,6 +681,7 @@ const AdminPanel = () => {
       type: "",
       startTime: "",
       endTime: "",
+    entryFeeCoins: 50,
       duration: 60,
       status: "draft",
       olympiadLogo: null,
@@ -693,6 +707,7 @@ const AdminPanel = () => {
       type: "",
       startTime: "",
       endTime: "",
+    entryFeeCoins: 50,
       duration: 60,
       status: "draft",
       olympiadLogo: null,
@@ -731,6 +746,7 @@ const AdminPanel = () => {
         startTime: formatToLocalDateTime(data?.startTime),
         endTime: formatToLocalDateTime(data?.endTime),
         duration: Math.floor((Number(data?.duration) || 3600) / 60),
+        entryFeeCoins: getEntryFee(data),
         status: data?.status || "draft",
         olympiadLogo: null,
       });
@@ -780,6 +796,7 @@ const AdminPanel = () => {
         title: formData.title,
         description: formData.description,
         type: formData.type,
+        entryFeeCoins: Number(formData.entryFeeCoins ?? 50),
         subject: formData.subject,
         startTime: formatDateTime(formData.startTime),
         endTime: formatDateTime(formData.endTime),
@@ -841,6 +858,7 @@ const AdminPanel = () => {
         type: "",
         startTime: "",
         endTime: "",
+    entryFeeCoins: 50,
         duration: 60,
         status: "draft",
       });
@@ -972,6 +990,7 @@ const AdminPanel = () => {
         startTime: new Date().toISOString(), // Reset start time
         endTime: new Date(Date.now() + 3600000).toISOString(), // Reset end time (1 hour from now)
         duration: normalizedDuration,
+        entryFeeCoins: getEntryFee(originalOlympiad),
         status: "draft", // Always draft
       };
 
@@ -1049,14 +1068,14 @@ const AdminPanel = () => {
 
   if (loading) {
     return (
-      <div className="admin-loading">
+      <div className="admin-loading brand-panel" data-brand-panel="admin">
         <div className="loading-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="admin-panel-page">
+    <div className="admin-panel-page brand-panel" data-brand-panel="admin">
       <div className="container">
         <div className="admin-header">
           <h1 className="admin-title text-glow">Admin Panel</h1>
@@ -1275,7 +1294,7 @@ const AdminPanel = () => {
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group" style={{ width: "100%" }}>
+                    <div className="form-group is-full">
                       <label>Description</label>
                       <textarea
                         value={formData.description}
@@ -1293,7 +1312,7 @@ const AdminPanel = () => {
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group" style={{ width: "100%" }}>
+                    <div className="form-group is-full">
                       <label>Olympiad Logo</label>
                       <input
                         type="file"
@@ -1308,19 +1327,12 @@ const AdminPanel = () => {
                       />
                       {formData.olympiadLogo && (
                         <div
-                          className="file-preview"
-                          style={{ marginTop: "12px" }}
+                          className="file-preview panel-preview"
                         >
                           <img
                             src={URL.createObjectURL(formData.olympiadLogo)}
                             alt="Logo preview"
-                            style={{
-                              maxWidth: "200px",
-                              maxHeight: "200px",
-                              borderRadius: "8px",
-                              border: "2px solid var(--border)",
-                              objectFit: "cover",
-                            }}
+                            className="panel-preview-image"
                           />
                         </div>
                       )}
@@ -1343,10 +1355,11 @@ const AdminPanel = () => {
                         min="1"
                         placeholder="60"
                       />
-                      <small style={{ color: "#888", fontSize: "12px" }}>
+                      <small className="panel-field-hint">
                         Will be converted to seconds ({(Number(formData.duration) || 60) * 60}s)
                       </small>
                     </div>
+                    <div className="form-group"><label htmlFor="entry-fee-coins">Entry fee (coins)</label><input id="entry-fee-coins" type="number" min="0" max="1000000" step="1" required value={formData.entryFeeCoins ?? 50} onChange={e=>setFormData({...formData,entryFeeCoins:e.target.value})}/><small className="panel-field-hint">Default: 50 coins. Charged once when a student starts. First place earns 100 coins after final results.</small></div>
                     <div className="form-group">
                       <label>Status</label>
                       <select
@@ -1425,6 +1438,7 @@ const AdminPanel = () => {
                                 title: formData.title,
                                 description: formData.description,
                                 type: formData.type,
+        entryFeeCoins: Number(formData.entryFeeCoins ?? 50),
                                 subject: formData.subject,
                                 startTime: formatDateTime(formData.startTime),
                                 endTime: formatDateTime(formData.endTime),
@@ -1636,7 +1650,9 @@ const AdminPanel = () => {
 
 // Question Manager Component
 const QuestionManager = ({ olympiad, onClose }) => {
-  const [questions, setQuestions] = useState([]);
+  const [allQuestions, setQuestions] = useState([]);
+  const [gradeCategory, setGradeCategory] = useState('5');
+  const questions = allQuestions.filter(question => (question.gradeCategory || '') === gradeCategory);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -1690,11 +1706,6 @@ const QuestionManager = ({ olympiad, onClose }) => {
   const handleExcelImport = async (e) => {
     const file = e?.target?.files?.[0];
     if (!file) return;
-    if (olympiad.type !== "test") {
-      setNotification({ message: "Import is only available for test (multiple-choice) olympiads.", type: "error" });
-      e.target.value = "";
-      return;
-    }
     const allowed = [".xlsx", ".xls", ".csv"];
     const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
     if (!allowed.includes(ext)) {
@@ -1705,6 +1716,10 @@ const QuestionManager = ({ olympiad, onClose }) => {
     setImportingExcel(true);
     try {
       const { questions: parsed, errors } = await parseQuestionsFromExcelFile(file);
+      const expectedType = olympiad.type === "test" ? "multiple-choice" : "essay";
+      if (olympiad.type !== "mixed" && parsed.some(question => question.type !== expectedType)) {
+        throw new Error(`This ${olympiad.type} olympiad accepts only ${expectedType} questions. Use its template or change the Type column.`);
+      }
       if (parsed.length === 0) {
         setNotification({
           message: errors.length ? errors[0] : "No valid questions found in the file.",
@@ -1719,6 +1734,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         await adminAPI.addQuestion({
           olympiadId: olympiad._id,
           ...parsed[i],
+          gradeCategory: gradeCategory || null,
           order: startOrder + i,
         });
       }
@@ -1777,6 +1793,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         }
 
         const payload = {
+          gradeCategory: gradeCategory || null,
           question: questionForm.question,
           type: "multiple-choice",
           options: validOptions,
@@ -1805,6 +1822,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         }
 
         const payload = {
+          gradeCategory: gradeCategory || null,
           question: questionForm.question,
           type: "essay",
           points: Number(questionForm.points) || 10,
@@ -1970,8 +1988,10 @@ const QuestionManager = ({ olympiad, onClose }) => {
         <div className="modal-body">
           <div className="questions-header">
             <h3>Questions ({Array.isArray(questions) ? questions.length : 0})</h3>
+            <label>School grade / education<select value={gradeCategory} disabled={importingExcel} onChange={e => { setGradeCategory(e.target.value); setEditingQuestionId(null); setShowAddForm(false); resetQuestionForm(); }}><option value="">Shared (existing questions)</option>{GRADE_CATEGORIES.map(grade => <option key={grade} value={grade}>{gradeLabel(grade)}</option>)}</select></label>
             <div className="questions-header-actions">
-              {olympiad.type === "test" && (
+              <button type="button" className="button-secondary" onClick={() => downloadQuestionWorkbook(questions, gradeCategory)}>Export questions</button>
+              {(
                 <>
                   <input
                     ref={excelInputRef}
@@ -1990,10 +2010,10 @@ const QuestionManager = ({ olympiad, onClose }) => {
                     {importingExcel ? "Importing…" : "Import from Excel"}
                   </button>
                   <a
-                    href="/questions-import-template.xlsx"
+                    href="#"
+                    onClick={event => { event.preventDefault(); downloadQuestionWorkbook([], gradeCategory, true, olympiad.type); }}
                     download="questions-import-template.xlsx"
-                    className="button-secondary"
-                    style={{ textDecoration: "none" }}
+                    className="button-secondary panel-plain-link"
                   >
                     Download template
                   </a>
@@ -2176,6 +2196,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
           )}
 
           <div className="questions-list">
+            <GradePrizesEditor olympiad={olympiad} gradeCategory={gradeCategory} />
             {!Array.isArray(questions) || questions.length === 0 ? (
               <div className="empty-state">
                 <p>No questions yet. Add your first question!</p>
@@ -2210,7 +2231,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
                       ))}
                     </div>
                   )}
-                  <div className="form-actions" style={{ justifyContent: "flex-end" }}>
+                  <div className="form-actions align-end">
                     <button
                       type="button"
                       className="button-secondary"

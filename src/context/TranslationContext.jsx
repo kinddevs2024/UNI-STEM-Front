@@ -103,8 +103,8 @@ const translateElement = async (element, targetLanguage, shouldAbort = () => fal
       return;
     }
 
-    // Skip if parent has data-translate="false"
-    if (node.parentElement?.getAttribute("data-translate") === "false") {
+    // Respect a component's boundary, including all descendants and SDK UI.
+    if (node.parentElement?.closest('[data-translate="false"]')) {
       continue;
     }
     
@@ -152,6 +152,7 @@ const translateElement = async (element, targetLanguage, shouldAbort = () => fal
   // Translate attributes
   const elementsWithAttributes = element.querySelectorAll("[data-translate-attr]");
   for (const el of elementsWithAttributes) {
+    if (el.closest('[data-translate="false"]')) continue;
     if (shouldAbort()) {
       return;
     }
@@ -211,7 +212,7 @@ const translateElement = async (element, targetLanguage, shouldAbort = () => fal
         return;
       }
 
-      if (el.getAttribute("data-translate") === "false") continue;
+      if (el.closest('[data-translate="false"]')) continue;
 
       for (const attr of rule.attrs) {
         const originalAttrKey = `data-original-${attr}`;

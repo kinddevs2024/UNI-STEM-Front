@@ -5,6 +5,7 @@ import { formatDate, getImageUrl } from '../../utils/helpers';
 import NotificationToast from '../../components/NotificationToast';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import './ResolterPanel.css';
+import "../AdminPanel/PanelRedesign.css";
 
 const ResolterPanel = () => {
   const { user } = useAuth();
@@ -494,7 +495,7 @@ const ResolterPanel = () => {
 
   if (loading && results.length === 0) {
     return (
-      <div className="resolter-panel-page">
+      <div className="resolter-panel-page brand-panel" data-brand-panel="resolter">
         <div className="container">
           <div className="resolter-loading">
             <div className="loading-spinner"></div>
@@ -505,7 +506,7 @@ const ResolterPanel = () => {
   }
 
   return (
-    <div className="resolter-panel-page">
+    <div className="resolter-panel-page brand-panel" data-brand-panel="resolter">
       <div className="container">
         <div className="resolter-header">
           <h1 className="resolter-title text-glow">Resolter Panel</h1>

@@ -12,6 +12,21 @@ import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
 import "./Results.css";
+import AnswerReview from "../../components/AnswerReview";
+
+import { normalizeResult, flattenResultGroups } from '../../utils/result-data';
+
+async function getAdminResults(olympiadId = null) {
+  let page = 1;
+  const groups = [];
+  let response;
+  do {
+    response = await resolterAPI.getAllResults(olympiadId, null, { page, limit: 50 });
+    groups.push(...(response.data?.olympiadResults || []));
+    page += 1;
+  } while (page <= (response.data?.pagination?.pages || 1));
+  return { data: { success: true, results: flattenResultGroups(groups) } };
+}
 
 const Results = () => {
   const { id } = useParams(); // olympiadId from URL (optional)
@@ -68,7 +83,7 @@ const Results = () => {
           submissionsResponse = await universityAPI.getOlympiadResults(id);
         } else {
           // Use admin API endpoint
-          submissionsResponse = await adminAPI.getSubmissions(id, null);
+          submissionsResponse = await getAdminResults(id);
         }
         const submissionsData = submissionsResponse?.data;
 
@@ -132,14 +147,7 @@ const Results = () => {
         let allResults = [];
         if (visibleSubmissions.length > 0) {
           try {
-            allResults = (visibleSubmissions || []).map((submission, index) => ({
-              ...submission,
-              score: submission.score || submission.totalScore || 0,
-              totalScore: submission.totalScore || submission.score || 0,
-              totalPoints: Number(olympiad?.totalPoints) || 100,
-              completedAt: submission.submittedAt || submission.completedAt,
-              user: submission.user || { name: "Unknown", email: "Unknown" },
-            }));
+            allResults = (visibleSubmissions || []).map(submission => normalizeResult(submission, olympiad));
           } catch (mapError) {
             console.error(
               "Error mapping submissions in fetchResults:",
@@ -196,7 +204,7 @@ const Results = () => {
           setLoading(false);
           return;
         }
-        const response = await olympiadAPI.getResults(id, user._id);
+        const response = await olympiadAPI.getResultDetails(id);
         data = response.data;
 
         // Check if user has a submission but results aren't ready
@@ -371,7 +379,7 @@ const Results = () => {
           response = await universityAPI.getAllOlympiadResults();
         } else {
           // Use admin API endpoint
-          response = await adminAPI.getSubmissions(null, null);
+          response = await getAdminResults();
         }
 
         const submissionsData = response?.data;
@@ -532,7 +540,7 @@ const Results = () => {
         });
       }
 
-      setAllUserResults(visibleResults);
+      setAllUserResults(visibleResults.map(result => normalizeResult(result)));
     } catch (error) {
       console.error("Error fetching all user results:", error);
       setError("Failed to fetch results. Please try again later.");
@@ -607,7 +615,7 @@ const Results = () => {
       <div className="results-page page-container">
         <div>
           <div className="results-header">
-            <h1 className="results-title text-glow">
+            <h1 className="results-title">
               {canViewAllResults ? "All Results" : "All Your Results"}
             </h1>
             <p className="results-subtitle">
@@ -618,23 +626,27 @@ const Results = () => {
           </div>
 
           {(allUserResults || []).length === 0 ? (
+            <>
+            <div className="all-results-list"><div id="tutorial-results-slot" className="tutorial-grid-slot" /></div>
             <div className="empty-state">
-              <div className="empty-icon">📊</div>
-              <h3>No Results Found</h3>
+              <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
+              <h3>No results yet</h3>
               <p>
                 {canViewAllResults
                   ? "No olympiad results found yet."
-                  : "You haven't completed any olympiads yet."}
+                  : "Complete your first olympiad to see your score and place among participants here."}
               </p>
               <Link to="/dashboard" className="button-primary">
-                Go to Dashboard
+                Find an olympiad
               </Link>
             </div>
+            </>
           ) : (
             <div className="all-results-list">
+              <div id="tutorial-results-slot" className="tutorial-grid-slot" />
               {(allUserResults || []).map((resultItem, index) => {
                 const totalScore = Number(resultItem?.totalScore) || 0;
-                const totalPoints = Number(resultItem?.olympiad?.totalPoints) || 100;
+                const totalPoints = Number(resultItem?.maxScore ?? resultItem?.totalPoints ?? resultItem?.olympiad?.totalPoints) || 0;
                 const percentage = totalPoints > 0
                   ? Math.round((totalScore / totalPoints) * 100)
                   : 0;
@@ -693,7 +705,7 @@ const Results = () => {
                     </div>
 
                     <div className="result-item-action">
-                      <span className="action-text">View Details →</span>
+                      <span className="action-text">View results &amp; answers →</span>
                     </div>
                   </div>
                 );
@@ -723,8 +735,8 @@ const Results = () => {
               </>
             ) : (
               <>
-                <div className="empty-icon">📊</div>
-                <h3>No Results Found</h3>
+                <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
+                <h3>No results yet</h3>
                 <p>You haven't completed this olympiad yet.</p>
                 <Link to="/dashboard" className="button-primary">
                   Go to Dashboard
@@ -743,8 +755,8 @@ const Results = () => {
       <div className="results-page page-container">
         <div>
           <div className="empty-state">
-            <div className="empty-icon">📊</div>
-            <h3>No Results Found</h3>
+            <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
+            <h3>No results yet</h3>
             <p>No one has completed this olympiad yet.</p>
             <Link to="/dashboard" className="button-primary">
               Go to Dashboard
@@ -841,7 +853,7 @@ const Results = () => {
     <div className="results-page">
       <div className="container">
         <div className="results-header">
-          <h1 className="results-title text-glow">
+          <h1 className="results-title">
             {canViewAllResults ? "All Results" : "Your Results"}
           </h1>
           {olympiadTitle && (
@@ -883,7 +895,7 @@ const Results = () => {
                       <div className="top-three-name">
                         {isCurrentUser
                           ? "You"
-                          : topResult.userName || "Anonymous"}
+                          : topResult.userName || topResult.user?.name || "Unknown participant"}
                       </div>
                       <div className="top-three-score">
                         {topScore} / {topTotalPoints}
@@ -1000,7 +1012,7 @@ const Results = () => {
             >
               <div className="modal-header">
                 <h3>Edit Result</h3>
-                <button className="modal-close" onClick={closeEditModal}>
+                <button className="modal-close" onClick={closeEditModal} aria-label="Close edit result">
                   ×
                 </button>
               </div>
@@ -1152,6 +1164,8 @@ const Results = () => {
             </div>
           </div>
         )}
+
+        {!canViewAllResults && <AnswerReview questions={userResult?.questionReview} />}
 
         <div className="results-actions">
           <Link to={`/olympiad/${id}/leaderboard`} className="button-primary">

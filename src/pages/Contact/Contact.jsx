@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import Scene3D from "../../components/3D/Scene3D";
 import "./Contact.css";
 
 const Contact = () => {
@@ -34,23 +33,19 @@ const Contact = () => {
   return (
     <div className="contact-page">
       {/* Hero Section */}
-      <section className="hero-section h-svh ">
-        <div className="hero-3d">
-          <Scene3D subject="math" />
-        </div>
+      <section className="hero-section">
         <div className="hero-content">
+          <p className="go-public-eyebrow">LET'S START A CONVERSATION</p>
           <h1 className="hero-title">
-            <span className="text-glow">Contact Us</span>
+            Contact <em>Us</em>
           </h1>
           <p className="hero-subtitle">We'd love to hear from you</p>
         </div>
+        <div className="public-hero-art"><img src="/images/student-girl.webp" alt="" aria-hidden="true" width="260" height="280" /></div>
       </section>
 
       {/* Contact Section */}
       <section className="info-section">
-        <div className="section-3d">
-          <Scene3D subject="physics" />
-        </div>
         <div className="section-content">
           <div className="container">
             <div className="contact-container">
@@ -151,10 +146,7 @@ const Contact = () => {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="info-section">
-          <div className="section-3d">
-            <Scene3D subject="science" />
-          </div>
+        <section className="info-section contact-cta">
           <div className="section-content">
             <div className="container">
               <h2 className="section-title">Ready to Get Started?</h2>
@@ -179,7 +171,7 @@ const Contact = () => {
       {/* Footer */}
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 Global Olympiads. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Global Olympiads. All rights reserved.</p>
         </div>
       </footer>
     </div>

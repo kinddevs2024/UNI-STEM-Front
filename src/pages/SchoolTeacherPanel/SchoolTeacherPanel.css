@@ -1,46 +1,46 @@
-.school-teacher-panel-page {
+:where([data-brand-panel="teacher"]).school-teacher-panel-page {
   min-height: 100%;
   padding: 40px 20px;
   background: var(--bg-primary);
 }
 
-.teacher-loading {
+:where([data-brand-panel="teacher"]) .teacher-loading {
   min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.teacher-header {
+:where([data-brand-panel="teacher"]) .teacher-header {
   text-align: center;
   margin-bottom: 40px;
   animation: fadeIn 0.5s ease;
 }
 
-.teacher-title {
+:where([data-brand-panel="teacher"]) .teacher-title {
   font-size: 48px;
   font-weight: 700;
   letter-spacing: -2px;
   margin-bottom: 12px;
 }
 
-.teacher-subtitle {
+:where([data-brand-panel="teacher"]) .teacher-subtitle {
   font-size: 18px;
   color: var(--text-secondary);
 }
 
-.mode-toggle {
+:where([data-brand-panel="teacher"]) .mode-toggle {
   display: flex;
   gap: 16px;
   margin-bottom: 30px;
   justify-content: center;
 }
 
-.mode-button {
+:where([data-brand-panel="teacher"]) .mode-button {
   padding: 12px 24px;
   background: var(--bg-secondary);
   border: 2px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   color: var(--text-primary);
   font-size: 16px;
   font-weight: 500;
@@ -48,39 +48,39 @@
   transition: all 0.3s ease;
 }
 
-.mode-button:hover {
+:where([data-brand-panel="teacher"]) .mode-button:hover {
   background: var(--bg-tertiary);
   border-color: var(--accent);
 }
 
-.mode-button.active {
+:where([data-brand-panel="teacher"]) .mode-button.active {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--bg-primary);
 }
 
-.teacher-filters {
+:where([data-brand-panel="teacher"]) .teacher-filters {
   margin-bottom: 30px;
   animation: fadeIn 0.5s ease;
 }
 
-.filter-group {
+:where([data-brand-panel="teacher"]) .filter-group {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.filter-group label {
+:where([data-brand-panel="teacher"]) .filter-group label {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.filter-select {
+:where([data-brand-panel="teacher"]) .filter-select {
   padding: 10px 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
@@ -88,17 +88,17 @@
   min-width: 250px;
 }
 
-.filter-select:focus {
+:where([data-brand-panel="teacher"]) .filter-select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: none;
 }
 
-.teacher-results {
+:where([data-brand-panel="teacher"]) .teacher-results {
   animation: fadeIn 0.5s ease;
 }
 
-.results-header {
+:where([data-brand-panel="teacher"]) .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -106,17 +106,17 @@
   border-bottom: 1px solid var(--border);
 }
 
-.results-title {
+:where([data-brand-panel="teacher"]) .results-title {
   font-size: 24px;
   font-weight: 600;
   margin: 0;
 }
 
-.results-table {
+:where([data-brand-panel="teacher"]) .results-table {
   overflow-x: auto;
 }
 
-.table-header {
+:where([data-brand-panel="teacher"]) .table-header {
   display: grid;
   grid-template-columns: 2fr 2fr 2fr 150px 120px 150px;
   gap: 16px;
@@ -130,12 +130,12 @@
   color: var(--text-secondary);
 }
 
-.table-body {
+:where([data-brand-panel="teacher"]) .table-body {
   display: flex;
   flex-direction: column;
 }
 
-.table-row {
+:where([data-brand-panel="teacher"]) .table-row {
   display: grid;
   grid-template-columns: 2fr 2fr 2fr 150px 120px 150px;
   gap: 16px;
@@ -144,130 +144,130 @@
   transition: all 0.3s ease;
 }
 
-.table-row:hover {
+:where([data-brand-panel="teacher"]) .table-row:hover {
   background: var(--bg-tertiary);
 }
 
-.table-cell {
+:where([data-brand-panel="teacher"]) .table-cell {
   display: flex;
   align-items: center;
   font-size: 15px;
 }
 
-.score-value {
+:where([data-brand-panel="teacher"]) .score-value {
   font-size: 18px;
   font-weight: 700;
   color: var(--accent);
 }
 
-.score-max {
+:where([data-brand-panel="teacher"]) .score-max {
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.score-percentage {
+:where([data-brand-panel="teacher"]) .score-percentage {
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.status-badge {
+:where([data-brand-panel="teacher"]) .status-badge {
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 24px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
-.status-badge.graded {
-  background: rgba(0, 255, 0, 0.2);
-  color: #00ff00;
-  border: 1px solid #00ff00;
+:where([data-brand-panel="teacher"]) .status-badge.graded {
+  background: #e6f1e8;
+  color: #356e59;
+  border: 1px solid #356e59;
 }
 
-.status-badge.pending {
-  background: rgba(255, 255, 0, 0.2);
-  color: #ffff00;
-  border: 1px solid #ffff00;
+:where([data-brand-panel="teacher"]) .status-badge.pending {
+  background: #fff4cc;
+  color: #8a6a25;
+  border: 1px solid #8a6a25;
 }
 
-.empty-results {
+:where([data-brand-panel="teacher"]) .empty-results {
   padding: 60px 20px;
   text-align: center;
   color: var(--text-secondary);
 }
 
 /* Monitoring View */
-.monitoring-view {
+:where([data-brand-panel="teacher"]) .monitoring-view {
   animation: fadeIn 0.5s ease;
 }
 
-.active-students {
+:where([data-brand-panel="teacher"]) .active-students {
   animation: fadeIn 0.5s ease;
 }
 
-.students-header {
+:where([data-brand-panel="teacher"]) .students-header {
   padding: 24px;
   border-bottom: 1px solid var(--border);
   text-align: center;
 }
 
-.students-title {
+:where([data-brand-panel="teacher"]) .students-title {
   font-size: 24px;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
-.students-subtitle {
+:where([data-brand-panel="teacher"]) .students-subtitle {
   color: var(--text-secondary);
   margin: 0;
 }
 
-.students-grid {
+:where([data-brand-panel="teacher"]) .students-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   padding: 24px;
 }
 
-.student-card {
+:where([data-brand-panel="teacher"]) .student-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 24px;
   padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.student-card:hover {
+:where([data-brand-panel="teacher"]) .student-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: none;
 }
 
-.student-info {
+:where([data-brand-panel="teacher"]) .student-info {
   margin-bottom: 16px;
 }
 
-.student-name {
+:where([data-brand-panel="teacher"]) .student-name {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
   color: var(--text-primary);
 }
 
-.student-email {
+:where([data-brand-panel="teacher"]) .student-email {
   font-size: 14px;
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
-.student-olympiad {
+:where([data-brand-panel="teacher"]) .student-olympiad {
   font-size: 14px;
   color: var(--accent);
   margin-bottom: 12px;
 }
 
-.student-status {
+:where([data-brand-panel="teacher"]) .student-status {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -275,31 +275,31 @@
   color: var(--text-secondary);
 }
 
-.status-indicator {
+:where([data-brand-panel="teacher"]) .status-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
 }
 
-.status-indicator.active {
-  background: #00ff00;
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-  animation: pulse 2s infinite;
+:where([data-brand-panel="teacher"]) .status-indicator.active {
+  background: #356e59;
+  box-shadow: none;
+  animation: panel-teacher-pulse 2s infinite;
 }
 
-.student-action {
+:where([data-brand-panel="teacher"]) .student-action {
   display: flex;
   justify-content: flex-end;
 }
 
-.empty-students {
+:where([data-brand-panel="teacher"]) .empty-students {
   padding: 60px 20px;
   text-align: center;
   color: var(--text-secondary);
 }
 
-@keyframes pulse {
+@keyframes panel-teacher-pulse {
 
   0%,
   100% {
@@ -313,21 +313,21 @@
 
 @media (max-width: 768px) {
 
-  .table-header,
-  .table-row {
+  :where([data-brand-panel="teacher"]) .table-header,
+  :where([data-brand-panel="teacher"]) .table-row {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 
-  .table-cell {
+  :where([data-brand-panel="teacher"]) .table-cell {
     padding: 8px 0;
   }
 
-  .teacher-title {
+  :where([data-brand-panel="teacher"]) .teacher-title {
     font-size: 36px;
   }
 
-  .students-grid {
+  :where([data-brand-panel="teacher"]) .students-grid {
     grid-template-columns: 1fr;
   }
 }

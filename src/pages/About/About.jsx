@@ -1,28 +1,23 @@
 import { Link } from "react-router-dom";
-import Scene3D from "../../components/3D/Scene3D";
 import "./About.css";
 
 const About = () => {
   return (
     <div className="about-page">
-      <section className="hero-section h-svh">
-        <div className="hero-3d">
-          <Scene3D subject="math" />
-        </div>
+      <section className="hero-section">
         <div className="hero-content">
+          <p className="go-public-eyebrow">TALENT HAS NO BORDERS</p>
           <h1 className="hero-title">
-            <span className="text-glow">About Global Olympiads</span>
+            About Global <em>Olympiads</em>
           </h1>
           <p className="hero-subtitle">Academic competitions for everyone</p>
         </div>
+        <div className="public-hero-art"><img src="/images/student-girl.webp" alt="" aria-hidden="true" width="260" height="280" /></div>
       </section>
 
       <section className="info-section">
-        <div className="section-3d">
-          <Scene3D subject="physics" />
-        </div>
         <div className="about-content">
-          <h2>Our Mission</h2>
+          <div className="about-mission"><p className="go-public-eyebrow">KNOWLEDGE OPENS DOORS</p><h2>Our <em>Mission</em></h2>
           <p>
             Global Olympiads is the premier online platform for academic competitions
             across Mathematics, Physics, Chemistry, English, and Science. We
@@ -34,7 +29,8 @@ const About = () => {
             showcase their knowledge and skills through test-based and essay
             olympiads, with advanced proctoring and instant results.
           </p>
-          <h2>Get Started</h2>
+          </div>
+          <aside className="about-start"><img src="/images/trophy.webp" alt="" aria-hidden="true" width="140" height="140" /><h2>Get <em>Started</em></h2>
           <p>
             <Link to="/auth" className="about-link">
               Sign in
@@ -45,6 +41,7 @@ const About = () => {
             </Link>{" "}
             to join the next competition.
           </p>
+          </aside>
         </div>
       </section>
     </div>

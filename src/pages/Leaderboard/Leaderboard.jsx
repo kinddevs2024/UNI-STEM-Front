@@ -51,6 +51,29 @@ const Leaderboard = () => {
     setLoading(true);
     
     try {
+      if (id) {
+        let page = 1;
+        let data;
+        const rows = [];
+        do {
+          const response = await olympiadAPI.getLeaderboard(id, page);
+          data = response.data;
+          if (!data?.success || !Array.isArray(data.leaderboard)) throw new Error('Invalid leaderboard response');
+          rows.push(...data.leaderboard);
+          page += 1;
+        } while (page <= (data.pagination?.pages || 1));
+        const info = { _id: id, title: data.olympiadTitle, type: data.olympiadType };
+        setOlympiad(info);
+        setOlympiads([info]);
+        setSelectedFilter('all');
+        setAllResults(rows.map((row, index) => ({
+          ...row, _id: row._id || row.userId, rank: index + 1,
+          user: { _id: row.userId, name: row.userName || 'Participant', email: row.userEmail || '' },
+          olympiad: info, olympiadId: id, olympiadTitle: info.title, olympiadType: info.type,
+          totalScore: row.score ?? 0, totalPoints: row.totalPoints ?? 0,
+        })));
+        return;
+      }
       // Fetch all results from all olympiads
       let submissionsResponse;
       if (isResolter) {
@@ -139,6 +162,7 @@ const Leaderboard = () => {
       setAllResults(resultsWithOlympiad);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      setNotification({type:'error', message:'Could not load the leaderboard. Please try again.'});
     } finally {
       setLoading(false);
     }
@@ -193,9 +217,7 @@ const Leaderboard = () => {
     }
     
     // Assign ranks to filtered results
-    filtered.forEach((r, index) => {
-      r.rank = index + 1;
-    });
+    filtered = filtered.map((r, index) => ({ ...r, rank: r.rank || index + 1 }));
     
     return filtered;
   }, [allResults, selectedFilter, searchQuery]);
@@ -312,7 +334,7 @@ const Leaderboard = () => {
       />
       <div className="container">
         <div className="leaderboard-header">
-          <h1 className="leaderboard-title text-glow">Leaderboard</h1>
+          <h1 className="leaderboard-title">Leaderboard</h1>
           {olympiad && id ? (
             <h2 className="leaderboard-subtitle">{olympiad.title}</h2>
           ) : (
@@ -333,7 +355,7 @@ const Leaderboard = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
-            <button className="search-button" type="button">
+            <button className="search-button" type="button" aria-label="Search leaderboard">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.35-4.35"></path>
@@ -433,7 +455,7 @@ const Leaderboard = () => {
             >
               <div className="modal-header">
                 <h3>Edit Result</h3>
-                <button className="modal-close" onClick={closeEditModal}>
+                <button className="modal-close" onClick={closeEditModal} aria-label="Close edit result">
                   ×
                 </button>
               </div>

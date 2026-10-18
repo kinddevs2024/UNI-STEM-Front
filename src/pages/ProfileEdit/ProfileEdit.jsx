@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/api";
 import { USER_ROLES } from "../../utils/constants";
@@ -10,6 +10,8 @@ import "./ProfileEdit.css";
 const ProfileEdit = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const returnTo = typeof state?.returnTo === "string" && /^\/olympiad\/[^/?#]+\/start$/.test(state.returnTo) ? state.returnTo : "/profile";
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [formData, setFormData] = useState({
@@ -199,7 +201,7 @@ const ProfileEdit = () => {
       });
 
       setTimeout(() => {
-        navigate("/profile");
+        navigate(returnTo);
       }, 1500);
     } catch (error) {
       console.error("Profile update error:", error);
@@ -234,7 +236,7 @@ const ProfileEdit = () => {
     <div className="profile-edit-page">
       <div className="container">
         <div className="profile-edit-header">
-          <h1 className="profile-edit-title text-glow">Edit Profile</h1>
+          <div><p className="go-account-eyebrow">MAKE IT YOURS</p><h1 className="profile-edit-title">Edit <em>Profile</em></h1></div>
           <button
             className="button-secondary"
             onClick={() => navigate("/profile")}

@@ -16,13 +16,17 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
+import GoogleOneTap from "./components/GoogleOneTap";
+import { getAuthDestination } from "./utils/authDestination";
 import Navbar from "./components/Navbar";
+import DashboardWelcome from "./components/DashboardWelcome";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -31,11 +35,14 @@ import EssayOlympiad from "./pages/EssayOlympiad";
 import StartOlympiad from "./pages/StartOlympiad";
 import Leaderboard from "./pages/Leaderboard";
 import Results from "./pages/Results";
+import AdminRecordings from "./pages/AdminRecordings/AdminRecordings";
+import AdminTickets from "./pages/AdminTickets/AdminTickets";
+import TicketAccess from "./pages/TicketAccess/TicketAccess";
+import AdminUsers from "./pages/AdminUsers/AdminUsers";
 import AdminPanel from "./pages/AdminPanel";
 import OwnerPanel from "./pages/OwnerPanel";
 import Profile from "./pages/Profile";
 import ProfileEdit from "./pages/ProfileEdit";
-import CompleteProfile from "./pages/CompleteProfile";
 import ResolterPanel from "./pages/ResolterPanel";
 import SchoolTeacherPanel from "./pages/SchoolTeacherPanel";
 import CheckerPanel from "./pages/CheckerPanel";
@@ -55,17 +62,28 @@ import Home from "./pages/Home/Home";
 import "./styles/design-tokens.css";
 import "./styles/globals.css";
 import "./styles/animations.css";
+import "@fontsource-variable/golos-text";
+import "@fontsource/cormorant-garamond/600-italic.css";
+import "./styles/brand-system.css";
+import "./styles/dark-theme.css";
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route
+        path="/"
+        element={loading ? (
+          <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }} role="status" aria-label="Loading account">
+            <div className="loading-spinner" />
+          </div>
+        ) : isAuthenticated ? <Navigate to={getAuthDestination(user)} replace /> : <Home />}
+      />
 
       <Route
         path="/auth"
-        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Auth />}
+        element={isAuthenticated ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />}
       />
 
       <Route path="/updatepassword" element={<UpdatePassword />} />
@@ -138,6 +156,10 @@ const AppRoutes = () => {
         }
       />
 
+      <Route path="/ticket" element={<TicketAccess />} />
+      <Route path="/admin/recordings" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminRecordings /></ProtectedRoute>} />
+      <Route path="/admin/tickets" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminTickets /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminUsers /></ProtectedRoute>} />
       <Route
         path="/admin"
         element={
@@ -261,7 +283,7 @@ const AppRoutes = () => {
         path="/complete-profile"
         element={
           <ProtectedRoute>
-            <CompleteProfile />
+            <Navigate to="/dashboard" replace />
           </ProtectedRoute>
         }
       />
@@ -278,7 +300,7 @@ const AppRoutes = () => {
       <Route
         path="/buy-coins"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={USER_ROLES.STUDENT}>
             <BuyCoins />
           </ProtectedRoute>
         }
@@ -288,6 +310,11 @@ const AppRoutes = () => {
     </Routes>
   );
 };
+
+function RouteScene() {
+  const { pathname } = useLocation();
+  return <div key={pathname} className="route-scene"><AppRoutes /></div>;
+}
 
 function App() {
   return (
@@ -303,13 +330,15 @@ function App() {
                 }}
               >
                 <ScrollToTop />
+                <GoogleOneTap />
                 <CookieConsentWrapper />
                 <div className="app">
                   <Navbar />
                   <main className="main-content">
-                    <AppRoutes />
+                    <RouteScene />
                   </main>
                 </div>
+                <DashboardWelcome />
               </Router>
             </SocketProvider>
           </ThemeProvider>

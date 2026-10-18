@@ -127,15 +127,9 @@ export function parseQuestionsFromArrayBuffer(buffer, filename = "") {
   if (questionCol < 0) {
     return { questions: [], errors: ["Missing column: 'Question Text' or 'Question'."] };
   }
-  if (correctCol < 0) {
-    return { questions: [], errors: ["Missing column: 'Correct Answer'."] };
-  }
-
-  const optionCols = [optionColA, optionColB, optionColC, optionColD].filter((c) => c >= 0);
-  if (optionCols.length < 2) {
-    return { questions: [], errors: ["At least two option columns are required (e.g. Option A, Option B)."] };
-  }
-
+  const typeCol = headers.findIndex(header => norm(header) === 'type');
+  const dynamicOptionCols = headers.map((header, index) => /^option\s+(?:[a-z]|\d+)$/i.test(header.trim()) ? index : -1).filter(index => index >= 0);
+  const optionCols = dynamicOptionCols.length ? dynamicOptionCols : [optionColA, optionColB, optionColC, optionColD].filter((c) => c >= 0);
   const questions = [];
   for (let r = 1; r < data.length; r++) {
     const row = data[r];
@@ -147,23 +141,34 @@ export function parseQuestionsFromArrayBuffer(buffer, filename = "") {
       continue;
     }
 
-    const options = optionCols
-      .map((col) => (row[col] != null ? String(row[col]).trim() : ""))
-      .filter((o) => o !== "");
+    const optionValues = optionCols.map((col) => (row[col] != null ? String(row[col]).trim() : ""));
+    const options = optionValues.filter((option) => option !== "");
+    if (typeCol >= 0 && norm(row[typeCol]) === 'essay') {
+      questions.push({ question: questionText, type: 'essay', options: [], correctAnswers: [], correctAnswer: null, allowMultipleCorrect: false, points: pointsCol >= 0 ? parsePoints(row[pointsCol]) : 10 });
+      continue;
+    }
+    if (correctCol < 0 || optionCols.length < 2) {
+      errors.push(`Row ${r + 1}: multiple-choice questions need at least two option columns and a Correct Answer column, skipped.`);
+      continue;
+    }
     if (options.length < 2) {
       errors.push(`Row ${r + 1}: at least 2 non-empty options required, skipped.`);
       continue;
     }
 
-    const correctIndices = parseCorrectAnswer(row[correctCol], options.length);
-    if (correctIndices.length === 0) {
+    const correctIndices = parseCorrectAnswer(row[correctCol], optionValues.length);
+    if (correctIndices.length === 0 || correctIndices.some(index => !optionValues[index])) {
       errors.push(`Row ${r + 1}: invalid or missing Correct Answer (use A,B,C,D or 1,2,3,4), skipped.`);
       continue;
     }
 
     const allowMultiple = multipleCol >= 0 ? parseAllowMultiple(row[multipleCol]) : false;
+    if (!allowMultiple && correctIndices.length > 1) {
+      errors.push(`Row ${r + 1}: set Allow Multiple to YES when selecting several correct answers, skipped.`);
+      continue;
+    }
     const points = pointsCol >= 0 ? parsePoints(row[pointsCol]) : 10;
-    const correctAnswers = correctIndices.map((i) => options[i]);
+    const correctAnswers = correctIndices.map((i) => optionValues[i]);
     const correctAnswer = correctAnswers[0];
 
     questions.push({
