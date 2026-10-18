@@ -62,3 +62,11 @@ body[data-color-mode="dark"] .go-home .go-security { background:var(--bg-seconda
 body[data-color-mode="dark"] .go-home .go-security :is(h2,li) { color:var(--text-primary); }
 body[data-color-mode="dark"] .go-home .go-security p:not(.go-eyebrow) { color:var(--text-secondary); }
 body[data-color-mode="dark"] .go-home .go-security .go-eyebrow { color:#f9e78f; }
+
+/* Admin controls must resolve both their surface and text in dark mode. */
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] .card { background:var(--bg-secondary); color:var(--text-primary); border-color:var(--border); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(input,select,textarea):not([type=checkbox]):not([type=radio]):not([type=file]) { background:var(--bg-tertiary); color:var(--text-primary); border-color:var(--border); color-scheme:dark; }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(.button-secondary,.button-small,.pagination-button,.filter-button,.mode-button,.view-mode-button,.modal-close) { background:var(--bg-tertiary); color:var(--text-primary); border-color:var(--border); }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(.button-primary,.export-button,.modal-button.primary) { background:#dfcff5; color:#171530; border-color:#dfcff5; }
+body[data-color-mode="dark"] .brand-panel[data-brand-panel] :is(.button-primary,.export-button,.modal-button.primary):hover { background:#c9b1e6; color:#171530; }
+body[data-color-mode="dark"] .go-auth-card select { background:#302b48; border-color:#443d59; color:#f4f0fa; color-scheme:dark; }
