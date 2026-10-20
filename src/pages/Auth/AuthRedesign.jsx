@@ -40,6 +40,7 @@ export default function AuthRedesign() {
   const [confirmNewPassword,setConfirmNewPassword] = useState("");
   const [resendCooldown,setResendCooldown] = useState(0);
   const googleInFlight = useRef(false);
+  const telegramInFlight = useRef(false);
   const submitInFlight = useRef(false);
   const {login,register,loginWithGoogle,completeAuth} = useAuth();
   const navigate = useNavigate();
@@ -60,6 +61,28 @@ export default function AuthRedesign() {
     setNotice(null); setCode(""); setNewPassword(""); setConfirmNewPassword("");
     setForm(prev=>({...prev,password:"",confirmPassword:""}));
     setView(next);
+  };
+
+  useEffect(() => {
+    const values = new URLSearchParams(window.location.hash.slice(1));
+    const code = values.get('telegram_code');
+    if (!code || telegramInFlight.current) return;
+    telegramInFlight.current = true;
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    setGoogleBusy(true);
+    api.post('/auth/telegram/consume', { code }).then(({data}) => {
+      completeAuth(data.token, data.user);
+      navigate(getAuthDestination(data.user), { replace:true });
+    }).catch(error => showError(errorMessage(error, 'Telegram sign-in failed. Please try again.')))
+      .finally(() => { telegramInFlight.current = false; setGoogleBusy(false); });
+  }, []);
+
+  const handleTelegram = async () => {
+    if (disabled || telegramInFlight.current) return;
+    telegramInFlight.current = true; setGoogleBusy(true); setNotice(null);
+    try { const {data} = await api.post('/auth/telegram/start'); window.location.assign(data.url); }
+    catch(error) { showError(errorMessage(error, 'Telegram is unavailable. Please try again.')); }
+    finally { telegramInFlight.current = false; setGoogleBusy(false); }
   };
 
   const handleGoogleSuccess = async ({credential}) => {
@@ -146,8 +169,9 @@ export default function AuthRedesign() {
       <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
       <section className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
         {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
-        <div className="go-auth-heading" key={view} hidden={view === "register"}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
-        {mainView && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} /><div className="go-auth-divider"><span>or continue with email</span></div></>}
+        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{view === "register" ? "Welcome!" : title}</h1>{view !== "register" && <p>{description}</p>}</div>
+        {mainView && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg>Continue with Telegram</button>}
+        <div className="go-auth-divider"><span>or continue with email</span></div></>}
         {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
         <form className="go-auth-form" onSubmit={handleSubmit}>
           <fieldset disabled={disabled}>
