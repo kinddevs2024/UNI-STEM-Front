@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, Eye, EyeSlash, EnvelopeSimple, LockKey, Sparkle, CheckCircle, WarningCircle } from "@phosphor-icons/react";
+import { CaretDown, Check, ArrowLeft, ArrowUpRight, Eye, EyeSlash, EnvelopeSimple, LockKey, Sparkle, CheckCircle, WarningCircle } from "@phosphor-icons/react";
 import "@fontsource-variable/golos-text";
 import "@fontsource/cormorant-garamond/600-italic.css";
 import { useAuth } from "../../context/AuthContext";
@@ -27,7 +27,38 @@ function PasswordField({id,label,value,onChange,autoComplete="new-password",minL
   return <div className="go-auth-field"><label htmlFor={id}>{label}</label><div className="go-auth-input-wrap"><LockKey size={19} aria-hidden="true" /><input id={id} name={id} type={visible ? "text" : "password"} value={value} onChange={onChange} autoComplete={autoComplete} minLength={minLength} required placeholder={autoComplete === "current-password" ? "Your password" : `At least ${minLength} characters`} /><button type="button" className="go-auth-password-toggle" aria-label={visible ? "Hide password" : "Show password"} aria-pressed={visible} onClick={()=>setVisible(!visible)}>{visible ? <EyeSlash size={20} /> : <Eye size={20} />}</button></div></div>;
 }
 
+function GradePicker({value,onChange}) {
+  const [open,setOpen]=useState(false);
+  const root=useRef(null), trigger=useRef(null), options=useRef([]);
+  const choose=grade=>{onChange(grade);setOpen(false);trigger.current?.focus();};
+  useEffect(()=>{
+    const outside=e=>{if(!root.current?.contains(e.target))setOpen(false);};
+    document.addEventListener('pointerdown',outside);
+    return ()=>document.removeEventListener('pointerdown',outside);
+  },[]);
+  useLayoutEffect(()=>{if(open)options.current[Math.max(0,GRADE_CATEGORIES.indexOf(value))]?.focus();},[open]);
+  return <div className="go-auth-field go-auth-grade" ref={root} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);}}>
+    <label id="grade-label" htmlFor="gradeCategory">School grade / education</label>
+    <button id="gradeCategory" ref={trigger} type="button" className="go-auth-select" aria-labelledby="grade-label grade-value" aria-haspopup="listbox" aria-expanded={open} aria-controls={open?'grade-options':undefined} onClick={()=>setOpen(!open)} onKeyDown={e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();setOpen(true);}}}>
+      <span id="grade-value">{value?gradeLabel(value):'Choose your class'}</span><CaretDown size={18} weight="bold" aria-hidden="true"/>
+    </button>
+    {open&&<div id="grade-options" role="listbox" aria-labelledby="grade-label" className="go-auth-options" onKeyDown={e=>{
+      const i=options.current.indexOf(document.activeElement);
+      if(e.key==='Escape'){e.preventDefault();setOpen(false);trigger.current.focus();}
+      if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?GRADE_CATEGORIES.length-1:(i+(e.key==='ArrowDown'?1:-1)+GRADE_CATEGORIES.length)%GRADE_CATEGORIES.length;options.current[next]?.focus();}
+    }}>{GRADE_CATEGORIES.map((grade,i)=><button key={grade} ref={el=>options.current[i]=el} type="button" role="option" aria-selected={value===grade} tabIndex={-1} onClick={()=>choose(grade)}>{gradeLabel(grade)}{value===grade&&<Check size={17} aria-hidden="true"/>}</button>)}</div>}
+  </div>;
+}
+
 export default function AuthRedesign() {
+  const cardRef=useRef(null);
+  const [cardHeight,setCardHeight]=useState(null);
+  useLayoutEffect(()=>{
+    const observer=new ResizeObserver(()=>setCardHeight(cardRef.current?.getBoundingClientRect().height));
+    observer.observe(cardRef.current);
+    setCardHeight(cardRef.current.getBoundingClientRect().height);
+    return ()=>observer.disconnect();
+  },[]);
   const [view,setView] = useState("login");
   const [form,setForm] = useState(emptyForm);
   const [busy,setBusy] = useState(false);
@@ -121,6 +152,7 @@ export default function AuthRedesign() {
     event.preventDefault();
     if (submitInFlight.current || googleInFlight.current) return;
     setNotice(null);
+    if (view === "register" && !form.gradeCategory) { showError("Choose your school grade / education."); return; }
     if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) { showError("Enter your first and last name."); return; }
     if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) { showError("Passwords do not match."); return; }
     submitInFlight.current=true; setBusy(true);
@@ -187,7 +219,7 @@ export default function AuthRedesign() {
     <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link><Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link></header>
     <div className="go-auth-layout">
       <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
-      <section className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
+      <div className="go-auth-card-size" style={{height:cardHeight??undefined}}><section ref={cardRef} className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
         {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
         <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
         {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg><span>Continue with Telegram</span></button>}
@@ -201,14 +233,14 @@ export default function AuthRedesign() {
             {!mainView && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
             {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">Email verification code</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="000000" /></div>}
             {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label="New password" minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={e=>setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label="Confirm new password" minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={e=>setConfirmNewPassword(e.target.value)} /></>}
-            {view === "register" && <div className="go-auth-field"><label htmlFor="gradeCategory">School grade / education</label><select id="gradeCategory" name="gradeCategory" value={form.gradeCategory} onChange={change} required><option value="">Choose your class</option>{GRADE_CATEGORIES.map(grade => <option key={grade} value={grade}>{gradeLabel(grade)}</option>)}</select></div>}
+            {view === "register" && <GradePicker value={form.gradeCategory} onChange={gradeCategory=>setForm(prev=>({...prev,gradeCategory}))}/> }
             <button type="submit" className="go-auth-submit">{busy ? "Please wait…" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : (view === "forgot-reset" || view === "activate-account") ? "Save password" : "Verify code"}<ArrowUpRight size={20} aria-hidden="true" /></button>
             {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code"}</button>}
           </fieldset>
         </form>
         <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>
         
-      </section>
+      </section></div>
     </div>
     <footer className="go-auth-footer"><span>© {new Date().getFullYear()} Global Olympiad</span><a href="mailto:support@unistem.uz">Need help?<ArrowUpRight size={16} aria-hidden="true" /></a></footer>
   </div>;
