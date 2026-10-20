@@ -10,7 +10,7 @@ import GoogleAuthButton from "../../components/GoogleAuthButton";
 import "./AuthRedesign.css";
 import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
 
-const emptyForm = {email:"",password:"",confirmPassword:"",firstName:"",secondName:"",gradeCategory:""};
+const emptyForm = {email:"",password:"",firstName:"",secondName:"",gradeCategory:""};
 const titles = {
   "activate-account":["Make this account yours.","Choose your own password to finish your first sign-in."],
   login:["Welcome back.", "Sign in and continue your journey to new achievements."],
@@ -62,7 +62,7 @@ export default function AuthRedesign() {
   const changeView = next => {
     setTelegramConfirmation(null);
     setNotice(null); setCode(""); setNewPassword(""); setConfirmNewPassword("");
-    setForm(prev=>({...prev,password:"",confirmPassword:""}));
+    setForm(prev=>({...prev,password:""}));
     setView(next);
   };
 
@@ -122,7 +122,6 @@ export default function AuthRedesign() {
     if (submitInFlight.current || googleInFlight.current) return;
     setNotice(null);
     if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) { showError("Enter your first and last name."); return; }
-    if (view === "register" && form.password !== form.confirmPassword) { showError("Passwords do not match."); return; }
     if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) { showError("Passwords do not match."); return; }
     submitInFlight.current=true; setBusy(true);
     try {
@@ -137,7 +136,7 @@ export default function AuthRedesign() {
           setSetupToken(result.setupToken);setPendingEmail(result.username);setView("activate-account");setNewPassword("");setConfirmNewPassword("");setForm(prev=>({...prev,password:""}));
         } else if (result.emailVerificationRequired) {
           setPendingEmail(email); setCode(""); setResendCooldown(60); setView("verify-email");
-          setForm(prev=>({...prev,password:"",confirmPassword:""}));
+          setForm(prev=>({...prev,password:""}));
           showInfo("Verification code sent. Check your inbox and spam folder.");
         } else if (result.passwordResetRequired) {
           setPendingEmail(email); setCode(""); setView("forgot-verify");
@@ -164,7 +163,7 @@ export default function AuthRedesign() {
         const {data}=await authAPI.resetPasswordWithCode({email:pendingEmail.trim(),code,password:newPassword});
         if (!data?.success) { showError(data?.message || "Could not update the password."); return; }
         setView("login"); setNewPassword(""); setConfirmNewPassword(""); setCode("");
-        setForm(prev=>({...prev,email:pendingEmail,password:"",confirmPassword:""}));
+        setForm(prev=>({...prev,email:pendingEmail,password:""}));
         setNotice({type:"success",message:"Password updated. You can now sign in."});
       }
     } catch(error) { showError(errorMessage(error,"The request failed. Please try again.")); }
@@ -190,7 +189,7 @@ export default function AuthRedesign() {
       <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
       <section className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
         {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
-        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{view === "register" ? "Welcome!" : title}</h1>{view !== "register" && <p>{description}</p>}</div>
+        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
         {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg><span>Continue with Telegram</span></button>}
         <div className="go-auth-divider"><span>or continue with email</span></div></>}
         {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
@@ -198,7 +197,7 @@ export default function AuthRedesign() {
         <form className="go-auth-form" hidden={Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
           <fieldset disabled={disabled}>
             {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder="Your first name" /></div><div className="go-auth-field"><label htmlFor="secondName">Last name</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder="Your last name" /></div></div>}
-            {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label="Password" value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "register" && <PasswordField id="confirmPassword" label="Confirm password" value={form.confirmPassword} onChange={change} />}{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
+            {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label={view === "register" ? "New Password" : "Password"} value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
             {!mainView && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
             {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">Email verification code</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="000000" /></div>}
             {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label="New password" minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={e=>setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label="Confirm new password" minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={e=>setConfirmNewPassword(e.target.value)} /></>}
