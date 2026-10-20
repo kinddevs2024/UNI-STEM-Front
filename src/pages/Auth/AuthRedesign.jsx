@@ -181,7 +181,7 @@ export default function AuthRedesign() {
     finally { submitInFlight.current=false; setBusy(false); }
   };
 
-  return <div className="go-auth-page" data-view={view} data-translate="false">
+  return <div className="go-auth-page" data-translate="false">
     <img src="/images/auth-landscape.webp" className="go-auth-backdrop" alt="" aria-hidden="true" fetchpriority="high" />
     <div className="go-auth-shade" aria-hidden="true" />
     <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link><Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link></header>
@@ -206,7 +206,7 @@ export default function AuthRedesign() {
             {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code"}</button>}
           </fieldset>
         </form>
-        {!mainView && <p className="go-auth-bottom">{view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>}
+        <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>
         
       </section>
     </div>
