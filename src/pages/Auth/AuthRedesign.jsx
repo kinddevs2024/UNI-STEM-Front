@@ -64,6 +64,7 @@ export default function AuthRedesign() {
   };
 
   useEffect(() => {
+    const consumeTelegram = () => {
     const values = new URLSearchParams(window.location.hash.slice(1));
     const code = values.get('telegram_code');
     if (!code || telegramInFlight.current) return;
@@ -75,6 +76,10 @@ export default function AuthRedesign() {
       navigate(getAuthDestination(data.user), { replace:true });
     }).catch(error => showError(errorMessage(error, 'Telegram sign-in failed. Please try again.')))
       .finally(() => { telegramInFlight.current = false; setGoogleBusy(false); });
+    };
+    consumeTelegram();
+    window.addEventListener('hashchange', consumeTelegram);
+    return () => window.removeEventListener('hashchange', consumeTelegram);
   }, []);
 
   const handleTelegram = async () => {
