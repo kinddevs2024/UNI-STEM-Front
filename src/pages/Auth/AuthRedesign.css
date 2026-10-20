@@ -157,3 +157,11 @@
 .go-auth-card-size { border-radius:29px; background:var(--auth-paper); box-shadow:0 22px 70px rgba(14,21,43,.14); overflow:clip; }
 .go-auth-card-size > .go-auth-card { background:transparent; box-shadow:none; animation:none; }
 @media (max-width:480px) { .go-auth-card-size { border-radius:25px; } }
+
+/* Recover vertical space outside the card without changing the form. */
+.go-auth-header { min-height:44px; flex-shrink:0; }
+.go-auth-layout { padding-top:0; padding-bottom:0; }
+.go-auth-footer { min-height:24px; flex-shrink:0; }
+.go-auth-footer a { min-height:24px; }
+html:has(.go-auth-page),body:has(.go-auth-page) { scrollbar-width:none; scrollbar-gutter:auto; }
+html:has(.go-auth-page)::-webkit-scrollbar,body:has(.go-auth-page)::-webkit-scrollbar { display:none; }
