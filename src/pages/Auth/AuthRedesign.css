@@ -163,3 +163,10 @@
 .go-auth-header,.go-auth-footer { position:relative; z-index:1; flex-shrink:0; }
 html:has(.go-auth-page),body:has(.go-auth-page) { scrollbar-width:none; scrollbar-gutter:auto; }
 html:has(.go-auth-page)::-webkit-scrollbar,body:has(.go-auth-page)::-webkit-scrollbar { display:none; }
+
+/* Small screens need real separation from the header and footer. */
+@media (max-width:800px) {
+  .go-auth-page { padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  .go-auth-layout { margin-top:0; margin-bottom:0; padding-top:12px; padding-bottom:16px; flex-shrink:0; }
+  .go-auth-card-size { flex-shrink:0; }
+}
