@@ -32,6 +32,8 @@ export default function AuthRedesign() {
   const [form,setForm] = useState(emptyForm);
   const [busy,setBusy] = useState(false);
   const [googleBusy,setGoogleBusy] = useState(false);
+  const [telegramBusy,setTelegramBusy] = useState(false);
+  const [telegramConfirmation,setTelegramConfirmation] = useState(null);
   const [notice,setNotice] = useState(null);
   const [setupToken,setSetupToken] = useState("");
   const [pendingEmail,setPendingEmail] = useState("");
@@ -45,7 +47,7 @@ export default function AuthRedesign() {
   const {login,register,loginWithGoogle,completeAuth} = useAuth();
   const navigate = useNavigate();
   const mainView = view === "login" || view === "register";
-  const disabled = busy || googleBusy;
+  const disabled = busy || googleBusy || telegramBusy;
   const [title,description] = titles[view];
 
   useEffect(()=> {
@@ -58,6 +60,7 @@ export default function AuthRedesign() {
   const showError = message => setNotice({type:"error",message});
   const showInfo = message => setNotice({type:"info",message});
   const changeView = next => {
+    setTelegramConfirmation(null);
     setNotice(null); setCode(""); setNewPassword(""); setConfirmNewPassword("");
     setForm(prev=>({...prev,password:"",confirmPassword:""}));
     setView(next);
@@ -70,12 +73,13 @@ export default function AuthRedesign() {
     if (!code || telegramInFlight.current) return;
     telegramInFlight.current = true;
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    setGoogleBusy(true);
+    setTelegramBusy(true);
     api.post('/auth/telegram/consume', { code }).then(({data}) => {
+      if (data.confirmationRequired) { setTelegramConfirmation({ code, profile:data.profile }); return; }
       completeAuth(data.token, data.user);
       navigate(getAuthDestination(data.user), { replace:true });
     }).catch(error => showError(errorMessage(error, 'Telegram sign-in failed. Please try again.')))
-      .finally(() => { telegramInFlight.current = false; setGoogleBusy(false); });
+      .finally(() => { telegramInFlight.current = false; setTelegramBusy(false); });
     };
     consumeTelegram();
     window.addEventListener('hashchange', consumeTelegram);
@@ -84,10 +88,22 @@ export default function AuthRedesign() {
 
   const handleTelegram = async () => {
     if (disabled || telegramInFlight.current) return;
-    telegramInFlight.current = true; setGoogleBusy(true); setNotice(null);
+    telegramInFlight.current = true; setTelegramBusy(true); setNotice(null);
     try { const {data} = await api.post('/auth/telegram/start'); window.location.assign(data.url); }
     catch(error) { showError(errorMessage(error, 'Telegram is unavailable. Please try again.')); }
-    finally { telegramInFlight.current = false; setGoogleBusy(false); }
+    finally { telegramInFlight.current = false; setTelegramBusy(false); }
+  };
+
+  const confirmTelegram = async () => {
+    if (disabled || !telegramConfirmation || telegramInFlight.current) return;
+    telegramInFlight.current = true; setTelegramBusy(true); setNotice(null);
+    try {
+      const {data} = await api.post('/auth/telegram/consume', {code:telegramConfirmation.code,confirm:true});
+      if (!data.token || !data.user) throw Error('Telegram confirmation failed');
+      setTelegramConfirmation(null); completeAuth(data.token,data.user);
+      navigate(getAuthDestination(data.user),{replace:true});
+    } catch(error) { showError(errorMessage(error,'This Telegram link has expired. Please press Start in the bot again.')); }
+    finally { telegramInFlight.current=false;setTelegramBusy(false); }
   };
 
   const handleGoogleSuccess = async ({credential}) => {
@@ -175,10 +191,11 @@ export default function AuthRedesign() {
       <section className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
         {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
         <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{view === "register" ? "Welcome!" : title}</h1>{view !== "register" && <p>{description}</p>}</div>
-        {mainView && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg>Continue with Telegram</button>}
+        {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg><span>Continue with Telegram</span></button>}
         <div className="go-auth-divider"><span>or continue with email</span></div></>}
         {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
-        <form className="go-auth-form" onSubmit={handleSubmit}>
+        {telegramConfirmation && <div className="go-auth-telegram-confirmation"><p>Sign in with this Telegram profile?</p><p><strong>{telegramConfirmation.profile.name}</strong>{telegramConfirmation.profile.telegramUsername && <> · @{telegramConfirmation.profile.telegramUsername}</>}</p><button type="button" className="go-auth-telegram" disabled={disabled} onClick={confirmTelegram}><span>{telegramBusy ? "Signing in…" : "Continue with this account"}</span></button><button type="button" className="go-auth-back" disabled={disabled} onClick={()=>setTelegramConfirmation(null)}>Cancel</button></div>}
+        <form className="go-auth-form" hidden={Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
           <fieldset disabled={disabled}>
             {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder="Your first name" /></div><div className="go-auth-field"><label htmlFor="secondName">Last name</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder="Your last name" /></div></div>}
             {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label="Password" value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "register" && <PasswordField id="confirmPassword" label="Confirm password" value={form.confirmPassword} onChange={change} />}{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
