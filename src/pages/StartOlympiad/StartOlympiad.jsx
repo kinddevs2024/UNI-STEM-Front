@@ -1,8 +1,8 @@
 import { getEntryFee } from '../../utils/coinEntry';
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { olympiadAPI, authAPI } from "../../services/api";
-import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
+import { olympiadAPI } from "../../services/api";
+import { gradeLabel } from '../../utils/gradeCategories';
 import {
   formatDate,
   isOlympiadActive,
@@ -22,19 +22,7 @@ import "./StartOlympiad.css";
 const StartOlympiad = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, setUser, balance, refreshBalance } = useAuth();
-  const [savingGrade, setSavingGrade] = useState(false);
-  const changeGrade = async gradeCategory => {
-    if (!gradeCategory || savingGrade) return;
-    setSavingGrade(true);
-    try {
-      const response = await authAPI.updateProfile({ gradeCategory });
-      setUser(response.data.user);
-      const details = await olympiadAPI.getById(id);
-      setOlympiad(details.data);
-    } catch (error) { setNotification({ type: 'error', message: error?.response?.data?.message || 'Could not save your class.' }); }
-    finally { setSavingGrade(false); }
-  };
+  const { user, balance, refreshBalance } = useAuth();
   const [olympiad, setOlympiad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
@@ -211,8 +199,8 @@ const StartOlympiad = () => {
     }
 
     let cameraStream = null;
-    if (savingGrade || (olympiad.requiresGrade && !olympiad.gradeCategory)) {
-      setNotification({ type: 'error', message: 'Choose your school grade or Student before starting.' });
+    if (olympiad.requiresGrade && !olympiad.gradeCategory) {
+      navigate('/auth', {replace:true});
       return;
     }
     let screenStream = null;
@@ -460,7 +448,6 @@ const StartOlympiad = () => {
           <div className="start-header card">
             <h1 className="start-title">{olympiad.title}</h1>
             <p className="start-subtitle">{olympiad.description}</p>
-            {user?.role === 'student' && <div className="form-group"><label htmlFor="olympiad-grade">School grade / education</label><select id="olympiad-grade" value={olympiad.gradeCategory || user.gradeCategory || ''} disabled={savingGrade || olympiad.hasAttempt} onChange={e => changeGrade(e.target.value)}><option value="">Choose your class</option>{GRADE_CATEGORIES.map(grade => <option key={grade} value={grade}>{gradeLabel(grade)}</option>)}</select>{olympiad.hasAttempt && <small>Your class is fixed for this attempt.</small>}</div>}
             {(olympiad.gradePrizes || []).some(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)) && <section className="grade-prizes"><h2>Prizes · {gradeLabel(olympiad.gradeCategory || user?.gradeCategory)}</h2><div className="olympiad-info-grid">{olympiad.gradePrizes.filter(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)).sort((a,b) => a.place - b.place).map(prize => <article className="card" key={prize.place} style={{ padding: 16 }}>{prize.photo && <img src={getImageUrl(prize.photo)} alt={prize.name} style={{ width: '100%', maxHeight: 160, objectFit: 'contain' }} />}<strong>Place {prize.place}</strong><p>{prize.name}</p></article>)}</div></section>}
 
             {olympiadLogoUrl && (

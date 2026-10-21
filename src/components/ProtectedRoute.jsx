@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { needsGradeSelection } from "../utils/authDestination";
 import { USER_ROLES } from "../utils/constants";
 
 const ProtectedRoute = ({ children, requiredRole = null, allowedRoles = null }) => {
@@ -23,6 +24,8 @@ const ProtectedRoute = ({ children, requiredRole = null, allowedRoles = null }) 
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
+
+  if (needsGradeSelection(user)) return <Navigate to="/auth" replace />;
 
   // Normalize role for comparison (handle underscore/hyphen variations)
   const normalizeRole = (role) => {

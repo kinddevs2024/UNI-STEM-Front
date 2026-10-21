@@ -24,7 +24,7 @@ import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import GoogleOneTap from "./components/GoogleOneTap";
-import { getAuthDestination } from "./utils/authDestination";
+import { getAuthDestination, needsGradeSelection } from "./utils/authDestination";
 import Navbar from "./components/Navbar";
 import DashboardWelcome from "./components/DashboardWelcome";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -83,7 +83,7 @@ const AppRoutes = () => {
 
       <Route
         path="/auth"
-        element={isAuthenticated ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />}
+        element={loading ? <div style={{minHeight:"100svh",display:"grid",placeItems:"center"}} role="status" aria-label="Loading account"><div className="loading-spinner" /></div> : isAuthenticated && !needsGradeSelection(user) ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />}
       />
 
       <Route path="/updatepassword" element={<UpdatePassword />} />
@@ -350,9 +350,9 @@ function App() {
 
 // Separate component to handle cookie consent modal
 const CookieConsentWrapper = () => {
-  const { showCookieConsent, handleCookieConsent } = useAuth();
+  const { showCookieConsent, handleCookieConsent, user } = useAuth();
 
-  if (!showCookieConsent) return null;
+  if (!showCookieConsent || needsGradeSelection(user)) return null;
 
   return (
     <CookieConsentModal

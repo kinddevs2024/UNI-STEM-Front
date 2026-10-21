@@ -5,13 +5,14 @@ import "@fontsource-variable/golos-text";
 import "@fontsource/cormorant-garamond/600-italic.css";
 import { useAuth } from "../../context/AuthContext";
 import api, { authAPI } from "../../services/api";
-import { getAuthDestination } from "../../utils/authDestination";
+import { getAuthDestination, needsGradeSelection } from "../../utils/authDestination";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 import "./AuthRedesign.css";
 import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
 
 const emptyForm = {email:"",password:"",firstName:"",secondName:"",gradeCategory:""};
 const titles = {
+  "choose-grade":["Your next step.","Choose your class so we can show you the right olympiad questions."],
   "activate-account":["Make this account yours.","Choose your own password to finish your first sign-in."],
   login:["Welcome back.", "Sign in and continue your journey to new achievements."],
   register:["It starts here.", "Create an account and take your first step towards success."],
@@ -51,6 +52,9 @@ function GradePicker({value,onChange}) {
 }
 
 export default function AuthRedesign() {
+  const {user,setUser,login,register,loginWithGoogle,completeAuth} = useAuth();
+  const needsGrade = needsGradeSelection(user);
+  const [selectedGrade,setSelectedGrade] = useState("");
   const cardRef=useRef(null);
   const [cardHeight,setCardHeight]=useState(null);
   useLayoutEffect(()=>{
@@ -59,7 +63,8 @@ export default function AuthRedesign() {
     setCardHeight(cardRef.current.getBoundingClientRect().height);
     return ()=>observer.disconnect();
   },[]);
-  const [view,setView] = useState("login");
+  const [authView,setView] = useState("login");
+  const view = needsGrade ? "choose-grade" : authView;
   const [form,setForm] = useState(emptyForm);
   const [busy,setBusy] = useState(false);
   const [googleBusy,setGoogleBusy] = useState(false);
@@ -75,7 +80,6 @@ export default function AuthRedesign() {
   const googleInFlight = useRef(false);
   const telegramInFlight = useRef(false);
   const submitInFlight = useRef(false);
-  const {login,register,loginWithGoogle,completeAuth} = useAuth();
   const navigate = useNavigate();
   const mainView = view === "login" || view === "register";
   const disabled = busy || googleBusy || telegramBusy;
@@ -152,6 +156,18 @@ export default function AuthRedesign() {
     event.preventDefault();
     if (submitInFlight.current || googleInFlight.current) return;
     setNotice(null);
+    if (needsGrade) {
+      if (!GRADE_CATEGORIES.includes(selectedGrade)) { showError("Choose your class to continue."); return; }
+      submitInFlight.current=true; setBusy(true);
+      try {
+        const response=await authAPI.updateProfile({gradeCategory:selectedGrade});
+        const saved=response.data?.user;
+        if (!saved || saved.gradeCategory !== selectedGrade || needsGradeSelection(saved)) throw new Error("Class was not saved");
+        setUser(saved); navigate(getAuthDestination(saved),{replace:true});
+      } catch(error) { showError(errorMessage(error,"Could not save your class. Please try again.")); }
+      finally { submitInFlight.current=false; setBusy(false); }
+      return;
+    }
     if (view === "register" && !form.gradeCategory) { showError("Choose your school grade / education."); return; }
     if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) { showError("Enter your first and last name."); return; }
     if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) { showError("Passwords do not match."); return; }
@@ -216,29 +232,31 @@ export default function AuthRedesign() {
   return <div className="go-auth-page" data-translate="false">
     <img src="/images/auth-landscape.webp" className="go-auth-backdrop" alt="" aria-hidden="true" fetchpriority="high" />
     <div className="go-auth-shade" aria-hidden="true" />
-    <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link><Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link></header>
+    <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link>{!needsGrade && <Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link>}</header>
     <div className="go-auth-layout">
       <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
-      <div className="go-auth-card-size" style={{height:cardHeight??undefined}}><section ref={cardRef} className={`go-auth-card ${view === "register" ? "is-registration" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
+      <div className="go-auth-card-size" style={{height:cardHeight??undefined}}><section ref={cardRef} className={`go-auth-card ${view === "register" ? "is-registration" : needsGrade ? "is-grade-step" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
         <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
-        {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
+        {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : !needsGrade && <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
         {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg><span>Continue with Telegram</span></button>}
         <div className="go-auth-divider"><span>or continue with email</span></div></>}
         {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
-        {telegramConfirmation && <div className="go-auth-telegram-confirmation"><p>Sign in with this Telegram profile?</p><p><strong>{telegramConfirmation.profile.name}</strong>{telegramConfirmation.profile.telegramUsername && <> · @{telegramConfirmation.profile.telegramUsername}</>}</p><button type="button" className="go-auth-telegram" disabled={disabled} onClick={confirmTelegram}><span>{telegramBusy ? "Signing in…" : "Continue with this account"}</span></button><button type="button" className="go-auth-back" disabled={disabled} onClick={()=>setTelegramConfirmation(null)}>Cancel</button></div>}
-        <form className="go-auth-form" hidden={Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
+        {!needsGrade && telegramConfirmation && <div className="go-auth-telegram-confirmation"><p>Sign in with this Telegram profile?</p><p><strong>{telegramConfirmation.profile.name}</strong>{telegramConfirmation.profile.telegramUsername && <> · @{telegramConfirmation.profile.telegramUsername}</>}</p><button type="button" className="go-auth-telegram" disabled={disabled} onClick={confirmTelegram}><span>{telegramBusy ? "Signing in…" : "Continue with this account"}</span></button><button type="button" className="go-auth-back" disabled={disabled} onClick={()=>setTelegramConfirmation(null)}>Cancel</button></div>}
+        <form className="go-auth-form" hidden={!needsGrade && Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
           <fieldset disabled={disabled}>
+            {needsGrade && <><p className="go-grade-step-label" id="grade-step-label">Which class are you in?</p><div className="go-grade-grid" role="radiogroup" aria-labelledby="grade-step-label">{GRADE_CATEGORIES.map(grade=><label className={`go-grade-option ${selectedGrade===grade?'is-selected':''}`} key={grade}><input type="radio" name="onboardingGrade" value={grade} checked={selectedGrade===grade} onChange={()=>setSelectedGrade(grade)} required/><span className="go-grade-number">{grade==='student'?<Sparkle size={26} aria-hidden="true"/>:grade}</span><span>{grade==='student'?'University student':'Grade '+grade}</span><CheckCircle className="go-grade-check" size={18} weight="fill" aria-hidden="true"/></label>)}</div><p className="go-grade-note">Your class is saved to your account. You only need to choose it once.</p></>}
+
             {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder="Your first name" /></div><div className="go-auth-field"><label htmlFor="secondName">Last name</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder="Your last name" /></div></div>}
             {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label={view === "register" ? "New Password" : "Password"} value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
-            {!mainView && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
+            {!mainView && !needsGrade && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
             {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">Email verification code</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="000000" /></div>}
             {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label="New password" minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={e=>setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label="Confirm new password" minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={e=>setConfirmNewPassword(e.target.value)} /></>}
             {view === "register" && <GradePicker value={form.gradeCategory} onChange={gradeCategory=>setForm(prev=>({...prev,gradeCategory}))}/> }
-            <button type="submit" className="go-auth-submit">{busy ? "Please wait…" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : (view === "forgot-reset" || view === "activate-account") ? "Save password" : "Verify code"}<ArrowUpRight size={20} aria-hidden="true" /></button>
+            <button type="submit" className="go-auth-submit" disabled={disabled || (needsGrade && !selectedGrade)}>{busy ? "Please wait…" : needsGrade ? "Continue to my account" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : (view === "forgot-reset" || view === "activate-account") ? "Save password" : "Verify code"}<ArrowUpRight size={20} aria-hidden="true" /></button>
             {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code"}</button>}
           </fieldset>
         </form>
-        <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>
+        {!needsGrade && <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>}
         
       </section></div>
     </div>
