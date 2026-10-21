@@ -54,10 +54,9 @@ body[data-color-mode="dark"] .buy-coins-page .buy-coins-info .button-secondary {
 .manual-packages span { display:block; font-size:11px; margin-top:5px; }
 .manual-packs-label { display:block; margin-bottom:20px; }
 .manual-packs-label input { width:100%; margin-top:8px; }
-.manual-transfer-card { padding:22px; border-radius:18px; background:var(--bg-tertiary); border:1px solid var(--border); }
-.manual-transfer-card span,.manual-transfer-card strong { display:block; }
-.manual-transfer-card strong { font-size:clamp(17px,2vw,23px); letter-spacing:.04em; margin:12px 0; overflow-wrap:anywhere; user-select:all; }
-.manual-transfer-card button { background:transparent; color:var(--text-primary); text-decoration:underline; padding:4px 0; }
+.manual-transfer-card { display:flex;flex-direction:column;align-items:flex-start;gap:14px; }
+.manual-transfer-card>span { font-size:14px;color:var(--text-secondary); }
+.manual-transfer-card>button { background:transparent;color:var(--text-primary);text-decoration:underline;padding:8px 0; }
 .manual-total { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:24px 0; font-size:18px; }
 .manual-payment-form form label { display:block; font-weight:600; margin-bottom:12px; }
 .manual-payment-form input[type=file] { width:100%; padding:12px; border:1px dashed var(--border); border-radius:12px; color:var(--text-primary); }
