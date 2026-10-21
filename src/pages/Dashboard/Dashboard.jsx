@@ -266,7 +266,7 @@ const Dashboard = () => {
       return (
         <Link
           key={olympiad._id}
-          to={`/olympiad/${olympiad._id}/start`}
+          to={`/olympiad/${olympiad._id}/entry`}
           className="olympiad-card card card-interactive"
         >
           {cardContent}

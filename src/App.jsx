@@ -21,6 +21,7 @@ import {
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
+import OlympiadEntryGate from "./components/OlympiadEntryGate";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import GoogleOneTap from "./components/GoogleOneTap";
@@ -85,6 +86,8 @@ const AppRoutes = () => {
         path="/auth"
         element={loading ? <div style={{minHeight:"100svh",display:"grid",placeItems:"center"}} role="status" aria-label="Loading account"><div className="loading-spinner" /></div> : isAuthenticated && !needsGradeSelection(user) ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />}
       />
+
+      <Route path="/olympiad/:id/entry" element={<ProtectedRoute requiredRole={USER_ROLES.STUDENT}><OlympiadEntryGate /></ProtectedRoute>} />
 
       <Route path="/updatepassword" element={<UpdatePassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />

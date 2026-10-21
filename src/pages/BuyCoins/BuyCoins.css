@@ -38,3 +38,32 @@
 .buy-coins-page .buy-coins-balance { display:flex; align-items:center; gap:10px; }
 body[data-color-mode="dark"] .buy-coins-page :is(.buy-coins-subtitle,.buy-coins-header .go-account-eyebrow) { color:var(--text-secondary); }
 body[data-color-mode="dark"] .buy-coins-page .buy-coins-info .button-secondary { color:var(--text-primary); border-color:var(--border); }
+
+.manual-coins-heading { margin-bottom:28px; }
+.manual-payment-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; }
+.manual-payment-layout>section { padding:30px; min-width:0; }
+.manual-payment-summary h2 { font-size:40px; margin:8px 0; }
+.manual-rate { font-size:20px; font-weight:600; }
+.manual-payment-summary dl>div { display:flex; gap:16px; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.manual-payment-summary dd { margin:0; font-weight:600; }
+.manual-payment-summary p { line-height:1.75; }
+.manual-payment-summary .button-primary { margin:16px 0; }
+.manual-packages { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:18px 0; }
+.manual-packages button { border:1px solid var(--border); background:var(--bg-tertiary); color:var(--text-primary); border-radius:12px; padding:14px 5px; }
+.manual-packages button.is-selected { outline:2px solid #a88ccf; }
+.manual-packages span { display:block; font-size:11px; margin-top:5px; }
+.manual-packs-label { display:block; margin-bottom:20px; }
+.manual-packs-label input { width:100%; margin-top:8px; }
+.manual-transfer-card { padding:22px; border-radius:18px; background:var(--bg-tertiary); border:1px solid var(--border); }
+.manual-transfer-card span,.manual-transfer-card strong { display:block; }
+.manual-transfer-card strong { font-size:clamp(17px,2vw,23px); letter-spacing:.04em; margin:12px 0; overflow-wrap:anywhere; user-select:all; }
+.manual-transfer-card button { background:transparent; color:var(--text-primary); text-decoration:underline; padding:4px 0; }
+.manual-total { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:24px 0; font-size:18px; }
+.manual-payment-form form label { display:block; font-weight:600; margin-bottom:12px; }
+.manual-payment-form input[type=file] { width:100%; padding:12px; border:1px dashed var(--border); border-radius:12px; color:var(--text-primary); }
+.manual-file-hint { font-size:12px; color:var(--text-secondary); }
+.manual-notice { padding:14px; background:var(--bg-tertiary); border-radius:12px; }
+.manual-payment-history { margin-top:28px; padding:24px; }
+.manual-history-row { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:16px 0; border-bottom:1px solid var(--border); }
+.manual-history-row p { width:100%; }
+@media(max-width:800px) { .manual-payment-layout { grid-template-columns:1fr; gap:20px; } .manual-payment-layout>section { padding:22px; } .manual-payment-summary { order:0; } .manual-payment-form { order:1; } }
