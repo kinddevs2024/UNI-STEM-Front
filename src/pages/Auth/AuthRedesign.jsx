@@ -1,3 +1,5 @@
+import LanguageSwitcher from '../../components/LanguageSwitcher';
+import { t, useLocale } from "../../i18n/runtime";import { useTranslation } from '../../context/TranslationContext';
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CaretDown, Check, ArrowLeft, ArrowUpRight, Eye, EyeSlash, EnvelopeSimple, LockKey, Sparkle, CheckCircle, WarningCircle } from "@phosphor-icons/react";
@@ -5,116 +7,121 @@ import "@fontsource-variable/golos-text";
 import "@fontsource/cormorant-garamond/600-italic.css";
 import { useAuth } from "../../context/AuthContext";
 import api, { authAPI } from "../../services/api";
-import { getAuthDestination, needsGradeSelection } from "../../utils/authDestination";
+import { getAuthDestination, needsGradeSelection, needsLanguageSelection } from "../../utils/authDestination";
 import GoogleAuthButton from "../../components/GoogleAuthButton";
 import "./AuthRedesign.css";
 import { GRADE_CATEGORIES, gradeLabel } from '../../utils/gradeCategories';
 
-const emptyForm = {email:"",password:"",firstName:"",secondName:"",gradeCategory:""};
+const emptyForm = { email: "", password: "", firstName: "", secondName: "", gradeCategory: "" };
 const titles = {
-  "choose-grade":["Your next step.","Choose your class so we can show you the right olympiad questions."],
-  "activate-account":["Make this account yours.","Choose your own password to finish your first sign-in."],
-  login:["Welcome back.", "Sign in and continue your journey to new achievements."],
-  register:["It starts here.", "Create an account and take your first step towards success."],
-  "verify-email":["Check your inbox.", "Enter the six-digit code from your email to verify your address."],
-  "forgot-request":["Let us get you back in.", "Enter your account email to receive a recovery code."],
-  "forgot-verify":["Your code is on its way.", "Enter the six-digit code we sent to your email."],
-  "forgot-reset":["New password. Fresh start.", "Choose a password with at least 6 characters."],
+  "choose-language": ["Make yourself at home.", "Choose the language you want to use on the website."],
+  "choose-grade": ["Your next step.", "Choose your class so we can show you the right olympiad questions."],
+  "activate-account": ["Make this account yours.", "Choose your own password to finish your first sign-in."],
+  login: ["Welcome back.", "Sign in and continue your journey to new achievements."],
+  register: ["It starts here.", "Create an account and take your first step towards success."],
+  "verify-email": ["Check your inbox.", "Enter the six-digit code from your email to verify your address."],
+  "forgot-request": ["Let us get you back in.", "Enter your account email to receive a recovery code."],
+  "forgot-verify": ["Your code is on its way.", "Enter the six-digit code we sent to your email."],
+  "forgot-reset": ["New password. Fresh start.", "Choose a password with at least 6 characters."]
 };
-function errorMessage(error, fallback) { return error?.response?.data?.message || fallback; }
+function errorMessage(error, fallback) {return error?.response?.data?.message || fallback;}
 
-function PasswordField({id,label,value,onChange,autoComplete="new-password",minLength=6}) {
-  const [visible,setVisible] = useState(false);
-  return <div className="go-auth-field"><label htmlFor={id}>{label}</label><div className="go-auth-input-wrap"><LockKey size={19} aria-hidden="true" /><input id={id} name={id} type={visible ? "text" : "password"} value={value} onChange={onChange} autoComplete={autoComplete} minLength={minLength} required placeholder={autoComplete === "current-password" ? "Your password" : `At least ${minLength} characters`} /><button type="button" className="go-auth-password-toggle" aria-label={visible ? "Hide password" : "Show password"} aria-pressed={visible} onClick={()=>setVisible(!visible)}>{visible ? <EyeSlash size={20} /> : <Eye size={20} />}</button></div></div>;
+function PasswordField({ id, label, value, onChange, autoComplete = "new-password", minLength = 6 }) {useLocale();
+  const [visible, setVisible] = useState(false);
+  return <div className="go-auth-field"><label htmlFor={id}>{t(label)}</label><div className="go-auth-input-wrap"><LockKey size={19} aria-hidden="true" /><input id={id} name={id} type={visible ? "text" : "password"} value={value} onChange={onChange} autoComplete={autoComplete} minLength={minLength} required placeholder={t(autoComplete === "current-password" ? "Your password" : `At least ${minLength} characters`)} /><button type="button" className="go-auth-password-toggle" aria-label={t(visible ? "Hide password" : "Show password")} aria-pressed={visible} onClick={() => setVisible(!visible)}>{visible ? <EyeSlash size={20} /> : <Eye size={20} />}</button></div></div>;
 }
 
-function GradePicker({value,onChange}) {
-  const [open,setOpen]=useState(false);
-  const root=useRef(null), trigger=useRef(null), options=useRef([]);
-  const choose=grade=>{onChange(grade);setOpen(false);trigger.current?.focus();};
-  useEffect(()=>{
-    const outside=e=>{if(!root.current?.contains(e.target))setOpen(false);};
-    document.addEventListener('pointerdown',outside);
-    return ()=>document.removeEventListener('pointerdown',outside);
-  },[]);
-  useLayoutEffect(()=>{if(open)options.current[Math.max(0,GRADE_CATEGORIES.indexOf(value))]?.focus();},[open]);
-  return <div className="go-auth-field go-auth-grade" ref={root} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setOpen(false);}}>
-    <label id="grade-label" htmlFor="gradeCategory">School grade / education</label>
-    <button id="gradeCategory" ref={trigger} type="button" className="go-auth-select" aria-labelledby="grade-label grade-value" aria-haspopup="listbox" aria-expanded={open} aria-controls={open?'grade-options':undefined} onClick={()=>setOpen(!open)} onKeyDown={e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();setOpen(true);}}}>
-      <span id="grade-value">{value?gradeLabel(value):'Choose your class'}</span><CaretDown size={18} weight="bold" aria-hidden="true"/>
+function GradePicker({ value, onChange }) {useLocale();
+  const [open, setOpen] = useState(false);
+  const root = useRef(null),trigger = useRef(null),options = useRef([]);
+  const choose = (grade) => {onChange(grade);setOpen(false);trigger.current?.focus();};
+  useEffect(() => {
+    const outside = (e) => {if (!root.current?.contains(e.target)) setOpen(false);};
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, []);
+  useLayoutEffect(() => {if (open) options.current[Math.max(0, GRADE_CATEGORIES.indexOf(value))]?.focus();}, [open]);
+  return <div className="go-auth-field go-auth-grade" ref={root} onBlur={(e) => {if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);}}>
+    <label id="grade-label" htmlFor="gradeCategory">{t("School grade / education")}</label>
+    <button id="gradeCategory" ref={trigger} type="button" className="go-auth-select" aria-labelledby="grade-label grade-value" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? 'grade-options' : undefined} onClick={() => setOpen(!open)} onKeyDown={(e) => {if (['ArrowDown', 'ArrowUp'].includes(e.key)) {e.preventDefault();setOpen(true);}}}>
+      <span id="grade-value">{t(value ? gradeLabel(value) : 'Choose your class')}</span><CaretDown size={18} weight="bold" aria-hidden="true" />
     </button>
-    {open&&<div id="grade-options" role="listbox" aria-labelledby="grade-label" className="go-auth-options" onKeyDown={e=>{
-      const i=options.current.indexOf(document.activeElement);
-      if(e.key==='Escape'){e.preventDefault();setOpen(false);trigger.current.focus();}
-      if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?GRADE_CATEGORIES.length-1:(i+(e.key==='ArrowDown'?1:-1)+GRADE_CATEGORIES.length)%GRADE_CATEGORIES.length;options.current[next]?.focus();}
-    }}>{GRADE_CATEGORIES.map((grade,i)=><button key={grade} ref={el=>options.current[i]=el} type="button" role="option" aria-selected={value===grade} tabIndex={-1} onClick={()=>choose(grade)}>{gradeLabel(grade)}{value===grade&&<Check size={17} aria-hidden="true"/>}</button>)}</div>}
+    {open && <div id="grade-options" role="listbox" aria-labelledby="grade-label" className="go-auth-options" onKeyDown={(e) => {
+      const i = options.current.indexOf(document.activeElement);
+      if (e.key === 'Escape') {e.preventDefault();setOpen(false);trigger.current.focus();}
+      if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) {e.preventDefault();const next = e.key === 'Home' ? 0 : e.key === 'End' ? GRADE_CATEGORIES.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : -1) + GRADE_CATEGORIES.length) % GRADE_CATEGORIES.length;options.current[next]?.focus();}
+    }}>{GRADE_CATEGORIES.map((grade, i) => <button key={grade} ref={(el) => options.current[i] = el} type="button" role="option" aria-selected={value === grade} tabIndex={-1} onClick={() => choose(grade)}>{t(gradeLabel(grade))}{value === grade && <Check size={17} aria-hidden="true" />}</button>)}</div>}
   </div>;
 }
 
-export default function AuthRedesign() {
-  const {user,setUser,login,register,loginWithGoogle,completeAuth} = useAuth();
+export default function AuthRedesign() {useLocale();
+  const { user, setUser, login, register, loginWithGoogle, completeAuth } = useAuth();
   const needsGrade = needsGradeSelection(user);
-  const [selectedGrade,setSelectedGrade] = useState("");
-  const cardRef=useRef(null);
-  const [cardHeight,setCardHeight]=useState(null);
-  useLayoutEffect(()=>{
-    const observer=new ResizeObserver(()=>setCardHeight(cardRef.current?.getBoundingClientRect().height));
+  const needsLanguage = !needsGrade && needsLanguageSelection(user);
+  const onboarding = needsGrade || needsLanguage;
+  const { changeLanguage, availableLanguages } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState("");
+  const cardRef = useRef(null);
+  const [cardHeight, setCardHeight] = useState(null);
+  useLayoutEffect(() => {
+    const observer = new ResizeObserver(() => setCardHeight(cardRef.current?.getBoundingClientRect().height));
     observer.observe(cardRef.current);
     setCardHeight(cardRef.current.getBoundingClientRect().height);
-    return ()=>observer.disconnect();
-  },[]);
-  const [authView,setView] = useState("login");
-  const view = needsGrade ? "choose-grade" : authView;
-  const [form,setForm] = useState(emptyForm);
-  const [busy,setBusy] = useState(false);
-  const [googleBusy,setGoogleBusy] = useState(false);
-  const [telegramBusy,setTelegramBusy] = useState(false);
-  const [telegramConfirmation,setTelegramConfirmation] = useState(null);
-  const [notice,setNotice] = useState(null);
-  const [setupToken,setSetupToken] = useState("");
-  const [pendingEmail,setPendingEmail] = useState("");
-  const [code,setCode] = useState("");
-  const [newPassword,setNewPassword] = useState("");
-  const [confirmNewPassword,setConfirmNewPassword] = useState("");
-  const [resendCooldown,setResendCooldown] = useState(0);
+    return () => observer.disconnect();
+  }, []);
+  const [authView, setView] = useState("login");
+  const view = needsGrade ? "choose-grade" : needsLanguage ? "choose-language" : authView;
+  const [form, setForm] = useState(emptyForm);
+  const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [telegramBusy, setTelegramBusy] = useState(false);
+  const [telegramConfirmation, setTelegramConfirmation] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [setupToken, setSetupToken] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const googleInFlight = useRef(false);
   const telegramInFlight = useRef(false);
   const submitInFlight = useRef(false);
   const navigate = useNavigate();
   const mainView = view === "login" || view === "register";
   const disabled = busy || googleBusy || telegramBusy;
-  const [title,description] = titles[view];
+  const [title, description] = titles[view];
 
-  useEffect(()=> {
+  useEffect(() => {
     if (!resendCooldown) return;
-    const timer=setTimeout(()=>setResendCooldown(value=>Math.max(0,value-1)),1000);
-    return ()=>clearTimeout(timer);
-  },[resendCooldown]);
+    const timer = setTimeout(() => setResendCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
-  const change = event => setForm(prev=>({...prev,[event.target.name]:event.target.value}));
-  const showError = message => setNotice({type:"error",message});
-  const showInfo = message => setNotice({type:"info",message});
-  const changeView = next => {
+  const change = (event) => setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+  const showError = (message) => setNotice({ type: "error", message });
+  const showInfo = (message) => setNotice({ type: "info", message });
+  const changeView = (next) => {
     setTelegramConfirmation(null);
-    setNotice(null); setCode(""); setNewPassword(""); setConfirmNewPassword("");
-    setForm(prev=>({...prev,password:""}));
+    setNotice(null);setCode("");setNewPassword("");setConfirmNewPassword("");
+    setForm((prev) => ({ ...prev, password: "" }));
     setView(next);
   };
 
   useEffect(() => {
     const consumeTelegram = () => {
-    const values = new URLSearchParams(window.location.hash.slice(1));
-    const code = values.get('telegram_code');
-    if (!code || telegramInFlight.current) return;
-    telegramInFlight.current = true;
-    window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    setTelegramBusy(true);
-    api.post('/auth/telegram/consume', { code }).then(({data}) => {
-      if (data.confirmationRequired) { setTelegramConfirmation({ code, profile:data.profile }); return; }
-      completeAuth(data.token, data.user);
-      navigate(getAuthDestination(data.user), { replace:true });
-    }).catch(error => showError(errorMessage(error, 'Telegram sign-in failed. Please try again.')))
-      .finally(() => { telegramInFlight.current = false; setTelegramBusy(false); });
+      const values = new URLSearchParams(window.location.hash.slice(1));
+      const code = values.get('telegram_code');
+      if (!code || telegramInFlight.current) return;
+      telegramInFlight.current = true;
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      setTelegramBusy(true);
+      api.post('/auth/telegram/consume', { code }).then(({ data }) => {
+        if (data.confirmationRequired) {setTelegramConfirmation({ code, profile: data.profile });return;}
+        completeAuth(data.token, data.user);
+        navigate(getAuthDestination(data.user), { replace: true });
+      }).catch((error) => showError(errorMessage(error, 'Telegram sign-in failed. Please try again.'))).
+      finally(() => {telegramInFlight.current = false;setTelegramBusy(false);});
     };
     consumeTelegram();
     window.addEventListener('hashchange', consumeTelegram);
@@ -123,147 +130,159 @@ export default function AuthRedesign() {
 
   const handleTelegram = async () => {
     if (disabled || telegramInFlight.current) return;
-    telegramInFlight.current = true; setTelegramBusy(true); setNotice(null);
-    try { const {data} = await api.post('/auth/telegram/start'); window.location.assign(data.url); }
-    catch(error) { showError(errorMessage(error, 'Telegram is unavailable. Please try again.')); }
-    finally { telegramInFlight.current = false; setTelegramBusy(false); }
+    telegramInFlight.current = true;setTelegramBusy(true);setNotice(null);
+    try {const { data } = await api.post('/auth/telegram/start');window.location.assign(data.url);}
+    catch (error) {showError(errorMessage(error, 'Telegram is unavailable. Please try again.'));} finally
+    {telegramInFlight.current = false;setTelegramBusy(false);}
   };
 
   const confirmTelegram = async () => {
     if (disabled || !telegramConfirmation || telegramInFlight.current) return;
-    telegramInFlight.current = true; setTelegramBusy(true); setNotice(null);
+    telegramInFlight.current = true;setTelegramBusy(true);setNotice(null);
     try {
-      const {data} = await api.post('/auth/telegram/consume', {code:telegramConfirmation.code,confirm:true});
+      const { data } = await api.post('/auth/telegram/consume', { code: telegramConfirmation.code, confirm: true });
       if (!data.token || !data.user) throw Error('Telegram confirmation failed');
-      setTelegramConfirmation(null); completeAuth(data.token,data.user);
-      navigate(getAuthDestination(data.user),{replace:true});
-    } catch(error) { showError(errorMessage(error,'This Telegram link has expired. Please press Start in the bot again.')); }
-    finally { telegramInFlight.current=false;setTelegramBusy(false); }
+      setTelegramConfirmation(null);completeAuth(data.token, data.user);
+      navigate(getAuthDestination(data.user), { replace: true });
+    } catch (error) {showError(errorMessage(error, 'This Telegram link has expired. Please press Start in the bot again.'));} finally
+    {telegramInFlight.current = false;setTelegramBusy(false);}
   };
 
-  const handleGoogleSuccess = async ({credential}) => {
+  const handleGoogleSuccess = async ({ credential }) => {
     if (!credential || googleInFlight.current || submitInFlight.current) return;
-    googleInFlight.current=true; setGoogleBusy(true); setNotice(null);
+    googleInFlight.current = true;setGoogleBusy(true);setNotice(null);
     try {
-      const result=await loginWithGoogle(credential,"id_token");
-      if (!result.success) { showError(result.error || "Google sign-in failed."); return; }
-      navigate(getAuthDestination(result.user),{replace:true});
-    } catch { showError("Could not complete sign-in. Please try again."); }
-    finally { googleInFlight.current=false; setGoogleBusy(false); }
+      const result = await loginWithGoogle(credential, "id_token");
+      if (!result.success) {showError(result.error || "Google sign-in failed.");return;}
+      navigate(getAuthDestination(result.user), { replace: true });
+    } catch {showError("Could not complete sign-in. Please try again.");} finally
+    {googleInFlight.current = false;setGoogleBusy(false);}
   };
 
-  const handleSubmit = async event => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (submitInFlight.current || googleInFlight.current) return;
     setNotice(null);
-    if (needsGrade) {
-      if (!GRADE_CATEGORIES.includes(selectedGrade)) { showError("Choose your class to continue."); return; }
-      submitInFlight.current=true; setBusy(true);
+    if (needsLanguage) {
+      if (!['uz', 'en', 'ru'].includes(selectedLanguage)) {showError('Choose your language to continue.');return;}
+      submitInFlight.current = true;setBusy(true);
       try {
-        const response=await authAPI.updateProfile({gradeCategory:selectedGrade});
-        const saved=response.data?.user;
-        if (!saved || saved.gradeCategory !== selectedGrade || needsGradeSelection(saved)) throw new Error("Class was not saved");
-        setUser(saved); navigate(getAuthDestination(saved),{replace:true});
-      } catch(error) { showError(errorMessage(error,"Could not save your class. Please try again.")); }
-      finally { submitInFlight.current=false; setBusy(false); }
+        const response = await authAPI.updateProfile({ language: selectedLanguage });
+        const saved = response.data?.user;
+        if (!saved || saved.language !== selectedLanguage) throw new Error('Language was not saved');
+        setUser(saved);await changeLanguage(selectedLanguage, { persist: false });
+        navigate(getAuthDestination(saved), { replace: true });
+      } catch (error) {showError(errorMessage(error, 'Could not save your language. Please try again.'));} finally
+      {submitInFlight.current = false;setBusy(false);}
       return;
     }
-    if (view === "register" && !form.gradeCategory) { showError("Choose your school grade / education."); return; }
-    if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) { showError("Enter your first and last name."); return; }
-    if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) { showError("Passwords do not match."); return; }
-    submitInFlight.current=true; setBusy(true);
+    if (needsGrade) {
+      if (!GRADE_CATEGORIES.includes(selectedGrade)) {showError("Choose your class to continue.");return;}
+      submitInFlight.current = true;setBusy(true);
+      try {
+        const response = await authAPI.updateProfile({ gradeCategory: selectedGrade });
+        const saved = response.data?.user;
+        if (!saved || saved.gradeCategory !== selectedGrade || needsGradeSelection(saved)) throw new Error("Class was not saved");
+        setUser(saved);navigate(getAuthDestination(saved), { replace: true });
+      } catch (error) {showError(errorMessage(error, "Could not save your class. Please try again."));} finally
+      {submitInFlight.current = false;setBusy(false);}
+      return;
+    }
+    if (view === "register" && !form.gradeCategory) {showError("Choose your school grade / education.");return;}
+    if (view === "register" && (!form.firstName.trim() || !form.secondName.trim())) {showError("Enter your first and last name.");return;}
+    if ((view === "forgot-reset" || view === "activate-account") && newPassword !== confirmNewPassword) {showError("Passwords do not match.");return;}
+    submitInFlight.current = true;setBusy(true);
     try {
       if (mainView) {
-        const email=form.email.trim();
-        const result=view === "login" ? await login(email,form.password) : await register({
-          email,password:form.password,name:`${form.firstName.trim()} ${form.secondName.trim()}`.trim(),
-          firstName:form.firstName.trim(),secondName:form.secondName.trim(),phone:null,
-          gradeCategory:form.gradeCategory,
+        const email = form.email.trim();
+        const result = view === "login" ? await login(email, form.password) : await register({
+          email, password: form.password, name: `${form.firstName.trim()} ${form.secondName.trim()}`.trim(),
+          firstName: form.firstName.trim(), secondName: form.secondName.trim(), phone: null,
+          gradeCategory: form.gradeCategory
         });
         if (result.passwordChangeRequired) {
-          setSetupToken(result.setupToken);setPendingEmail(result.username);setView("activate-account");setNewPassword("");setConfirmNewPassword("");setForm(prev=>({...prev,password:""}));
+          setSetupToken(result.setupToken);setPendingEmail(result.username);setView("activate-account");setNewPassword("");setConfirmNewPassword("");setForm((prev) => ({ ...prev, password: "" }));
         } else if (result.emailVerificationRequired) {
-          setPendingEmail(email); setCode(""); setResendCooldown(60); setView("verify-email");
-          setForm(prev=>({...prev,password:""}));
+          setPendingEmail(email);setCode("");setResendCooldown(60);setView("verify-email");
+          setForm((prev) => ({ ...prev, password: "" }));
           showInfo("Verification code sent. Check your inbox and spam folder.");
         } else if (result.passwordResetRequired) {
-          setPendingEmail(email); setCode(""); setView("forgot-verify");
+          setPendingEmail(email);setCode("");setView("forgot-verify");
           showInfo("A recovery code was sent to your email.");
         } else if (result.success) {
-          navigate(result.user ? getAuthDestination(result.user) : "/",{replace:true});
-        } else { showError(result.error || "Could not sign in. Check your details and try again."); }
+          navigate(result.user ? getAuthDestination(result.user) : "/", { replace: true });
+        } else {showError(result.error || "Could not sign in. Check your details and try again.");}
       } else if (view === "activate-account") {
-        await api.post('/auth/activate-account',{setupToken,password:newPassword});
-        const result=await login(pendingEmail,newPassword);if(!result.success)throw new Error(result.error||'Sign in with your new password.');setSetupToken('');navigate('/profile',{replace:true});
+        await api.post('/auth/activate-account', { setupToken, password: newPassword });
+        const result = await login(pendingEmail, newPassword);if (!result.success) throw new Error(result.error || 'Sign in with your new password.');setSetupToken('');navigate('/profile', { replace: true });
       } else if (view === "verify-email") {
-        const {data}=await authAPI.verifyEmail({email:pendingEmail.trim(),code});
+        const { data } = await authAPI.verifyEmail({ email: pendingEmail.trim(), code });
         if (!data?.success || !data.token || !data.user) throw new Error("Invalid verification response");
-        completeAuth(data.token,data.user);
-        navigate(getAuthDestination(data.user),{replace:true});
+        completeAuth(data.token, data.user);
+        navigate(getAuthDestination(data.user), { replace: true });
       } else if (view === "forgot-request") {
-        await authAPI.requestPasswordResetCode({email:pendingEmail.trim()});
-        setCode(""); setResendCooldown(60); setView("forgot-verify"); showInfo("Code sent. Check your inbox and spam folder.");
+        await authAPI.requestPasswordResetCode({ email: pendingEmail.trim() });
+        setCode("");setResendCooldown(60);setView("forgot-verify");showInfo("Code sent. Check your inbox and spam folder.");
       } else if (view === "forgot-verify") {
-        const {data}=await authAPI.verifyPasswordResetCode({email:pendingEmail.trim(),code});
-        if (!data?.success) { showError(data?.message || "Could not verify the code."); return; }
-        setView("forgot-reset"); setNotice(null);
+        const { data } = await authAPI.verifyPasswordResetCode({ email: pendingEmail.trim(), code });
+        if (!data?.success) {showError(data?.message || "Could not verify the code.");return;}
+        setView("forgot-reset");setNotice(null);
       } else if (view === "forgot-reset") {
-        const {data}=await authAPI.resetPasswordWithCode({email:pendingEmail.trim(),code,password:newPassword});
-        if (!data?.success) { showError(data?.message || "Could not update the password."); return; }
-        setView("login"); setNewPassword(""); setConfirmNewPassword(""); setCode("");
-        setForm(prev=>({...prev,email:pendingEmail,password:""}));
-        setNotice({type:"success",message:"Password updated. You can now sign in."});
+        const { data } = await authAPI.resetPasswordWithCode({ email: pendingEmail.trim(), code, password: newPassword });
+        if (!data?.success) {showError(data?.message || "Could not update the password.");return;}
+        setView("login");setNewPassword("");setConfirmNewPassword("");setCode("");
+        setForm((prev) => ({ ...prev, email: pendingEmail, password: "" }));
+        setNotice({ type: "success", message: "Password updated. You can now sign in." });
       }
-    } catch(error) { showError(errorMessage(error,"The request failed. Please try again.")); }
-    finally { submitInFlight.current=false; setBusy(false); }
+    } catch (error) {showError(errorMessage(error, "The request failed. Please try again."));} finally
+    {submitInFlight.current = false;setBusy(false);}
   };
 
-  const resendCode=async()=> {
+  const resendCode = async () => {
     if (submitInFlight.current || resendCooldown) return;
-    submitInFlight.current=true; setBusy(true); setNotice(null);
+    submitInFlight.current = true;setBusy(true);setNotice(null);
     try {
-      if (view === "verify-email") await authAPI.resendVerificationCode({email:pendingEmail.trim()});
-      else await authAPI.requestPasswordResetCode({email:pendingEmail.trim()});
-      setResendCooldown(60); showInfo("A new code was sent to your email.");
-    } catch(error) { showError(errorMessage(error,"Could not send the code. Please try again.")); }
-    finally { submitInFlight.current=false; setBusy(false); }
+      if (view === "verify-email") await authAPI.resendVerificationCode({ email: pendingEmail.trim() });else
+      await authAPI.requestPasswordResetCode({ email: pendingEmail.trim() });
+      setResendCooldown(60);showInfo("A new code was sent to your email.");
+    } catch (error) {showError(errorMessage(error, "Could not send the code. Please try again."));} finally
+    {submitInFlight.current = false;setBusy(false);}
   };
 
   return <div className="go-auth-page" data-translate="false">
     <img src="/images/auth-landscape.webp" className="go-auth-backdrop" alt="" aria-hidden="true" fetchpriority="high" />
     <div className="go-auth-shade" aria-hidden="true" />
-    <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label="Global Olympiad — home"><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link>{!needsGrade && <Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />Back to home</Link>}</header>
+    <header className="go-auth-header"><Link to="/" className="go-auth-brand" aria-label={t("Global Olympiad — home")}><img src="/logo_logo.png" width="40" height="40" alt="" /><span>global<span>olympiad</span></span></Link><div className="go-auth-header-actions">{!onboarding && <LanguageSwitcher />}{!onboarding && <Link to="/" className="go-auth-home-link"><ArrowLeft size={17} aria-hidden="true" />{t("Back to home")}</Link>}</div></header>
     <div className="go-auth-layout">
-      <section className="go-auth-story" aria-label="Global Olympiad"><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />YOUR TALENT HAS NO LIMITS</span><h2>Dream bigger.<br />Reach <em>higher.</em></h2><p>Your knowledge can open up a world of opportunities.<br />Start your journey with Global Olympiad.</p><div className="go-auth-story-note"><GlobeNote />Online olympiads. Real opportunities.</div></section>
-      <div className="go-auth-card-size" style={{height:cardHeight??undefined}}><section ref={cardRef} className={`go-auth-card ${view === "register" ? "is-registration" : needsGrade ? "is-grade-step" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
-        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{title}</h1><p>{description}</p></div>
-        {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label="Choose sign-in or registration"><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={()=>changeView("login")}>Sign in</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={()=>changeView("register")}>Sign up</button></div> : !needsGrade && <button className="go-auth-back" type="button" disabled={disabled} onClick={()=>changeView("login")}><ArrowLeft size={17} aria-hidden="true" />Back to sign in</button>}
-        {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z"/></svg><span>Continue with Telegram</span></button>}
-        <div className="go-auth-divider"><span>or continue with email</span></div></>}
-        {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{notice.message}</span></div>}
-        {!needsGrade && telegramConfirmation && <div className="go-auth-telegram-confirmation"><p>Sign in with this Telegram profile?</p><p><strong>{telegramConfirmation.profile.name}</strong>{telegramConfirmation.profile.telegramUsername && <> · @{telegramConfirmation.profile.telegramUsername}</>}</p><button type="button" className="go-auth-telegram" disabled={disabled} onClick={confirmTelegram}><span>{telegramBusy ? "Signing in…" : "Continue with this account"}</span></button><button type="button" className="go-auth-back" disabled={disabled} onClick={()=>setTelegramConfirmation(null)}>Cancel</button></div>}
-        <form className="go-auth-form" hidden={!needsGrade && Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
+      <section className="go-auth-story" aria-label={t("Global Olympiad")}><span className="go-auth-story-tag"><Sparkle size={16} weight="fill" aria-hidden="true" />{t("YOUR TALENT HAS NO LIMITS")}</span><h2>{t("Dream bigger.")}<br />{t("Reach ")}<em>{t("higher.")}</em></h2><p>{t("Your knowledge can open up a world of opportunities.")}<br />{t("Start your journey with Global Olympiad.")}</p><div className="go-auth-story-note"><GlobeNote />{t("Online olympiads. Real opportunities.")}</div></section>
+      <div className="go-auth-card-size" style={{ height: cardHeight ?? undefined }}><section ref={cardRef} className={`go-auth-card ${view === "register" ? "is-registration" : onboarding ? "is-grade-step" : ""}`} aria-labelledby="go-auth-title" aria-busy={disabled}>
+        <div className="go-auth-heading" key={view}><h1 id="go-auth-title">{t(title)}</h1><p>{t(description)}</p></div>
+        {mainView ? <div className="go-auth-tabs" data-active={view} role="group" aria-label={t("Choose sign-in or registration")}><button type="button" className={view === "login" ? "is-active" : ""} aria-pressed={view === "login"} disabled={disabled} onClick={() => changeView("login")}>{t("Sign in")}</button><button type="button" className={view === "register" ? "is-active" : ""} aria-pressed={view === "register"} disabled={disabled} onClick={() => changeView("register")}>{t("Sign up")}</button></div> : !onboarding && <button className="go-auth-back" type="button" disabled={disabled} onClick={() => changeView("login")}><ArrowLeft size={17} aria-hidden="true" />{t("Back to sign in")}</button>}
+        {mainView && !telegramConfirmation && <><GoogleAuthButton onSuccess={handleGoogleSuccess} onError={showError} busy={googleBusy} disabled={disabled} allowOneTap={!disabled} />{mainView && <button type="button" className="go-auth-telegram" disabled={disabled} onClick={handleTelegram}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#229ED9" d="M21.7 3.3 18.4 20c-.2 1.2-.9 1.5-1.9.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.2L5.7 13.5.8 12c-1.1-.4-1.1-1.1.2-1.6L20 3c.9-.3 1.7.2 1.7.3Z" /></svg><span>{t("Continue with Telegram")}</span></button>}
+        <div className="go-auth-divider"><span>{t("or continue with email")}</span></div></>}
+        {notice && <div className={`go-auth-notice ${notice.type}`} role={notice.type === "error" ? "alert" : "status"}>{notice.type === "error" ? <WarningCircle size={19} aria-hidden="true" /> : <CheckCircle size={19} aria-hidden="true" />}<span>{t(notice.message)}</span></div>}
+        {!onboarding && telegramConfirmation && <div className="go-auth-telegram-confirmation"><p>{t("Sign in with this Telegram profile?")}</p><p><strong>{telegramConfirmation.profile.name}</strong>{telegramConfirmation.profile.telegramUsername && <> · @{telegramConfirmation.profile.telegramUsername}</>}</p><button type="button" className="go-auth-telegram" disabled={disabled} onClick={confirmTelegram}><span>{t(telegramBusy ? "Signing in…" : "Continue with this account")}</span></button><button type="button" className="go-auth-back" disabled={disabled} onClick={() => setTelegramConfirmation(null)}>{t("Cancel")}</button></div>}
+        <form className="go-auth-form" hidden={!onboarding && Boolean(telegramConfirmation)} onSubmit={handleSubmit}>
           <fieldset disabled={disabled}>
-            {needsGrade && <><p className="go-grade-step-label" id="grade-step-label">Which class are you in?</p><div className="go-grade-grid" role="radiogroup" aria-labelledby="grade-step-label">{GRADE_CATEGORIES.map(grade=><label className={`go-grade-option ${selectedGrade===grade?'is-selected':''}`} key={grade}><input type="radio" name="onboardingGrade" value={grade} checked={selectedGrade===grade} onChange={()=>setSelectedGrade(grade)} required/><span className="go-grade-number">{grade==='student'?<Sparkle size={26} aria-hidden="true"/>:grade}</span><span>{grade==='student'?'University student':'Grade '+grade}</span><CheckCircle className="go-grade-check" size={18} weight="fill" aria-hidden="true"/></label>)}</div><p className="go-grade-note">Your class is saved to your account. You only need to choose it once.</p></>}
+            {needsLanguage && <><div className="go-language-grid" role="radiogroup" aria-label={t("Website language")}>{availableLanguages.map((lang) => <label className={`go-grade-option ${selectedLanguage === lang.code ? 'is-selected' : ''}`} key={lang.code}><input type="radio" name="onboardingLanguage" value={lang.code} checked={selectedLanguage === lang.code} onChange={() => setSelectedLanguage(lang.code)} required /><span className="go-grade-number">{t(lang.code.toUpperCase())}</span><span lang={lang.code}>{lang.name}</span><CheckCircle className="go-grade-check" size={18} weight="fill" aria-hidden="true" /></label>)}</div><p className="go-grade-note">{t("Your language is saved to your account. You can change it later in Settings.")}</p></>}
+            {needsGrade && <><p className="go-grade-step-label" id="grade-step-label">{t("Which class are you in?")}</p><div className="go-grade-grid" role="radiogroup" aria-labelledby="grade-step-label">{GRADE_CATEGORIES.map((grade) => <label className={`go-grade-option ${selectedGrade === grade ? 'is-selected' : ''}`} key={grade}><input type="radio" name="onboardingGrade" value={grade} checked={selectedGrade === grade} onChange={() => setSelectedGrade(grade)} required /><span className="go-grade-number">{grade === 'student' ? <Sparkle size={26} aria-hidden="true" /> : grade}</span><span>{t(grade === 'student' ? 'University student' : 'Grade ' + grade)}</span><CheckCircle className="go-grade-check" size={18} weight="fill" aria-hidden="true" /></label>)}</div><p className="go-grade-note">{t("Your class is saved to your account. You only need to choose it once.")}</p></>}
 
-            {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder="Your first name" /></div><div className="go-auth-field"><label htmlFor="secondName">Last name</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder="Your last name" /></div></div>}
-            {mainView && <><div className="go-auth-field"><label htmlFor="email">{view === "login" ? "Email or username" : "Email"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder="you@example.com" /></div></div><PasswordField id="password" label={view === "register" ? "New Password" : "Password"} value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "login" && <button type="button" className="go-auth-forgot" onClick={()=>{setPendingEmail(form.email);changeView("forgot-request");}}>Forgot password?</button>}</>}
-            {!mainView && !needsGrade && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{view === "forgot-request" ? "Account email" : "Code sent to"}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={e=>setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder="you@example.com" /></div></div>}
-            {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">Email verification code</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="000000" /></div>}
-            {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label="New password" minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={e=>setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label="Confirm new password" minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={e=>setConfirmNewPassword(e.target.value)} /></>}
-            {view === "register" && <GradePicker value={form.gradeCategory} onChange={gradeCategory=>setForm(prev=>({...prev,gradeCategory}))}/> }
-            <button type="submit" className="go-auth-submit" disabled={disabled || (needsGrade && !selectedGrade)}>{busy ? "Please wait…" : needsGrade ? "Continue to my account" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : (view === "forgot-reset" || view === "activate-account") ? "Save password" : "Verify code"}<ArrowUpRight size={20} aria-hidden="true" /></button>
-            {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code"}</button>}
+            {view === "register" && <div className="go-auth-name-row"><div className="go-auth-field"><label htmlFor="firstName">{t("First name")}</label><input id="firstName" name="firstName" value={form.firstName} onChange={change} required autoComplete="given-name" placeholder={t("Your first name")} /></div><div className="go-auth-field"><label htmlFor="secondName">{t("Last name")}</label><input id="secondName" name="secondName" value={form.secondName} onChange={change} required autoComplete="family-name" placeholder={t("Your last name")} /></div></div>}
+            {mainView && <><div className="go-auth-field"><label htmlFor="email">{t(view === "login" ? "Email or username" : "Email")}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="email" name="email" type={view === "login" ? "text" : "email"} value={form.email} onChange={change} autoComplete="username" required placeholder={t("you@example.com")} /></div></div><PasswordField id="password" label={t(view === "register" ? "New Password" : "Password")} value={form.password} onChange={change} autoComplete={view === "login" ? "current-password" : "new-password"} minLength={view === "login" ? null : 6} />{view === "login" && <button type="button" className="go-auth-forgot" onClick={() => {setPendingEmail(form.email);changeView("forgot-request");}}>{t("Forgot password?")}</button>}</>}
+            {!mainView && !onboarding && view !== "forgot-reset" && view !== "activate-account" && <div className="go-auth-field"><label htmlFor="pendingEmail">{t(view === "forgot-request" ? "Account email" : "Code sent to")}</label><div className="go-auth-input-wrap"><EnvelopeSimple size={19} aria-hidden="true" /><input id="pendingEmail" type="email" value={pendingEmail} onChange={(e) => setPendingEmail(e.target.value)} autoComplete="email" required readOnly={view !== "forgot-request"} placeholder={t("you@example.com")} /></div></div>}
+            {(view === "verify-email" || view === "forgot-verify") && <div className="go-auth-field"><label htmlFor="emailCode">{t("Email verification code")}</label><input className="go-auth-code" id="emailCode" type="text" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder={t("000000")} /></div>}
+            {(view === "forgot-reset" || view === "activate-account") && <><PasswordField id="newPassword" label={t("New password")} minLength={view === "activate-account" ? 8 : 6} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} /><PasswordField id="confirmNewPassword" label={t("Confirm new password")} minLength={view === "activate-account" ? 8 : 6} value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} /></>}
+            {view === "register" && <GradePicker value={form.gradeCategory} onChange={(gradeCategory) => setForm((prev) => ({ ...prev, gradeCategory }))} />}
+            <button type="submit" className="go-auth-submit" disabled={disabled || needsGrade && !selectedGrade || needsLanguage && !selectedLanguage}>{t(busy ? "Please wait…" : needsGrade ? "Continue" : needsLanguage ? "Continue to my account" : view === "login" ? "Sign in" : view === "register" ? "Create account" : view === "forgot-request" ? "Send code" : view === "forgot-reset" || view === "activate-account" ? "Save password" : "Verify code")}<ArrowUpRight size={20} aria-hidden="true" /></button>
+            {(view === "verify-email" || view === "forgot-verify") && <button type="button" className="go-auth-resend" disabled={resendCooldown > 0} onClick={resendCode}>{t(resendCooldown ? `Resend in ${resendCooldown}s` : "Resend code")}</button>}
           </fieldset>
         </form>
-        {!needsGrade && <p className="go-auth-bottom">{mainView ? <>{view === "login" ? "New here?" : "Already have an account?"} <button type="button" disabled={disabled} onClick={()=>changeView(view === "login" ? "register" : "login")}>{view === "login" ? "Sign up" : "Sign in"}</button></> : view === "activate-account" ? "Your temporary password will stop working after this change." : "If the email has not arrived, check your spam folder."}</p>}
-        
+        {!onboarding && <p className="go-auth-bottom">{mainView ? <>{t(view === "login" ? "New here?" : "Already have an account?")} <button type="button" disabled={disabled} onClick={() => changeView(view === "login" ? "register" : "login")}>{t(view === "login" ? "Sign up" : "Sign in")}</button></> : view === "activate-account" ? t("Your temporary password will stop working after this change.") : t("If the email has not arrived, check your spam folder.")}</p>}
+
       </section></div>
     </div>
-    <footer className="go-auth-footer"><span>© {new Date().getFullYear()} Global Olympiad</span><a href="mailto:support@unistem.uz">Need help?<ArrowUpRight size={16} aria-hidden="true" /></a></footer>
+    <footer className="go-auth-footer"><span>© {t(new Date().getFullYear())}{t(" Global Olympiad")}</span><a href="mailto:support@unistem.uz">{t("Need help?")}<ArrowUpRight size={16} aria-hidden="true" /></a></footer>
   </div>;
 }
 
-function GlobeNote() { return <CheckCircle size={17} aria-hidden="true" />; }
-
-
+function GlobeNote() {useLocale();return <CheckCircle size={17} aria-hidden="true" />;}

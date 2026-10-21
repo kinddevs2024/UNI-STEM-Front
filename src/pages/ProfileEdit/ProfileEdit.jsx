@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/api";
@@ -7,7 +7,7 @@ import { getImageUrl } from "../../utils/helpers";
 import NotificationToast from "../../components/NotificationToast";
 import "./ProfileEdit.css";
 
-const ProfileEdit = () => {
+const ProfileEdit = () => {useLocale();
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -27,7 +27,7 @@ const ProfileEdit = () => {
     schoolId: "",
     dateBorn: "",
     gender: "",
-    userLogo: null,
+    userLogo: null
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const ProfileEdit = () => {
         schoolId: user.schoolId || "",
         dateBorn: formatDateForInput(user.dateBorn),
         gender: user.gender || "",
-        userLogo: null,
+        userLogo: null
       });
     }
   }, [user]);
@@ -76,22 +76,22 @@ const ProfileEdit = () => {
     if (e.target.type === "file") {
       setFormData({
         ...formData,
-        [e.target.name]: e.target.files[0] || null,
+        [e.target.name]: e.target.files[0] || null
       });
     } else {
       const newFormData = {
         ...formData,
-        [e.target.name]: e.target.value,
+        [e.target.name]: e.target.value
       };
 
       // Auto-update name field when firstName or secondName changes
       if (e.target.name === "firstName" || e.target.name === "secondName") {
         const firstName =
-          e.target.name === "firstName" ? e.target.value : formData.firstName;
+        e.target.name === "firstName" ? e.target.value : formData.firstName;
         const secondName =
-          e.target.name === "secondName" ? e.target.value : formData.secondName;
+        e.target.name === "secondName" ? e.target.value : formData.secondName;
         newFormData.name =
-          `${firstName || ""} ${secondName || ""}`.trim() || newFormData.name;
+        `${firstName || ""} ${secondName || ""}`.trim() || newFormData.name;
       }
 
       setFormData(newFormData);
@@ -111,19 +111,19 @@ const ProfileEdit = () => {
         try {
           const logoResponse = await authAPI.uploadLogo(formData.userLogo);
           logoUrl =
-            logoResponse.data.logoUrl ||
-            logoResponse.data.url ||
-            logoResponse.data.userLogo;
+          logoResponse.data.logoUrl ||
+          logoResponse.data.url ||
+          logoResponse.data.userLogo;
           setNotification({
             message: "Logo uploaded successfully!",
-            type: "success",
+            type: "success"
           });
         } catch (logoError) {
           setNotification({
             message:
-              logoError.response?.data?.message ||
-              "Failed to upload logo. Please try again.",
-            type: "error",
+            logoError.response?.data?.message ||
+            "Failed to upload logo. Please try again.",
+            type: "error"
           });
           setLoading(false);
           return;
@@ -134,13 +134,13 @@ const ProfileEdit = () => {
       // Backend expects 'name' field, not 'firstName' and 'secondName'
       // Construct name from firstName and secondName if name is empty
       const fullName =
-        formData.name.trim() ||
-        `${formData.firstName || ""} ${formData.secondName || ""}`.trim();
+      formData.name.trim() ||
+      `${formData.firstName || ""} ${formData.secondName || ""}`.trim();
 
       if (!fullName) {
         setNotification({
           message: "Name is required",
-          type: "error",
+          type: "error"
         });
         setLoading(false);
         return;
@@ -157,9 +157,9 @@ const ProfileEdit = () => {
         phone: formData.phone || null,
         address: formData.address || "",
         gender: formData.gender || "",
-        dateBorn: formData.dateBorn
-          ? new Date(formData.dateBorn + "T00:00:00").toISOString()
-          : "",
+        dateBorn: formData.dateBorn ?
+        new Date(formData.dateBorn + "T00:00:00").toISOString() :
+        ""
       };
 
       if (user.role === USER_ROLES.STUDENT) {
@@ -197,7 +197,7 @@ const ProfileEdit = () => {
 
       setNotification({
         message: "Profile updated successfully!",
-        type: "success",
+        type: "success"
       });
 
       setTimeout(() => {
@@ -207,13 +207,13 @@ const ProfileEdit = () => {
       console.error("Profile update error:", error);
       console.error("Error response:", error.response?.data);
       const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to update profile. Please check all required fields.";
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Failed to update profile. Please check all required fields.";
       setNotification({
         message: errorMessage,
-        type: "error",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -228,86 +228,86 @@ const ProfileEdit = () => {
             <div className="loading-spinner"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="profile-edit-page">
       <div className="container">
         <div className="profile-edit-header">
-          <div><p className="go-account-eyebrow">MAKE IT YOURS</p><h1 className="profile-edit-title">Edit <em>Profile</em></h1></div>
+          <div><p className="go-account-eyebrow">{t("MAKE IT YOURS")}</p><h1 className="profile-edit-title">{t("Edit ")}<em>{t("Profile")}</em></h1></div>
           <button
             className="button-secondary"
-            onClick={() => navigate("/profile")}
-          >
-            Cancel
+            onClick={() => navigate("/profile")}>{t("Cancel ")}
+
+
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="profile-edit-form card">
           <div className="form-section">
-            <h3 className="section-title">Profile Picture</h3>
+            <h3 className="section-title">{t("Profile Picture")}</h3>
             <div className="form-group">
-              <label htmlFor="userLogo">Upload Profile Picture</label>
+              <label htmlFor="userLogo">{t("Upload Profile Picture")}</label>
               <input
                 type="file"
                 id="userLogo"
                 name="userLogo"
                 accept="image/*"
                 onChange={handleChange}
-                className="file-input"
-              />
-              {formData.userLogo && (
-                <div className="file-preview">
+                className="file-input" />
+
+              {formData.userLogo &&
+              <div className="file-preview">
                   <img
-                    src={URL.createObjectURL(formData.userLogo)}
-                    alt="Preview"
-                    className="preview-image"
-                  />
+                  src={URL.createObjectURL(formData.userLogo)}
+                  alt={t("Preview")}
+                  className="preview-image" />
+
                 </div>
-              )}
-              {!formData.userLogo && user.userLogo && (
-                <div className="file-preview">
+              }
+              {!formData.userLogo && user.userLogo &&
+              <div className="file-preview">
                   <img
-                    src={getImageUrl(user.userLogo)}
-                    alt="Current"
-                    className="preview-image"
-                  />
-                  <p className="preview-note">Current profile picture</p>
+                  src={getImageUrl(user.userLogo)}
+                  alt={t("Current")}
+                  className="preview-image" />
+
+                  <p className="preview-note">{t("Current profile picture")}</p>
                 </div>
-              )}
+              }
             </div>
           </div>
 
           <div className="form-section">
-            <h3 className="section-title">Personal Information</h3>
+            <h3 className="section-title">{t("Personal Information")}</h3>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="firstName">First Name</label>
+                <label htmlFor="firstName">{t("First Name")}</label>
                 <input
                   type="text"
                   id="firstName"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="Enter your first name"
-                />
+                  placeholder={t("Enter your first name")} />
+
               </div>
               <div className="form-group">
-                <label htmlFor="secondName">Last Name</label>
+                <label htmlFor="secondName">{t("Last Name")}</label>
                 <input
                   type="text"
                   id="secondName"
                   name="secondName"
                   value={formData.secondName}
                   onChange={handleChange}
-                  placeholder="Enter your last name"
-                />
+                  placeholder={t("Enter your last name")} />
+
               </div>
             </div>
             <div className="form-group">
-              <label htmlFor="name">Full Name</label>
+              <label htmlFor="name">{t("Full Name")}</label>
               <input
                 type="text"
                 id="name"
@@ -315,95 +315,95 @@ const ProfileEdit = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Enter your full name"
-              />
+                placeholder={t("Enter your full name")} />
+
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="dateBorn">Date of Birth</label>
+                <label htmlFor="dateBorn">{t("Date of Birth")}</label>
                 <input
                   type="date"
                   id="dateBorn"
                   name="dateBorn"
                   value={formData.dateBorn}
-                  onChange={handleChange}
-                />
+                  onChange={handleChange} />
+
               </div>
               <div className="form-group">
-                <label htmlFor="gender">Gender</label>
+                <label htmlFor="gender">{t("Gender")}</label>
                 <select
                   id="gender"
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className="form-select"
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
+                  className="form-select">
+
+                  <option value="">{t("Select gender")}</option>
+                  <option value="male">{t("Male")}</option>
+                  <option value="female">{t("Female")}</option>
+                  <option value="other">{t("Other")}</option>
+                  <option value="prefer-not-to-say">{t("Prefer not to say")}</option>
                 </select>
               </div>
             </div>
             <div className="form-group">
-              <label htmlFor="address">Address</label>
+              <label htmlFor="address">{t("Address")}</label>
               <textarea
                 id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Enter your address"
-                rows="3"
-              />
+                placeholder={t("Enter your address")}
+                rows="3" />
+
             </div>
           </div>
 
-          {user.role === USER_ROLES.STUDENT && (
-            <div className="form-section">
-              <h3 className="section-title">School Information</h3>
+          {user.role === USER_ROLES.STUDENT &&
+          <div className="form-section">
+              <h3 className="section-title">{t("School Information")}</h3>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="schoolName">School Name</label>
+                  <label htmlFor="schoolName">{t("School Name")}</label>
                   <input
-                    type="text"
-                    id="schoolName"
-                    name="schoolName"
-                    value={formData.schoolName}
-                    onChange={handleChange}
-                    placeholder="Enter your school name"
-                  />
+                  type="text"
+                  id="schoolName"
+                  name="schoolName"
+                  value={formData.schoolName}
+                  onChange={handleChange}
+                  placeholder={t("Enter your school name")} />
+
                 </div>
                 <div className="form-group">
-                  <label htmlFor="schoolId">School ID</label>
+                  <label htmlFor="schoolId">{t("School ID")}</label>
                   <input
-                    type="text"
-                    id="schoolId"
-                    name="schoolId"
-                    value={formData.schoolId}
-                    onChange={handleChange}
-                    placeholder="Enter your school ID"
-                  />
+                  type="text"
+                  id="schoolId"
+                  name="schoolId"
+                  value={formData.schoolId}
+                  onChange={handleChange}
+                  placeholder={t("Enter your school ID")} />
+
                 </div>
               </div>
             </div>
-          )}
+          }
 
           <div className="form-section">
-            <h3 className="section-title">Contact Information</h3>
+            <h3 className="section-title">{t("Contact Information")}</h3>
             <div className="form-group">
-              <label htmlFor="tel">Phone Number</label>
+              <label htmlFor="tel">{t("Phone Number")}</label>
               <input
                 type="tel"
                 id="tel"
                 name="tel"
                 value={formData.tel}
                 onChange={handleChange}
-                placeholder="Enter your phone number"
-              />
+                placeholder={t("Enter your phone number")} />
+
             </div>
             <div className="form-group">
-              <label htmlFor="email">Gmail</label>
+              <label htmlFor="email">{t("Gmail")}</label>
               <input
                 type="email"
                 id="email"
@@ -411,8 +411,8 @@ const ProfileEdit = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="Enter your email"
-              />
+                placeholder={t("Enter your email")} />
+
             </div>
           </div>
 
@@ -420,26 +420,26 @@ const ProfileEdit = () => {
             <button
               type="button"
               className="button-secondary"
-              onClick={() => navigate("/profile")}
-            >
-              Cancel
+              onClick={() => navigate("/profile")}>{t("Cancel ")}
+
+
             </button>
             <button type="submit" className="button-primary" disabled={loading}>
-              {loading ? "Saving..." : "Save Changes"}
+              {t(loading ? "Saving..." : "Save Changes")}
             </button>
           </div>
         </form>
 
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ProfileEdit;

@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+import { t, useLocale } from "../i18n/runtime";import { useEffect, useState } from 'react';
 import './QuestionCard.css';
 
-const QuestionCard = ({ 
-  question, 
-  questionNumber, 
+const QuestionCard = ({
+  question,
+  questionNumber,
   totalQuestions,
   selectedAnswer,
   onAnswerChange,
   disabled = false
-}) => {
+}) => {useLocale();
   const isMultiSelect = Boolean(question?.allowMultipleCorrect);
   const normalizeAnswer = (value) => {
     if (isMultiSelect) {
@@ -42,9 +42,9 @@ const QuestionCard = ({
 
   const handleMultiAnswerToggle = (option) => {
     const currentAnswers = Array.isArray(localAnswer) ? localAnswer : [];
-    const nextAnswers = currentAnswers.includes(option)
-      ? currentAnswers.filter((answer) => answer !== option)
-      : [...currentAnswers, option];
+    const nextAnswers = currentAnswers.includes(option) ?
+    currentAnswers.filter((answer) => answer !== option) :
+    [...currentAnswers, option];
 
     handleAnswerChange(nextAnswers);
   };
@@ -52,59 +52,58 @@ const QuestionCard = ({
   return (
     <div className="question-card card">
       <div className="question-header">
-        <span className="question-number">
-          Question {questionNumber} of {totalQuestions}
+        <span className="question-number">{t("Question ")}
+          {t(questionNumber)}{t(" of ")}{t(totalQuestions)}
         </span>
-        <span className="question-points">{question.points} points</span>
+        <span className="question-points">{question.points}{t(" points")}</span>
       </div>
-      
+
       <div className="question-text">
         {question.question || question.questionText}
       </div>
 
-      {question.type === 'multiple-choice' && question.options ? (
-        <div className="question-options">
-          {question.options.map((option, index) => (
-            <label 
-              key={index} 
-              className={`option-label ${isMultiSelect ? (Array.isArray(localAnswer) && localAnswer.includes(option) ? 'selected' : '') : (localAnswer === option ? 'selected' : '')}`}
-            >
-              {isMultiSelect ? (
-                <input
-                  type="checkbox"
-                  name={`question-${question._id}-${index}`}
-                  value={option}
-                  checked={Array.isArray(localAnswer) && localAnswer.includes(option)}
-                  onChange={() => handleMultiAnswerToggle(option)}
-                  disabled={disabled}
-                />
-              ) : (
-                <input
-                  type="radio"
-                  name={`question-${question._id}`}
-                  value={option}
-                  checked={localAnswer === option}
-                  onChange={(e) => handleAnswerChange(e.target.value)}
-                  disabled={disabled}
-                />
-              )}
-              <span className="option-text">{option}</span>
+      {question.type === 'multiple-choice' && question.options ?
+      <div className="question-options">
+          {question.options.map((option, index) =>
+        <label
+          key={index}
+          className={`option-label ${isMultiSelect ? Array.isArray(localAnswer) && localAnswer.includes(option) ? 'selected' : '' : localAnswer === option ? 'selected' : ''}`}>
+
+              {isMultiSelect ?
+          <input
+            type="checkbox"
+            name={`question-${question._id}-${index}`}
+            value={option}
+            checked={Array.isArray(localAnswer) && localAnswer.includes(option)}
+            onChange={() => handleMultiAnswerToggle(option)}
+            disabled={disabled} /> :
+
+
+          <input
+            type="radio"
+            name={`question-${question._id}`}
+            value={option}
+            checked={localAnswer === option}
+            onChange={(e) => handleAnswerChange(e.target.value)}
+            disabled={disabled} />
+
+          }
+              <span className="option-text">{t(option)}</span>
             </label>
-          ))}
-        </div>
-      ) : (
-        <textarea
-          className="question-essay-input"
-          value={localAnswer}
-          onChange={(e) => handleAnswerChange(e.target.value)}
-          placeholder="Type your answer here..."
-          disabled={disabled}
-          rows={10}
-        />
-      )}
-    </div>
-  );
+        )}
+        </div> :
+
+      <textarea
+        className="question-essay-input"
+        value={localAnswer}
+        onChange={(e) => handleAnswerChange(e.target.value)}
+        placeholder={t("Type your answer here...")}
+        disabled={disabled}
+        rows={10} />
+
+      }
+    </div>);
+
 };
 
 export default QuestionCard;
-

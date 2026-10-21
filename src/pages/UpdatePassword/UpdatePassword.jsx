@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NotificationToast from "../../components/NotificationToast";
 import { authAPI } from "../../services/api";
 import "./UpdatePassword.css";
 
-const UpdatePassword = () => {
+const UpdatePassword = () => {useLocale();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const UpdatePassword = () => {
     if (!email || !token) {
       setNotification({
         message: "Missing email or token. Please use the link from your email.",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -32,7 +32,7 @@ const UpdatePassword = () => {
     if (password.length < 6) {
       setNotification({
         message: "Password must be at least 6 characters",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -47,28 +47,28 @@ const UpdatePassword = () => {
       const response = await authAPI.setPassword({
         email,
         token,
-        password,
+        password
       });
 
       if (response.data?.success) {
         setDone(true);
         setNotification({
           message: "Account confirmed. Password set successfully. You can sign in now.",
-          type: "success",
+          type: "success"
         });
       } else {
         setNotification({
           message: response.data?.message || "Failed to set password",
-          type: "error",
+          type: "error"
         });
       }
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        (error.code === "ERR_NETWORK"
-          ? "Connection failed. Please try again."
-          : "Failed to set password");
+      error.response?.data?.message ||
+      error.message || (
+      error.code === "ERR_NETWORK" ?
+      "Connection failed. Please try again." :
+      "Failed to set password");
       setNotification({ message: errorMessage, type: "error" });
     } finally {
       setLoading(false);
@@ -80,28 +80,28 @@ const UpdatePassword = () => {
       <div className="update-password-container">
         <div className="update-password-card card">
           <div className="update-password-header">
-            <p className="go-account-eyebrow">A FRESH START</p>
-            <h1 className="update-password-title">Confirm Account &amp; <em>Set Password</em></h1>
-            <p className="update-password-subtitle">
-              Confirm your account and create a new password to access it.
+            <p className="go-account-eyebrow">{t("A FRESH START")}</p>
+            <h1 className="update-password-title">{t("Confirm Account & ")}<em>{t("Set Password")}</em></h1>
+            <p className="update-password-subtitle">{t("Confirm your account and create a new password to access it. ")}
+
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="update-password-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t("Email")}</label>
               <input
                 type="email"
                 id="email"
                 value={email}
                 autoComplete="email"
                 disabled
-                readOnly
-              />
+                readOnly />
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">New Password</label>
+              <label htmlFor="password">{t("New Password")}</label>
               <input
                 type="password"
                 id="password"
@@ -109,12 +109,12 @@ const UpdatePassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
                 required
-                placeholder="Enter new password"
-              />
+                placeholder={t("Enter new password")} />
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
+              <label htmlFor="confirmPassword">{t("Confirm Password")}</label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -122,39 +122,39 @@ const UpdatePassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
                 required
-                placeholder="Confirm new password"
-              />
+                placeholder={t("Confirm new password")} />
+
             </div>
 
             <div className="update-password-actions">
               <button
                 type="submit"
                 className="button-primary"
-                disabled={loading || done}
-              >
-                {loading ? "Saving..." : "Set Password"}
+                disabled={loading || done}>
+
+                {t(loading ? "Saving..." : "Set Password")}
               </button>
               <button
                 type="button"
                 className="button-secondary"
-                onClick={() => navigate("/auth")}
-              >
-                Back to Sign In
+                onClick={() => navigate("/auth")}>{t("Back to Sign In ")}
+
+
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      {notification && (
-        <NotificationToast
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-    </div>
-  );
+      {notification &&
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification(null)} />
+
+      }
+    </div>);
+
 };
 
 export default UpdatePassword;

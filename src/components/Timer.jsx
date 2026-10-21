@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { t, useLocale } from "../i18n/runtime";import { useState, useEffect } from 'react';
 import { formatTime } from '../utils/helpers';
 import { TIMER_WARNING_THRESHOLD, TIMER_DANGER_THRESHOLD } from '../utils/constants';
 import './Timer.css';
 
-const Timer = ({ initialSeconds, onExpire, className = '' }) => {
+const Timer = ({ initialSeconds, onExpire, className = '' }) => {useLocale();
   const [seconds, setSeconds] = useState(initialSeconds);
   const [isExpired, setIsExpired] = useState(false);
 
@@ -46,12 +46,11 @@ const Timer = ({ initialSeconds, onExpire, className = '' }) => {
 
   return (
     <div className={`timer ${getTimerClass()} ${className}`}>
-      <div className="timer-label">Time Remaining</div>
-      <div className="timer-display">{formatTime(seconds)}</div>
-      {isExpired && <div className="timer-expired-message">Time's Up!</div>}
-    </div>
-  );
+      <div className="timer-label">{t("Time Remaining")}</div>
+      <div className="timer-display">{t(formatTime(seconds))}</div>
+      {isExpired && <div className="timer-expired-message">{t("Time's Up!")}</div>}
+    </div>);
+
 };
 
 export default Timer;
-

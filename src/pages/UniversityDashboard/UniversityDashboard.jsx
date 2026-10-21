@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useCallback } from "react";
 import { universityAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import NotificationToast from "../../components/NotificationToast";
@@ -8,7 +8,7 @@ import "../AdminPanel/AdminPanel.css";
 import "./UniversityDashboard.css";
 import "../AdminPanel/PanelRedesign.css";
 
-const UniversityDashboard = () => {
+const UniversityDashboard = () => {useLocale();
   const { user } = useAuth();
 
   // Olympiad state
@@ -28,7 +28,7 @@ const UniversityDashboard = () => {
     duration: 60,
     status: "draft",
     olympiadLogo: null,
-    universityName: "",
+    universityName: ""
   });
 
   const [notification, setNotification] = useState(null);
@@ -43,7 +43,7 @@ const UniversityDashboard = () => {
       console.error("Error fetching olympiads:", error);
       setNotification({
         message: "Failed to load olympiads. Please try again later.",
-        type: "error",
+        type: "error"
       });
     } finally {
       setOlympiadsLoading(false);
@@ -65,7 +65,7 @@ const UniversityDashboard = () => {
     if (!formData.title || !formData.title.trim()) {
       setNotification({
         message: "Please provide a title for the olympiad",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -73,7 +73,7 @@ const UniversityDashboard = () => {
     if (!formData.type) {
       setNotification({
         message: "Please select an olympiad type",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -94,7 +94,7 @@ const UniversityDashboard = () => {
         endTime: formatDateTime(formData.endTime),
         duration: (Number(formData.duration) || 60) * 60,
         status: formData.status,
-        universityName: formData.universityName,
+        universityName: formData.universityName
       };
 
       const response = await universityAPI.createOlympiad(olympiadData);
@@ -118,20 +118,20 @@ const UniversityDashboard = () => {
         setCurrentStep(3);
         setNotification({
           message: "Olympiad created! Now add questions.",
-          type: "success",
+          type: "success"
         });
       } else {
         setNotification({
           message:
-            "Olympiad created but ID not received. Please refresh and try again.",
-          type: "error",
+          "Olympiad created but ID not received. Please refresh and try again.",
+          type: "error"
         });
       }
     } catch (error) {
       console.error("Error creating olympiad:", error);
       setNotification({
         message: "Failed to create olympiad. Please try again.",
-        type: "error",
+        type: "error"
       });
     } finally {
       setOlympiadsLoading(false);
@@ -142,7 +142,7 @@ const UniversityDashboard = () => {
     if (!createdOlympiadId) {
       setNotification({
         message: "Olympiad ID not found. Please refresh and try again.",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -150,7 +150,7 @@ const UniversityDashboard = () => {
     try {
       const questionWithOlympiad = {
         ...questionData,
-        olympiadId: createdOlympiadId,
+        olympiadId: createdOlympiadId
       };
       await universityAPI.addQuestion(questionWithOlympiad);
       setQuestions([...questions, questionData]);
@@ -158,7 +158,7 @@ const UniversityDashboard = () => {
       console.error("Error adding question:", error);
       setNotification({
         message: "Failed to add question",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -166,7 +166,7 @@ const UniversityDashboard = () => {
   const handleFinish = () => {
     setNotification({
       message: "Olympiad created successfully with questions!",
-      type: "success",
+      type: "success"
     });
     setShowCreateForm(false);
     setCurrentStep(1);
@@ -182,7 +182,7 @@ const UniversityDashboard = () => {
       duration: 60,
       status: "draft",
       olympiadLogo: null,
-      universityName: "",
+      universityName: ""
     });
     fetchOlympiads();
   };
@@ -191,15 +191,15 @@ const UniversityDashboard = () => {
     <div className="university-dashboard-page page-container brand-panel" data-brand-panel="university-dashboard">
       <div>
         <div className="university-header">
-          <h1 className="university-title text-glow">University Dashboard</h1>
-          <p className="university-subtitle">
-            Create and manage olympiads
+          <h1 className="university-title text-glow">{t("University Dashboard")}</h1>
+          <p className="university-subtitle">{t("Create and manage olympiads ")}
+
           </p>
         </div>
 
         {/* Olympiad Management */}
         <div className="university-header-actions">
-          <h2>Olympiad Management</h2>
+          <h2>{t("Olympiad Management")}</h2>
           <button
             className="button-primary"
             onClick={() => {
@@ -218,399 +218,399 @@ const UniversityDashboard = () => {
                   duration: 60,
                   status: "draft",
                   olympiadLogo: null,
-                  universityName: "",
+                  universityName: ""
                 });
               }
-            }}
-          >
-            {showCreateForm ? "Cancel" : "+ Create Olympiad"}
+            }}>
+
+            {t(showCreateForm ? "Cancel" : "+ Create Olympiad")}
           </button>
         </div>
 
-        {showCreateForm && (
-          <div className="create-form card">
+        {showCreateForm &&
+        <div className="create-form card">
             {/* Step Indicator */}
             <div className="step-indicator">
               <div
-                className={`step ${currentStep >= 1 ? "active" : ""} ${
-                  currentStep > 1 ? "completed" : ""
-                }`}
-              >
+              className={`step ${currentStep >= 1 ? "active" : ""} ${
+              currentStep > 1 ? "completed" : ""}`
+              }>
+
                 <span className="step-number">1</span>
-                <span className="step-label">Choose Type</span>
+                <span className="step-label">{t("Choose Type")}</span>
               </div>
               <div
-                className={`step ${currentStep >= 2 ? "active" : ""} ${
-                  currentStep > 2 ? "completed" : ""
-                }`}
-              >
+              className={`step ${currentStep >= 2 ? "active" : ""} ${
+              currentStep > 2 ? "completed" : ""}`
+              }>
+
                 <span className="step-number">2</span>
-                <span className="step-label">Basic Info</span>
+                <span className="step-label">{t("Basic Info")}</span>
               </div>
               <div className={`step ${currentStep >= 3 ? "active" : ""}`}>
                 <span className="step-number">3</span>
-                <span className="step-label">Add Questions</span>
+                <span className="step-label">{t("Add Questions")}</span>
               </div>
             </div>
 
             {/* Step 1: Choose Type */}
-            {currentStep === 1 && (
-              <div className="step-content">
-                <h2>Step 1: Choose Olympiad Type</h2>
-                <p className="step-description">
-                  Select the type of olympiad you want to create
-                </p>
+            {currentStep === 1 &&
+          <div className="step-content">
+                <h2>{t("Step 1: Choose Olympiad Type")}</h2>
+                <p className="step-description">{t("Select the type of olympiad you want to create ")}
+
+            </p>
                 <div className="type-selection">
                   <button
-                    type="button"
-                    className={`type-card ${
-                      formData.type === "test" ? "selected" : ""
-                    }`}
-                    onClick={() => handleTypeSelect("test")}
-                  >
+                type="button"
+                className={`type-card ${
+                formData.type === "test" ? "selected" : ""}`
+                }
+                onClick={() => handleTypeSelect("test")}>
+
                     <div className="type-icon">📝</div>
-                    <h3>Test</h3>
-                    <p>Multiple choice questions with automatic grading</p>
+                    <h3>{t("Test")}</h3>
+                    <p>{t("Multiple choice questions with automatic grading")}</p>
                   </button>
                   <button
-                    type="button"
-                    className={`type-card ${
-                      formData.type === "essay" ? "selected" : ""
-                    }`}
-                    onClick={() => handleTypeSelect("essay")}
-                  >
+                type="button"
+                className={`type-card ${
+                formData.type === "essay" ? "selected" : ""}`
+                }
+                onClick={() => handleTypeSelect("essay")}>
+
                     <div className="type-icon">✍️</div>
-                    <h3>Essay</h3>
-                    <p>Essay questions requiring manual grading</p>
+                    <h3>{t("Essay")}</h3>
+                    <p>{t("Essay questions requiring manual grading")}</p>
                   </button>
                 </div>
               </div>
-            )}
+          }
 
             {/* Step 2: Basic Info */}
-            {currentStep === 2 && (
-              <div className="step-content">
-                <h2>Step 2: Basic Information</h2>
-                <p className="step-description">
-                  Fill in the olympiad details
-                </p>
+            {currentStep === 2 &&
+          <div className="step-content">
+                <h2>{t("Step 2: Basic Information")}</h2>
+                <p className="step-description">{t("Fill in the olympiad details ")}
+
+            </p>
                 <form onSubmit={handleCreateOlympiad}>
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Title</label>
+                      <label>{t("Title")}</label>
                       <input
-                        type="text"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            title: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., Math Olympiad 2025"
-                        required
-                      />
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      title: e.target.value
+                    })
+                    }
+                    placeholder={t("e.g., Math Olympiad 2025")}
+                    required />
+
                     </div>
                     <div className="form-group">
-                      <label>Subject</label>
+                      <label>{t("Subject")}</label>
                       <select
-                        value={formData.subject}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subject: e.target.value,
-                          })
-                        }
-                        required
-                      >
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="English">English</option>
-                        <option value="Science">Science</option>
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
+                    value={formData.subject}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      subject: e.target.value
+                    })
+                    }
+                    required>
+
+                        <option value="Mathematics">{t("Mathematics")}</option>
+                        <option value="English">{t("English")}</option>
+                        <option value="Science">{t("Science")}</option>
+                        <option value="Physics">{t("Physics")}</option>
+                        <option value="Chemistry">{t("Chemistry")}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Description</label>
+                    <label>{t("Description")}</label>
                     <textarea
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Describe the olympiad..."
-                      rows="4"
-                    />
+                  value={formData.description}
+                  onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    description: e.target.value
+                  })
+                  }
+                  placeholder={t("Describe the olympiad...")}
+                  rows="4" />
+
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Start Time</label>
+                      <label>{t("Start Time")}</label>
                       <input
-                        type="datetime-local"
-                        value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>End Time</label>
-                      <input
-                        type="datetime-local"
-                        value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            endTime: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      startTime: e.target.value
+                    })
+                    } />
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>University Name</label>
-                      <input
-                        type="text"
-                        value={formData.universityName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            universityName: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., Harvard University"
-                        required
-                      />
                     </div>
                     <div className="form-group">
-                      <label>Duration (minutes)</label>
+                      <label>{t("End Time")}</label>
                       <input
-                        type="number"
-                        value={formData.duration}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            duration: Number(e.target.value) || 60,
-                          })
-                        }
-                        min="1"
-                        required
-                      />
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      endTime: e.target.value
+                    })
+                    } />
+
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Status</label>
+                      <label>{t("University Name")}</label>
+                      <input
+                    type="text"
+                    value={formData.universityName}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      universityName: e.target.value
+                    })
+                    }
+                    placeholder={t("e.g., Harvard University")}
+                    required />
+
+                    </div>
+                    <div className="form-group">
+                      <label>{t("Duration (minutes)")}</label>
+                      <input
+                    type="number"
+                    value={formData.duration}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      duration: Number(e.target.value) || 60
+                    })
+                    }
+                    min="1"
+                    required />
+
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>{t("Status")}</label>
                       <select
-                        value={formData.status}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            status: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="published">Published</option>
-                        <option value="unpublished">Unpublished</option>
+                    value={formData.status}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value
+                    })
+                    }>
+
+                        <option value="draft">{t("Draft")}</option>
+                        <option value="published">{t("Published")}</option>
+                        <option value="unpublished">{t("Unpublished")}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Olympiad Logo (optional)</label>
+                    <label>{t("Olympiad Logo (optional)")}</label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          olympiadLogo: e.target.files[0] || null,
-                        })
-                      }
-                    />
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    olympiadLogo: e.target.files[0] || null
+                  })
+                  } />
+
                   </div>
 
                   <div className="form-actions">
                     <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={() => setCurrentStep(1)}
-                    >
-                      Back
-                    </button>
-                    <button type="submit" className="button-primary">
-                      Create & Add Questions
-                    </button>
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => setCurrentStep(1)}>{t("Back ")}
+
+
+                </button>
+                    <button type="submit" className="button-primary">{t("Create & Add Questions ")}
+
+                </button>
                   </div>
                 </form>
               </div>
-            )}
+          }
 
             {/* Step 3: Add Questions */}
-            {currentStep === 3 && (
-              <div className="step-content">
-                <h2>Step 3: Add Questions</h2>
-                <p className="step-description">
-                  Add questions to your{" "}
-                  {formData.type === "test" ? "test" : "essay"} olympiad
-                </p>
+            {currentStep === 3 &&
+          <div className="step-content">
+                <h2>{t("Step 3: Add Questions")}</h2>
+                <p className="step-description">{t("Add questions to your")}
+              {t(" ")}
+                  {t(formData.type === "test" ? "test" : "essay")}{t(" olympiad ")}
+            </p>
 
-                {(questions || []).length > 0 && (
-                  <div className="questions-list">
-                    <h3>Added Questions ({(questions || []).length})</h3>
-                    {(questions || []).map((q, index) => (
-                      <div key={index} className="question-item card">
+                {(questions || []).length > 0 &&
+            <div className="questions-list">
+                    <h3>{t("Added Questions (")}{t((questions || []).length)})</h3>
+                    {(questions || []).map((q, index) =>
+              <div key={index} className="question-item card">
                         <div className="question-header">
-                          <span className="question-number">
-                            Q{index + 1}
+                          <span className="question-number">{t("Q")}
+                    {t(index + 1)}
                           </span>
                           <span className="question-points">
-                            {Number(q?.points) || 0} pts
-                          </span>
+                            {t(Number(q?.points) || 0)}{t(" pts ")}
+                  </span>
                         </div>
                         <p className="question-text">{q.question}</p>
-                        {q.type === "multiple-choice" && q.options && (
-                          <div className="question-options">
-                            {(q.options || []).map((opt, optIndex) => (
-                              (() => {
-                                const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0
-                                  ? q.correctAnswers
-                                  : q.correctAnswer
-                                    ? [q.correctAnswer]
-                                    : [];
-                                const isCorrect = correctList.includes(opt);
-                                return (
-                              <div
-                                key={optIndex}
-                                className={`option ${isCorrect ? "correct" : ""}`}
-                              >
-                                {String.fromCharCode(65 + optIndex)}. {opt}
-                              </div>
-                                );
-                              })()
-                            ))}
+                        {q.type === "multiple-choice" && q.options &&
+                <div className="question-options">
+                            {(q.options || []).map((opt, optIndex) =>
+                  (() => {
+                    const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0 ?
+                    q.correctAnswers :
+                    q.correctAnswer ?
+                    [q.correctAnswer] :
+                    [];
+                    const isCorrect = correctList.includes(opt);
+                    return (
+                      <div
+                        key={optIndex}
+                        className={`option ${isCorrect ? "correct" : ""}`}>
+
+                                {t(String.fromCharCode(65 + optIndex))}. {t(opt)}
+                              </div>);
+
+                  })()
+                  )}
                           </div>
-                        )}
+                }
                       </div>
-                    ))}
+              )}
                   </div>
-                )}
+            }
 
                 <QuestionFormStep
-                  olympiadId={createdOlympiadId}
-                  olympiadType={formData.type}
-                  questions={questions}
-                  onAddQuestion={handleAddQuestion}
-                  onFinish={handleFinish}
-                  onBack={() => setCurrentStep(2)}
-                />
+              olympiadId={createdOlympiadId}
+              olympiadType={formData.type}
+              questions={questions}
+              onAddQuestion={handleAddQuestion}
+              onFinish={handleFinish}
+              onBack={() => setCurrentStep(2)} />
+
               </div>
-            )}
+          }
           </div>
-        )}
+        }
 
         {/* Olympiads List */}
-        {olympiadsLoading ? (
-          <div className="university-loading">
+        {olympiadsLoading ?
+        <div className="university-loading">
             <div className="loading-spinner"></div>
-          </div>
-        ) : (
-          <div className="olympiads-grid">
-            {Array.isArray(olympiads) && olympiads.length > 0
-              ? (olympiads || []).map((olympiad) => (
-                  <div
-                    key={olympiad._id}
-                    className="olympiad-card card card-interactive"
-                  >
+          </div> :
+
+        <div className="olympiads-grid">
+            {Array.isArray(olympiads) && olympiads.length > 0 ?
+          (olympiads || []).map((olympiad) =>
+          <div
+            key={olympiad._id}
+            className="olympiad-card card card-interactive">
+
                     <div className="olympiad-card-header">
                       <div className="olympiad-title">{olympiad.title}</div>
                       <span
-                        className={`status-badge status-${
-                          olympiad.status || "draft"
-                        }`}
-                      >
-                        {olympiad.status || "draft"}
+                className={`status-badge status-${
+                olympiad.status || "draft"}`
+                }>
+
+                        {olympiad.status || t("draft")}
                       </span>
                     </div>
                     <div className="olympiad-meta">
-                      {olympiad.universityName && (
-                        <div className="olympiad-meta-item">
-                          <span className="meta-label">University:</span>
+                      {olympiad.universityName &&
+              <div className="olympiad-meta-item">
+                          <span className="meta-label">{t("University:")}</span>
                           <span className="meta-value">
                             {olympiad.universityName}
                           </span>
                         </div>
-                      )}
+              }
                       <div className="olympiad-meta-item">
-                        <span className="meta-label">Subject:</span>
+                        <span className="meta-label">{t("Subject:")}</span>
                         <span className="meta-value">
-                          {olympiad.subject}
+                          {t(olympiad.subject)}
                         </span>
                       </div>
                       <div className="olympiad-meta-item">
-                        <span className="meta-label">Type:</span>
-                        <span className="meta-value">{olympiad.type}</span>
+                        <span className="meta-label">{t("Type:")}</span>
+                        <span className="meta-value">{t(olympiad.type)}</span>
                       </div>
-                      {olympiad.startTime && (
-                        <div className="olympiad-meta-item">
-                          <span className="meta-label">Start:</span>
+                      {olympiad.startTime &&
+              <div className="olympiad-meta-item">
+                          <span className="meta-label">{t("Start:")}</span>
                           <span className="meta-value">
-                            {formatDate(olympiad.startTime)}
+                            {t(formatDate(olympiad.startTime))}
                           </span>
                         </div>
-                      )}
+              }
                     </div>
                     <div className="olympiad-card-actions">
                       <a
-                        href={`/olympiad/${olympiad._id}`}
-                        className="button-secondary"
-                      >
-                        View Details
-                      </a>
+                href={`/olympiad/${olympiad._id}`}
+                className="button-secondary">{t("View Details ")}
+
+
+              </a>
                       <a
-                        href={`/olympiad/${olympiad._id}/results`}
-                        className="button-primary"
-                      >
-                        View Results
-                      </a>
+                href={`/olympiad/${olympiad._id}/results`}
+                className="button-primary">{t("View Results ")}
+
+
+              </a>
                     </div>
                   </div>
-                ))
-              : null}
+          ) :
+          null}
             {(!Array.isArray(olympiads) || olympiads.length === 0) &&
-              !olympiadsLoading && (
-                <div className="empty-state">
+          !olympiadsLoading &&
+          <div className="empty-state">
                   <div className="empty-icon">🏆</div>
-                  <h3>No olympiads yet</h3>
-                  <p>Create your first olympiad to get started.</p>
+                  <h3>{t("No olympiads yet")}</h3>
+                  <p>{t("Create your first olympiad to get started.")}</p>
                 </div>
-              )}
+          }
           </div>
-        )}
+        }
 
         {/* Notification Toast */}
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default UniversityDashboard;

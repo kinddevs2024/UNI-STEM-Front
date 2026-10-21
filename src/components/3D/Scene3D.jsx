@@ -1,4 +1,4 @@
-import { Canvas } from "@react-three/fiber";
+import { t, useLocale } from "../../i18n/runtime";import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useTheme } from "../../context/ThemeContext";
 import { useEffect, useState } from "react";
@@ -8,15 +8,15 @@ import ChemistryScene from "./ChemistryScene";
 import EnglishScene from "./EnglishScene";
 import ScienceScene from "./ScienceScene";
 
-const Scene3D = ({ subject = "math" }) => {
+const Scene3D = ({ subject = "math" }) => {useLocale();
   const { currentTheme, customTheme } = useTheme();
   const [themeColors, setThemeColors] = useState({
     primary: '#216E1A',
     secondary: '#3B6F2F',
     accent: '#43A806',
-    bg: '#FFFFFF',
+    bg: '#FFFFFF'
   });
-  
+
   // Get theme colors from CSS variables (they're set by ThemeContext)
   useEffect(() => {
     const updateColors = () => {
@@ -25,7 +25,7 @@ const Scene3D = ({ subject = "math" }) => {
         primary: getComputedStyle(root).getPropertyValue('--text-primary').trim() || '#216E1A',
         secondary: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#3B6F2F',
         accent: getComputedStyle(root).getPropertyValue('--accent').trim() || '#43A806',
-        bg: getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#FFFFFF',
+        bg: getComputedStyle(root).getPropertyValue('--bg-primary').trim() || '#FFFFFF'
       });
     };
 
@@ -36,7 +36,7 @@ const Scene3D = ({ subject = "math" }) => {
     const observer = new MutationObserver(updateColors);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['style'],
+      attributeFilter: ['style']
     });
 
     return () => observer.disconnect();
@@ -64,25 +64,22 @@ const Scene3D = ({ subject = "math" }) => {
     <Canvas
       style={{
         width: "100%",
-        height: "100%",
+        height: "100%"
       }}
       camera={{ position: [0, 0, 5], fov: 50 }}
-      gl={{ antialias: true, alpha: true }}
-    >
+      gl={{ antialias: true, alpha: true }}>
+
       <OrbitControls
         enableZoom={false}
         enablePan={false}
         autoRotate
         autoRotateSpeed={0.5}
         minPolarAngle={Math.PI / 3}
-        maxPolarAngle={Math.PI / 2.2}
-      />
-      {getScene()}
-    </Canvas>
-  );
+        maxPolarAngle={Math.PI / 2.2} />
+
+      {t(getScene())}
+    </Canvas>);
+
 };
 
 export default Scene3D;
-
-
-

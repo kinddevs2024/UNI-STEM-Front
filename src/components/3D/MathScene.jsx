@@ -1,9 +1,9 @@
-import { useRef } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text, Box, Torus, Sphere } from "@react-three/drei";
 import * as THREE from "three";
 
-const RotatingShape = ({ position, shape, color }) => {
+const RotatingShape = ({ position, shape, color }) => {useLocale();
   const meshRef = useRef();
 
   useFrame((state) => {
@@ -11,53 +11,53 @@ const RotatingShape = ({ position, shape, color }) => {
       meshRef.current.rotation.x += 0.01;
       meshRef.current.rotation.y += 0.01;
       meshRef.current.position.y =
-        position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.2;
+      position[1] + Math.sin(state.clock.elapsedTime + position[0]) * 0.2;
     }
   });
 
   return (
     <group ref={meshRef} position={position}>
-      {shape === "box" && (
-        <Box args={[0.5, 0.5, 0.5]}>
+      {shape === "box" &&
+      <Box args={[0.5, 0.5, 0.5]}>
           <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-          />
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.3} />
+
         </Box>
-      )}
-      {shape === "torus" && (
-        <Torus args={[0.3, 0.1, 16, 32]}>
+      }
+      {shape === "torus" &&
+      <Torus args={[0.3, 0.1, 16, 32]}>
           <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-          />
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.3} />
+
         </Torus>
-      )}
-      {shape === "sphere" && (
-        <Sphere args={[0.3, 32, 32]}>
+      }
+      {shape === "sphere" &&
+      <Sphere args={[0.3, 32, 32]}>
           <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={0.3}
-          />
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.3} />
+
         </Sphere>
-      )}
-    </group>
-  );
+      }
+    </group>);
+
 };
 
-const FloatingFormula = ({ position, formula, color, outlineColor }) => {
+const FloatingFormula = ({ position, formula, color, outlineColor }) => {useLocale();
   const textRef = useRef();
 
   useFrame((state) => {
     if (textRef.current) {
       textRef.current.position.y =
-        position[1] +
-        Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.3;
+      position[1] +
+      Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.3;
       textRef.current.rotation.y =
-        Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+      Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
     }
   });
 
@@ -70,14 +70,14 @@ const FloatingFormula = ({ position, formula, color, outlineColor }) => {
       anchorX="center"
       anchorY="middle"
       outlineWidth={0.02}
-      outlineColor={outlineColor}
-    >
-      {formula}
-    </Text>
-  );
+      outlineColor={outlineColor}>
+
+      {t(formula)}
+    </Text>);
+
 };
 
-export default function MathScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+export default function MathScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {useLocale();
   const primaryColor = colors.primary || '#216E1A';
   const accentColor = colors.accent || '#43A806';
   const outlineColor = colors.bg === '#FFFFFF' || colors.bg === '#ffffff' ? '#000000' : '#FFFFFF';
@@ -95,15 +95,12 @@ export default function MathScene({ colors = { primary: '#216E1A', secondary: '#
       <RotatingShape
         position={[1.5, 1.5, -0.5]}
         shape="torus"
-        color={accentColor}
-      />
+        color={accentColor} />
+
 
       <FloatingFormula position={[-1, 2, 0]} formula="∫" color={primaryColor} outlineColor={outlineColor} />
       <FloatingFormula position={[1, -2, 0]} formula="∑" color={accentColor} outlineColor={outlineColor} />
       <FloatingFormula position={[0, 0, 2]} formula="π" color={primaryColor} outlineColor={outlineColor} />
-    </>
-  );
+    </>);
+
 }
-
-
-

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState } from "react";
 import "./QuestionFormStep.css";
 
 // Question Form Component for Step 3
@@ -10,8 +10,8 @@ const QuestionFormStep = ({
   onUpdateQuestion,
   onDeleteQuestion,
   onFinish,
-  onBack,
-}) => {
+  onBack
+}) => {useLocale();
   const [questionForm, setQuestionForm] = useState({
     question: "",
     type: olympiadType === "test" ? "multiple-choice" : "essay",
@@ -19,16 +19,16 @@ const QuestionFormStep = ({
     correctAnswer: "",
     correctAnswers: [],
     allowMultipleCorrect: false,
-    points: 10,
+    points: 10
   });
   const [editingQuestionId, setEditingQuestionId] = useState(null);
 
   const getQuestionCorrectAnswers = (question) => {
-    const fromArray = Array.isArray(question?.correctAnswers)
-      ? question.correctAnswers.filter((answer) =>
-          (Array.isArray(question?.options) ? question.options : []).includes(answer)
-        )
-      : [];
+    const fromArray = Array.isArray(question?.correctAnswers) ?
+    question.correctAnswers.filter((answer) =>
+    (Array.isArray(question?.options) ? question.options : []).includes(answer)
+    ) :
+    [];
 
     if (fromArray.length > 0) return [...new Set(fromArray)];
     if (typeof question?.correctAnswer === "string" && question.correctAnswer.trim() !== "") {
@@ -52,13 +52,13 @@ const QuestionFormStep = ({
         return;
       }
 
-      const selectedCorrectAnswers = questionForm.allowMultipleCorrect
-        ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).filter((answer) =>
-            validOptions.includes(answer)
-          )
-        : (typeof questionForm.correctAnswer === "string" && validOptions.includes(questionForm.correctAnswer)
-            ? [questionForm.correctAnswer]
-            : []);
+      const selectedCorrectAnswers = questionForm.allowMultipleCorrect ?
+      (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).filter((answer) =>
+      validOptions.includes(answer)
+      ) :
+      typeof questionForm.correctAnswer === "string" && validOptions.includes(questionForm.correctAnswer) ?
+      [questionForm.correctAnswer] :
+      [];
 
       if (selectedCorrectAnswers.length === 0) {
         return;
@@ -71,7 +71,7 @@ const QuestionFormStep = ({
         correctAnswer: selectedCorrectAnswers[0],
         correctAnswers: selectedCorrectAnswers,
         allowMultipleCorrect: Boolean(questionForm.allowMultipleCorrect),
-        points: questionForm.points,
+        points: questionForm.points
       };
 
       if (isEditing && onUpdateQuestion) {
@@ -88,7 +88,7 @@ const QuestionFormStep = ({
       const payload = {
         question: questionForm.question,
         type: "essay",
-        points: questionForm.points,
+        points: questionForm.points
       };
 
       if (isEditing && onUpdateQuestion) {
@@ -106,15 +106,15 @@ const QuestionFormStep = ({
       correctAnswer: "",
       correctAnswers: [],
       allowMultipleCorrect: false,
-      points: 10,
+      points: 10
     });
     setEditingQuestionId(null);
   };
 
   const handleEditQuestion = (question) => {
-    const normalizedOptions = Array.isArray(question?.options)
-      ? question.options
-      : [];
+    const normalizedOptions = Array.isArray(question?.options) ?
+    question.options :
+    [];
     const paddedOptions = [...normalizedOptions];
     while (paddedOptions.length < 4) {
       paddedOptions.push("");
@@ -129,7 +129,7 @@ const QuestionFormStep = ({
       allowMultipleCorrect: Boolean(
         question?.allowMultipleCorrect || getQuestionCorrectAnswers(question).length > 1
       ),
-      points: Number(question?.points) || 10,
+      points: Number(question?.points) || 10
     });
     setEditingQuestionId(question?._id || null);
   };
@@ -146,7 +146,7 @@ const QuestionFormStep = ({
         correctAnswer: "",
         correctAnswers: [],
         allowMultipleCorrect: false,
-        points: 10,
+        points: 10
       });
     }
   };
@@ -158,7 +158,7 @@ const QuestionFormStep = ({
       const nextOptions = [...newOptions];
       const validOptionSet = new Set(nextOptions.filter((opt) => String(opt).trim() !== ""));
       const nextCorrectAnswers = (Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []).filter((answer) =>
-        validOptionSet.has(answer)
+      validOptionSet.has(answer)
       );
       const nextCorrectAnswer = validOptionSet.has(prev.correctAnswer) ? prev.correctAnswer : "";
 
@@ -166,7 +166,7 @@ const QuestionFormStep = ({
         ...prev,
         options: nextOptions,
         correctAnswers: nextCorrectAnswers,
-        correctAnswer: nextCorrectAnswer,
+        correctAnswer: nextCorrectAnswer
       };
     });
   };
@@ -174,236 +174,236 @@ const QuestionFormStep = ({
   const handleAddOption = () => {
     setQuestionForm((prev) => ({
       ...prev,
-      options: [...(Array.isArray(prev.options) ? prev.options : []), ""],
+      options: [...(Array.isArray(prev.options) ? prev.options : []), ""]
     }));
   };
 
   return (
     <div className="step-content question-form-step">
-      <h2>Step 3: Add Questions</h2>
-      <p className="step-description">
-        Add questions to your {olympiadType === "test" ? "test" : "essay"}{" "}
-        olympiad
+      <h2>{t("Step 3: Add Questions")}</h2>
+      <p className="step-description">{t("Add questions to your ")}
+        {t(olympiadType === "test" ? "test" : "essay")}{t(" ")}{t("olympiad ")}
+
       </p>
 
       {/* Questions List */}
-      {questions && questions.length > 0 && (
-        <div className="questions-list">
-          <h3>Added Questions ({questions.length})</h3>
-          {questions.map((q, index) => (
-            <div key={q._id || index} className="question-item card">
+      {questions && questions.length > 0 &&
+      <div className="questions-list">
+          <h3>{t("Added Questions (")}{t(questions.length)})</h3>
+          {questions.map((q, index) =>
+        <div key={q._id || index} className="question-item card">
               <div className="question-header">
-                <span className="question-number">Q{index + 1}</span>
-                <span className="question-points">{q.points} pts</span>
+                <span className="question-number">{t("Q")}{t(index + 1)}</span>
+                <span className="question-points">{q.points}{t(" pts")}</span>
               </div>
-              <p className="question-text">{q.question || "No question text"}</p>
-              {q.type === "multiple-choice" && q.options && q.options.length > 0 && (
-                <div className="question-options">
-                  {q.options.map((opt, optIndex) => (
-                    (() => {
-                      const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0
-                        ? q.correctAnswers
-                        : q.correctAnswer
-                          ? [q.correctAnswer]
-                          : [];
-                      const isCorrect = correctList.includes(opt);
-                      return (
-                    <div
-                      key={optIndex}
-                      className={`option ${isCorrect ? "correct" : ""}`}
-                    >
-                      {String.fromCharCode(65 + optIndex)}. {opt}
-                    </div>
-                      );
-                    })()
-                  ))}
+              <p className="question-text">{q.question || t("No question text")}</p>
+              {q.type === "multiple-choice" && q.options && q.options.length > 0 &&
+          <div className="question-options">
+                  {q.options.map((opt, optIndex) =>
+            (() => {
+              const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0 ?
+              q.correctAnswers :
+              q.correctAnswer ?
+              [q.correctAnswer] :
+              [];
+              const isCorrect = correctList.includes(opt);
+              return (
+                <div
+                  key={optIndex}
+                  className={`option ${isCorrect ? "correct" : ""}`}>
+
+                      {t(String.fromCharCode(65 + optIndex))}. {t(opt)}
+                    </div>);
+
+            })()
+            )}
                 </div>
-              )}
+          }
               <div className="form-actions" style={{ justifyContent: "flex-end" }}>
                 <button
-                  type="button"
-                  className="button-secondary"
-                  onClick={() => handleEditQuestion(q)}
-                >
-                  Edit
-                </button>
+              type="button"
+              className="button-secondary"
+              onClick={() => handleEditQuestion(q)}>{t("Edit ")}
+
+
+            </button>
                 <button
-                  type="button"
-                  className="button-danger"
-                  onClick={() => handleDeleteQuestion(q?._id)}
-                >
-                  Delete
-                </button>
+              type="button"
+              className="button-danger"
+              onClick={() => handleDeleteQuestion(q?._id)}>{t("Delete ")}
+
+
+            </button>
               </div>
             </div>
-          ))}
+        )}
         </div>
-      )}
+      }
 
       {/* Add Question Form */}
       <form onSubmit={handleAddQuestion} className="question-form">
         <div className="form-group">
-          <label>Question</label>
+          <label>{t("Question")}</label>
           <textarea
             value={questionForm.question}
             onChange={(e) =>
-              setQuestionForm({ ...questionForm, question: e.target.value })
+            setQuestionForm({ ...questionForm, question: e.target.value })
             }
-            placeholder="Enter your question..."
+            placeholder={t("Enter your question...")}
             rows="3"
-            required
-          />
+            required />
+
         </div>
 
-        {olympiadType === "test" && (
-          <>
+        {olympiadType === "test" &&
+        <>
             <div className="form-group">
-              <label>Options</label>
+              <label>{t("Options")}</label>
               <div className="answer-mode-toggle-wrapper">
                 <label className="answer-mode-toggle">
                   <input
-                    className="answer-mode-toggle-input"
-                    type="checkbox"
-                    checked={Boolean(questionForm.allowMultipleCorrect)}
-                    onChange={(e) =>
-                      setQuestionForm((prev) => {
-                        const nextAllowMultiple = e.target.checked;
-                        const nextCorrectAnswers = nextAllowMultiple
-                          ? Array.from(
-                              new Set([
-                                ...(Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []),
-                                ...(prev.correctAnswer ? [prev.correctAnswer] : []),
-                              ].filter(Boolean))
-                            )
-                          : [
-                              (Array.isArray(prev.correctAnswers) ? prev.correctAnswers[0] : null) ||
-                                prev.correctAnswer ||
-                                "",
-                            ].filter(Boolean);
+                  className="answer-mode-toggle-input"
+                  type="checkbox"
+                  checked={Boolean(questionForm.allowMultipleCorrect)}
+                  onChange={(e) =>
+                  setQuestionForm((prev) => {
+                    const nextAllowMultiple = e.target.checked;
+                    const nextCorrectAnswers = nextAllowMultiple ?
+                    Array.from(
+                      new Set([
+                      ...(Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []),
+                      ...(prev.correctAnswer ? [prev.correctAnswer] : [])].
+                      filter(Boolean))
+                    ) :
+                    [
+                    (Array.isArray(prev.correctAnswers) ? prev.correctAnswers[0] : null) ||
+                    prev.correctAnswer ||
+                    ""].
+                    filter(Boolean);
 
-                        return {
-                          ...prev,
-                          allowMultipleCorrect: nextAllowMultiple,
-                          correctAnswers: nextAllowMultiple ? nextCorrectAnswers : nextCorrectAnswers.slice(0, 1),
-                          correctAnswer: nextCorrectAnswers[0] || "",
-                        };
-                      })
-                    }
-                  />
+                    return {
+                      ...prev,
+                      allowMultipleCorrect: nextAllowMultiple,
+                      correctAnswers: nextAllowMultiple ? nextCorrectAnswers : nextCorrectAnswers.slice(0, 1),
+                      correctAnswer: nextCorrectAnswers[0] || ""
+                    };
+                  })
+                  } />
+
                   <span className="answer-mode-toggle-slider" aria-hidden="true" />
-                  <span className="answer-mode-toggle-text">Allow multiple correct answers</span>
+                  <span className="answer-mode-toggle-text">{t("Allow multiple correct answers")}</span>
                 </label>
               </div>
               {questionForm.options.map((option, index) => {
-                const isSelected = questionForm.allowMultipleCorrect
-                  ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== ""
-                  : questionForm.correctAnswer === option && option.trim() !== "";
-                return (
+              const isSelected = questionForm.allowMultipleCorrect ?
+              (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== "" :
+              questionForm.correctAnswer === option && option.trim() !== "";
+              return (
                 <div key={index} className={`option-input-row ${isSelected ? "is-selected" : ""}`}>
                   <span className="option-label">
-                    {String.fromCharCode(65 + index)}.
+                    {t(String.fromCharCode(65 + index))}.
                   </span>
                   <input
                     type="text"
                     value={option}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                    className="option-input"
-                  />
-                  <label className="option-select-control">
-                    {questionForm.allowMultipleCorrect ? (
-                      <input
-                        className="option-select-input"
-                        type="checkbox"
-                        value={option}
-                        checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
-                        onChange={(e) =>
-                          setQuestionForm((prev) => {
-                            const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
-                            const nextCorrectAnswers = e.target.checked
-                              ? [...new Set([...current, option])]
-                              : current.filter((answer) => answer !== option);
+                    placeholder={t(`Option ${String.fromCharCode(65 + index)}`)}
+                    className="option-input" />
 
-                            return {
-                              ...prev,
-                              correctAnswers: nextCorrectAnswers,
-                              correctAnswer: nextCorrectAnswers[0] || "",
-                            };
-                          })
-                        }
-                        disabled={!option.trim()}
-                      />
-                    ) : (
-                      <input
-                        className="option-select-input"
-                        type="radio"
-                        name="correctAnswer"
-                        value={option}
-                        checked={questionForm.correctAnswer === option}
-                        onChange={(e) =>
-                          setQuestionForm({
-                            ...questionForm,
-                            correctAnswer: e.target.value,
-                            correctAnswers: [e.target.value],
-                          })
-                        }
-                        disabled={!option.trim()}
-                      />
-                    )}
+                  <label className="option-select-control">
+                    {questionForm.allowMultipleCorrect ?
+                    <input
+                      className="option-select-input"
+                      type="checkbox"
+                      value={option}
+                      checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
+                      onChange={(e) =>
+                      setQuestionForm((prev) => {
+                        const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
+                        const nextCorrectAnswers = e.target.checked ?
+                        [...new Set([...current, option])] :
+                        current.filter((answer) => answer !== option);
+
+                        return {
+                          ...prev,
+                          correctAnswers: nextCorrectAnswers,
+                          correctAnswer: nextCorrectAnswers[0] || ""
+                        };
+                      })
+                      }
+                      disabled={!option.trim()} /> :
+
+
+                    <input
+                      className="option-select-input"
+                      type="radio"
+                      name="correctAnswer"
+                      value={option}
+                      checked={questionForm.correctAnswer === option}
+                      onChange={(e) =>
+                      setQuestionForm({
+                        ...questionForm,
+                        correctAnswer: e.target.value,
+                        correctAnswers: [e.target.value]
+                      })
+                      }
+                      disabled={!option.trim()} />
+
+                    }
                     <span
                       className={`option-select-indicator ${questionForm.allowMultipleCorrect ? "is-checkbox" : "is-radio"} ${isSelected ? "is-selected" : ""}`}
-                      aria-hidden="true"
-                    >
-                      {questionForm.allowMultipleCorrect && isSelected ? "✓" : ""}
+                      aria-hidden="true">
+
+                      {t(questionForm.allowMultipleCorrect && isSelected ? "✓" : "")}
                     </span>
-                    <span className="option-select-text">Correct</span>
+                    <span className="option-select-text">{t("Correct")}</span>
                   </label>
-                </div>
-                );
-              })}
+                </div>);
+
+            })}
               <button
-                type="button"
-                className="button-secondary"
-                onClick={handleAddOption}
-              >
-                + Add Option
-              </button>
+              type="button"
+              className="button-secondary"
+              onClick={handleAddOption}>{t("+ Add Option ")}
+
+
+            </button>
             </div>
           </>
-        )}
+        }
 
         <div className="form-row">
           <div className="form-group">
-            <label>Points</label>
+            <label>{t("Points")}</label>
             <input
               type="number"
               value={questionForm.points}
               onChange={(e) =>
-                setQuestionForm({
-                  ...questionForm,
-                  points: parseInt(e.target.value) || 10,
-                })
+              setQuestionForm({
+                ...questionForm,
+                points: parseInt(e.target.value) || 10
+              })
               }
               min="1"
-              required
-            />
+              required />
+
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="button" className="button-secondary" onClick={onBack}>
-            Back
+          <button type="button" className="button-secondary" onClick={onBack}>{t("Back ")}
+
           </button>
           <button type="submit" className="button-primary">
-            {editingQuestionId ? "Update Question" : "Add Question"}
+            {t(editingQuestionId ? "Update Question" : "Add Question")}
           </button>
-          <button type="button" className="button-success" onClick={onFinish}>
-            Finish
+          <button type="button" className="button-success" onClick={onFinish}>{t("Finish ")}
+
           </button>
         </div>
       </form>
-    </div>
-  );
+    </div>);
+
 };
 
 export default QuestionFormStep;

@@ -1,3 +1,4 @@
+import {getIntlLocale,getLocale} from '../i18n/runtime';
 import { API_BASE_URL } from "./constants";
 
 // Helper to get full image URL (handle relative paths from API)
@@ -46,7 +47,11 @@ export const formatTime = (seconds) => {
 
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  if (getLocale() === 'uz' && !Number.isNaN(date.getTime())) {
+    const months=['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+    return `${date.getDate()}-${months[date.getMonth()]} ${date.getFullYear()}, ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+  }
+  return date.toLocaleDateString(getIntlLocale(), {
     year: "numeric",
     month: "long",
     day: "numeric",

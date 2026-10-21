@@ -1,17 +1,17 @@
-import { useRef } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Sphere, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
-const Atom = ({ position, color }) => {
+const Atom = ({ position, color }) => {useLocale();
   const groupRef = useRef();
 
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.rotation.y += 0.01;
       groupRef.current.position.y =
-        position[1] +
-        Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.2;
+      position[1] +
+      Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.2;
     }
   });
 
@@ -22,25 +22,25 @@ const Atom = ({ position, color }) => {
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={0.5}
-        />
+          emissiveIntensity={0.5} />
+
       </Sphere>
 
       {/* Electron orbits */}
-      {[0, 1, 2].map((i) => (
-        <group key={i} rotation={[0, (i * Math.PI) / 3, 0]}>
+      {[0, 1, 2].map((i) =>
+      <group key={i} rotation={[0, i * Math.PI / 3, 0]}>
           <ElectronOrbit
-            radius={0.5 + i * 0.2}
-            color={color}
-            speed={0.5 + i * 0.2}
-          />
+          radius={0.5 + i * 0.2}
+          color={color}
+          speed={0.5 + i * 0.2} />
+
         </group>
-      ))}
-    </group>
-  );
+      )}
+    </group>);
+
 };
 
-const ElectronOrbit = ({ radius, color, speed }) => {
+const ElectronOrbit = ({ radius, color, speed }) => {useLocale();
   const electronRef = useRef();
   const orbitRef = useRef();
 
@@ -60,14 +60,14 @@ const ElectronOrbit = ({ radius, color, speed }) => {
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={0.8}
-        />
+          emissiveIntensity={0.8} />
+
       </Sphere>
-    </group>
-  );
+    </group>);
+
 };
 
-const Particle = ({ position, velocity, color }) => {
+const Particle = ({ position, velocity, color }) => {useLocale();
   const meshRef = useRef();
 
   useFrame(() => {
@@ -86,29 +86,29 @@ const Particle = ({ position, velocity, color }) => {
       <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={0.4}
-      />
-    </Sphere>
-  );
+        emissiveIntensity={0.4} />
+
+    </Sphere>);
+
 };
 
-export default function PhysicsScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {
+export default function PhysicsScene({ colors = { primary: '#216E1A', secondary: '#3B6F2F', accent: '#43A806', bg: '#FFFFFF' } }) {useLocale();
   const primaryColor = colors.primary || '#216E1A';
   const accentColor = colors.accent || '#43A806';
   const secondaryColor = colors.secondary || '#3B6F2F';
 
   const particles = Array.from({ length: 10 }, (_, i) => ({
     position: [
-      (Math.random() - 0.5) * 4,
-      (Math.random() - 0.5) * 4,
-      (Math.random() - 0.5) * 4,
-    ],
+    (Math.random() - 0.5) * 4,
+    (Math.random() - 0.5) * 4,
+    (Math.random() - 0.5) * 4],
+
     velocity: new THREE.Vector3(
       (Math.random() - 0.5) * 0.02,
       (Math.random() - 0.5) * 0.02,
       (Math.random() - 0.5) * 0.02
     ),
-    color: i % 2 === 0 ? primaryColor : accentColor,
+    color: i % 2 === 0 ? primaryColor : accentColor
   }));
 
   return (
@@ -121,12 +121,9 @@ export default function PhysicsScene({ colors = { primary: '#216E1A', secondary:
       <Atom position={[1.5, 0, 0]} color={primaryColor} />
       <Atom position={[0, 1.5, -1]} color={accentColor} />
 
-      {particles.map((particle, i) => (
-        <Particle key={i} {...particle} />
-      ))}
-    </>
-  );
+      {particles.map((particle, i) =>
+      <Particle key={i} {...particle} />
+      )}
+    </>);
+
 }
-
-
-

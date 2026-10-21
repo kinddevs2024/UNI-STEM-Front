@@ -1,6 +1,6 @@
-import './Pagination.css';
+import { t, useLocale } from "../i18n/runtime";import './Pagination.css';
 
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {useLocale();
   if (totalPages <= 1) return null;
 
   const getPageNumbers = () => {
@@ -61,8 +61,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         className="pagination-button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        aria-label="Previous page"
-      >
+        aria-label={t("Previous page")}>
+
         ‹
       </button>
 
@@ -71,8 +71,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           return (
             <span key={`ellipsis-${index}`} className="pagination-ellipsis">
               ...
-            </span>
-          );
+            </span>);
+
         }
 
         return (
@@ -80,25 +80,24 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             key={page}
             className={`pagination-button ${currentPage === page ? 'active' : ''}`}
             onClick={() => onPageChange(page)}
-            aria-label={`Page ${page}`}
-            aria-current={currentPage === page ? 'page' : undefined}
-          >
-            {page}
-          </button>
-        );
+            aria-label={t(`Page ${page}`)}
+            aria-current={currentPage === page ? 'page' : undefined}>
+
+            {t(page)}
+          </button>);
+
       })}
 
       <button
         className="pagination-button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        aria-label="Next page"
-      >
+        aria-label={t("Next page")}>
+
         ›
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Pagination;
-

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { t, useLocale } from "../i18n/runtime";import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './NotificationToast.css';
 
-const NotificationToast = ({ message, type = 'info', duration = 3000, onClose, action }) => {
+const NotificationToast = ({ message, type = 'info', duration = 3000, onClose, action }) => {useLocale();
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -32,23 +32,22 @@ const NotificationToast = ({ message, type = 'info', duration = 3000, onClose, a
 
   return (
     <div className={`notification-toast ${type} ${isVisible ? 'visible' : ''} ${action ? 'has-action' : ''}`} role={type === 'error' ? 'alert' : 'status'}>
-      <div className="notification-icon">{getIcon()}</div>
-      <div className="notification-message">{message}{action && <Link className="notification-action button-primary" to={action.to} state={action.state}>{action.label}</Link>}</div>
-      <button 
+      <div className="notification-icon">{t(getIcon())}</div>
+      <div className="notification-message">{t(message)}{action && <Link className="notification-action button-primary" to={action.to} state={action.state}>{t(action.label)}</Link>}</div>
+      <button
         className="notification-close"
-        aria-label="Dismiss notification"
+        aria-label={t("Dismiss notification")}
         onClick={() => {
           setIsVisible(false);
           setTimeout(() => {
             if (onClose) onClose();
           }, 300);
-        }}
-      >
+        }}>
+
         ×
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 export default NotificationToast;
-

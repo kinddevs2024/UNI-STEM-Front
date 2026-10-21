@@ -184,3 +184,13 @@ html:has(.go-auth-page)::-webkit-scrollbar,body:has(.go-auth-page)::-webkit-scro
 .go-grade-note { font-size:11px; line-height:1.6; color:#767581!important; margin:4px 0!important; }
 .go-auth-submit:disabled { opacity:.55; cursor:not-allowed; }
 @media(max-width:480px) { .go-grade-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .go-grade-option { min-height:80px; } }
+
+.go-language-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+@media(max-width:420px){.go-language-grid{grid-template-columns:1fr}.go-language-grid .go-grade-option{min-height:90px;}}
+
+.go-auth-card .go-grade-step-label {color:var(--text-primary,#171530);}
+.go-auth-card .go-grade-note {color:var(--text-secondary,#716f7a);}
+
+.go-auth-google-control { position:relative; }
+.go-auth-google-control.has-local-caption::after { content:attr(data-caption);position:absolute;pointer-events:none;left:36px;right:16px;top:8px;height:24px;display:flex;align-items:center;justify-content:center;background:#fff;color:#3c4043;font-family:"Google Sans",Arial,sans-serif;font-size:14px;font-weight:400;letter-spacing:.25px;line-height:normal; }
+.go-auth-card .go-auth-field label {color:var(--text-secondary,#716f7a);}

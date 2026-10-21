@@ -1,4 +1,4 @@
-import { getEntryFee } from '../../utils/coinEntry';
+import { t, useLocale } from "../../i18n/runtime";import { getEntryFee } from '../../utils/coinEntry';
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { olympiadAPI } from "../../services/api";
@@ -9,8 +9,8 @@ import {
   isOlympiadUpcoming,
   isOlympiadEnded,
   getTimeRemaining,
-  getImageUrl,
-} from "../../utils/helpers";
+  getImageUrl } from
+"../../utils/helpers";
 import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
 import NotificationToast from "../../components/NotificationToast";
@@ -19,7 +19,7 @@ import { requestCameraStream, requestScreenStream, getMediaAccessErrorMessage, u
 import { setPendingProctoringStreams, clearPendingProctoringStreams } from "../../utils/proctoringSession";
 import "./StartOlympiad.css";
 
-const StartOlympiad = () => {
+const StartOlympiad = () => {useLocale();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, balance, refreshBalance } = useAuth();
@@ -58,15 +58,15 @@ const StartOlympiad = () => {
         stream.getTracks().forEach((track) => track.stop());
         setNotification({
           message:
-            'Please select "Entire Screen" in the share dialog. Window/tab sharing is not allowed.',
-          type: "error",
+          'Please select "Entire Screen" in the share dialog. Window/tab sharing is not allowed.',
+          type: "error"
         });
       } catch (error) {
         const friendlyMessage = getMediaAccessErrorMessage(error, { needsScreen: true });
         const isFatalUnsupported =
-          friendlyMessage.includes("secure context") ||
-          friendlyMessage.includes("not supported") ||
-          friendlyMessage.includes("unsupported");
+        friendlyMessage.includes("secure context") ||
+        friendlyMessage.includes("not supported") ||
+        friendlyMessage.includes("unsupported");
 
         if (isFatalUnsupported) {
           throw error;
@@ -74,8 +74,8 @@ const StartOlympiad = () => {
 
         setNotification({
           message:
-            'Screen sharing is required. Please choose "Entire Screen" to continue.',
-          type: "error",
+          'Screen sharing is required. Please choose "Entire Screen" to continue.',
+          type: "error"
         });
       }
 
@@ -98,14 +98,14 @@ const StartOlympiad = () => {
     }
 
     if (!storedFingerprint) {
-      generateDeviceFingerprint()
-        .then(fp => {
-          setDeviceFingerprint(fp);
-          localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
-        })
-        .catch(err => {
-          console.error('Error generating device fingerprint:', err);
-        });
+      generateDeviceFingerprint().
+      then((fp) => {
+        setDeviceFingerprint(fp);
+        localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
+      }).
+      catch((err) => {
+        console.error('Error generating device fingerprint:', err);
+      });
     }
   }, [id, user]);
 
@@ -137,10 +137,10 @@ const StartOlympiad = () => {
               const latestResult = userResults[0];
               const completedDate = new Date(latestResult.completedAt);
               const now = new Date();
-              const isSameMonth = 
-                completedDate.getMonth() === now.getMonth() &&
-                completedDate.getFullYear() === now.getFullYear();
-              
+              const isSameMonth =
+              completedDate.getMonth() === now.getMonth() &&
+              completedDate.getFullYear() === now.getFullYear();
+
               if (isSameMonth) {
                 setAlreadySubmittedThisMonth(true);
                 const nextMonth = new Date(completedDate);
@@ -159,17 +159,17 @@ const StartOlympiad = () => {
       // Check if already started
       const alreadyStarted = localStorage.getItem(`olympiad_${id}_started`);
       if (alreadyStarted) {
+
+
+
+
+
+
+
+
         // Allow direct navigation if already started
         // User can continue from where they left
-      }
-    } catch (error) {
-      setNotification({
-        message: error?.response?.data?.message || error?.message || "Unable to load olympiad. Please refresh the page.",
-        type: "error",
-      });
-      setTimeout(() => navigate("/dashboard"), 2000);
-    } finally {
-      setLoading(false);
+      }} catch (error) {setNotification({ message: error?.response?.data?.message || error?.message || "Unable to load olympiad. Please refresh the page.", type: "error" });setTimeout(() => navigate("/dashboard"), 2000);} finally {setLoading(false);
     }
   };
 
@@ -184,7 +184,7 @@ const StartOlympiad = () => {
       console.error("❌ Olympiad data is missing");
       setNotification({
         message: "Olympiad data not loaded. Please refresh the page.",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -193,14 +193,14 @@ const StartOlympiad = () => {
       console.warn("⚠️ Consent not given");
       setNotification({
         message: "Please read and accept the terms to continue",
-        type: "error",
+        type: "error"
       });
       return;
     }
 
     let cameraStream = null;
     if (olympiad.requiresGrade && !olympiad.gradeCategory) {
-      navigate('/auth', {replace:true});
+      navigate('/auth', { replace: true });
       return;
     }
     let screenStream = null;
@@ -209,14 +209,14 @@ const StartOlympiad = () => {
       clearPendingProctoringStreams();
       if (typeof MediaRecorder === 'undefined') throw new Error('Video recording is not supported. Please update your browser before starting.');
 
-      cameraStream = await requestCameraStream({ video: { facingMode:'user' }, audio: false });
+      cameraStream = await requestCameraStream({ video: { facingMode: 'user' }, audio: false });
       if (!mobileCameraOnly) {
         const screenResult = await requestEntireScreenStream();
         screenStream = screenResult.stream;
         sharedDisplaySurface = screenResult.displaySurface;
       }
 
-      setPendingProctoringStreams({ cameraStream, screenStream, mode:mobileCameraOnly?'mobile_camera':'desktop' });
+      setPendingProctoringStreams({ cameraStream, screenStream, mode: mobileCameraOnly ? 'mobile_camera' : 'desktop' });
     } catch (permissionError) {
       if (cameraStream) {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -227,7 +227,7 @@ const StartOlympiad = () => {
 
       setNotification({
         message: getMediaAccessErrorMessage(permissionError, { needsScreen: true }),
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -237,9 +237,9 @@ const StartOlympiad = () => {
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
         await elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) { /* Safari */
+      } else if (elem.webkitRequestFullscreen) {/* Safari */
         await elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { /* IE11 */
+      } else if (elem.msRequestFullscreen) {/* IE11 */
         await elem.msRequestFullscreen();
       }
     } catch (err) {
@@ -263,8 +263,8 @@ const StartOlympiad = () => {
         if (isUpcomingCheck) {
           setNotification({
             message:
-              "Olympiad has not started yet. Please wait for the start time.",
-            type: "error",
+            "Olympiad has not started yet. Please wait for the start time.",
+            type: "error"
           });
           setStarting(false);
           return;
@@ -272,7 +272,7 @@ const StartOlympiad = () => {
         if (isEndedCheck) {
           setNotification({
             message: "Olympiad has ended. You cannot start it anymore.",
-            type: "error",
+            type: "error"
           });
           setStarting(false);
           return;
@@ -283,8 +283,8 @@ const StartOlympiad = () => {
       if (!Array.isArray(olympiad?.questions) || olympiad.questions.length === 0) {
         setNotification({
           message:
-            "This olympiad has no questions yet. Please contact the administrator.",
-          type: "error",
+          "This olympiad has no questions yet. Please contact the administrator.",
+          type: "error"
         });
         setStarting(false);
         return;
@@ -294,7 +294,7 @@ const StartOlympiad = () => {
       if (olympiad.status && olympiad.status !== "published") {
         setNotification({
           message: "This olympiad is not available for participation.",
-          type: "error",
+          type: "error"
         });
         setStarting(false);
         return;
@@ -305,11 +305,11 @@ const StartOlympiad = () => {
       // Note: In a full implementation, proctoring should be set up before this point
       // For now, we'll require basic proctoring status (this would be enhanced with actual camera/screen checks)
       const proctoringReady = {
-        frontCameraActive: Boolean(cameraStream?.getVideoTracks().some(track=>track.readyState==='live')),
+        frontCameraActive: Boolean(cameraStream?.getVideoTracks().some((track) => track.readyState === 'live')),
         backCameraActive: false,
-        screenShareActive: Boolean(screenStream?.getVideoTracks().some(track=>track.readyState==='live')),
+        screenShareActive: Boolean(screenStream?.getVideoTracks().some((track) => track.readyState === 'live')),
         displaySurface: sharedDisplaySurface || getDisplaySurfaceFromStream(screenStream),
-        mode: mobileCameraOnly ? 'mobile_camera' : 'desktop',
+        mode: mobileCameraOnly ? 'mobile_camera' : 'desktop'
       };
 
       // Generate device fingerprint if not already done
@@ -345,7 +345,7 @@ const StartOlympiad = () => {
       // Show success message
       setNotification({
         message: "Starting olympiad...",
-        type: "success",
+        type: "success"
       });
 
       // Small delay for better UX
@@ -353,7 +353,7 @@ const StartOlympiad = () => {
 
       // Navigate to the olympiad
       const targetPath =
-        olympiad.type === "essay" ? `/olympiad/${id}/essay` : `/olympiad/${id}`;
+      olympiad.type === "essay" ? `/olympiad/${id}/essay` : `/olympiad/${id}`;
 
       navigate(targetPath);
     } catch (error) {
@@ -362,38 +362,38 @@ const StartOlympiad = () => {
       if (typeof MediaRecorder === 'undefined') throw new Error('Video recording is not supported. Please update your browser before starting.');
       const errorMessage = error?.response?.data?.message || error?.message;
       if (error?.response?.data?.code === 'ENTRY_FEE_CHANGED') {
-        setOlympiad(prev=>({...prev,entryFeeCoins:error.response.data.entryFeeCoins}));
-        setNotification({message:error.response.data.message,type:'warning',duration:null});
+        setOlympiad((prev) => ({ ...prev, entryFeeCoins: error.response.data.entryFeeCoins }));
+        setNotification({ message: error.response.data.message, type: 'warning', duration: null });
         setStarting(false);
-        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        if (document.fullscreenElement && document.exitFullscreen) {try {await document.exitFullscreen();} catch {}}
         return;
       }
       if (error?.response?.data?.code === 'INSUFFICIENT_COINS') {
-        setNotification({message:error.response.data.message,type:'warning',duration:null,action:{label:'Top up coins →',to:'/buy-coins'}});
+        setNotification({ message: error.response.data.message, type: 'warning', duration: null, action: { label: 'Top up coins →', to: '/buy-coins' } });
         await refreshBalance?.();
         setStarting(false);
-        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        if (document.fullscreenElement && document.exitFullscreen) {try {await document.exitFullscreen();} catch {}}
         return;
       }
       if (error?.response?.data?.code === 'OLYMPIAD_ALREADY_SUBMITTED') {
         setNotification({ message: error.response.data.message, type: 'warning', duration: null, action: { label: 'View saved result →', to: `/olympiad/${id}/results` } });
         setStarting(false);
-        if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch {} }
+        if (document.fullscreenElement && document.exitFullscreen) {try {await document.exitFullscreen();} catch {}}
         return;
       }
       if (error?.response?.data?.code === "PROFILE_INCOMPLETE") {
-        setNotification({ message:"Complete your profile before starting this olympiad. Save your details to return here.", type:"error", duration:null, action:{ label:"Complete profile →", to:"/profile/edit", state:{ returnTo:`/olympiad/${id}/start` } } });
+        setNotification({ message: "Complete your profile before starting this olympiad. Save your details to return here.", type: "error", duration: null, action: { label: "Complete profile →", to: "/profile/edit", state: { returnTo: `/olympiad/${id}/start` } } });
         setStarting(false);
         if (document.fullscreenElement && document.exitFullscreen) {
-          try { await document.exitFullscreen(); } catch { /* The profile link remains available. */ }
+          try {await document.exitFullscreen();} catch {/* The profile link remains available. */}
         }
         return;
       }
       setNotification({
-        message: errorMessage 
-          ? `Unable to start olympiad: ${errorMessage}` 
-          : "Connection failed. Please try again.",
-        type: "error",
+        message: errorMessage ?
+        `Unable to start olympiad: ${errorMessage}` :
+        "Connection failed. Please try again.",
+        type: "error"
       });
       setStarting(false);
     }
@@ -401,7 +401,7 @@ const StartOlympiad = () => {
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const minutes = Math.floor(seconds % 3600 / 60);
     const secs = seconds % 60;
 
     if (hours > 0) {
@@ -414,8 +414,8 @@ const StartOlympiad = () => {
     return (
       <div className="start-olympiad-loading">
         <div className="loading-spinner"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!olympiad) {
@@ -423,21 +423,21 @@ const StartOlympiad = () => {
       <div className="start-olympiad-page">
         <div className="container">
           <div className="error-state card">
-            <h2>Olympiad not found</h2>
-            <Link to="/dashboard" className="button-primary">
-              Back to Dashboard
+            <h2>{t("Olympiad not found")}</h2>
+            <Link to="/dashboard" className="button-primary">{t("Back to Dashboard ")}
+
             </Link>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const isUpcoming = isOlympiadUpcoming(olympiad.startTime);
   const isActive = isOlympiadActive(olympiad.startTime, olympiad.endTime);
   const isEnded = isOlympiadEnded(olympiad.endTime);
   const olympiadLogoField =
-    olympiad?.olympiadLogo || olympiad?.logo || olympiad?.logoUrl || olympiad?.image || "";
+  olympiad?.olympiadLogo || olympiad?.logo || olympiad?.logoUrl || olympiad?.image || "";
   const olympiadLogoUrl = olympiadLogoField ? getImageUrl(olympiadLogoField) : "";
 
   return (
@@ -448,211 +448,211 @@ const StartOlympiad = () => {
           <div className="start-header card">
             <h1 className="start-title">{olympiad.title}</h1>
             <p className="start-subtitle">{olympiad.description}</p>
-            {(olympiad.gradePrizes || []).some(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)) && <section className="grade-prizes"><h2>Prizes · {gradeLabel(olympiad.gradeCategory || user?.gradeCategory)}</h2><div className="olympiad-info-grid">{olympiad.gradePrizes.filter(prize => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)).sort((a,b) => a.place - b.place).map(prize => <article className="card" key={prize.place} style={{ padding: 16 }}>{prize.photo && <img src={getImageUrl(prize.photo)} alt={prize.name} style={{ width: '100%', maxHeight: 160, objectFit: 'contain' }} />}<strong>Place {prize.place}</strong><p>{prize.name}</p></article>)}</div></section>}
+            {(olympiad.gradePrizes || []).some((prize) => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)) && <section className="grade-prizes"><h2>{t("Prizes · ")}{t(gradeLabel(olympiad.gradeCategory || user?.gradeCategory))}</h2><div className="olympiad-info-grid">{olympiad.gradePrizes.filter((prize) => prize.gradeCategory === (olympiad.gradeCategory || user?.gradeCategory)).sort((a, b) => a.place - b.place).map((prize) => <article className="card" key={prize.place} style={{ padding: 16 }}>{prize.photo && <img src={getImageUrl(prize.photo)} alt={prize.name} style={{ width: '100%', maxHeight: 160, objectFit: 'contain' }} />}<strong>{t("Place ")}{t(prize.place)}</strong><p>{prize.name}</p></article>)}</div></section>}
 
-            {olympiadLogoUrl && (
-              <div className="olympiad-hero-image-wrap">
+            {olympiadLogoUrl &&
+            <div className="olympiad-hero-image-wrap">
                 <img
-                  src={olympiadLogoUrl}
-                  alt={`${olympiad.title} banner`}
-                  className="olympiad-hero-image"
-                />
-              </div>
-            )}
+                src={olympiadLogoUrl}
+                alt={t(`${olympiad.title} banner`)}
+                className="olympiad-hero-image" />
 
-          {user?.role==='student'&&<div className="coin-entry-notice"><p><strong>Entry: {getEntryFee(olympiad)} coins</strong> · Your balance: {balance ?? 0} coins</p><p>Charged once when you start. Resuming is free. First place earns 100 coins after the olympiad closes and results are checked.</p><Link to="/buy-coins">Need more coins? Top up →</Link></div>}
+              </div>
+            }
+
+          {user?.role === 'student' && <div className="coin-entry-notice"><p><strong>{t("Entry: ")}{t(getEntryFee(olympiad))}{t(" coins")}</strong>{t(" · Your balance: ")}{t(balance ?? 0)}{t(" coins")}</p><p>{t("Charged once when you start. Resuming is free. First place earns 100 coins after the olympiad closes and results are checked.")}</p><Link to="/buy-coins">{t("Need more coins? Top up →")}</Link></div>}
             <div className="olympiad-info-grid">
               <div className="info-item">
-                <span className="info-label">Subject</span>
-                <span className="info-value">{olympiad.subject}</span>
+                <span className="info-label">{t("Subject")}</span>
+                <span className="info-value">{t(olympiad.subject)}</span>
               </div>
               <div className="info-item">
-                <span className="info-label">Type</span>
+                <span className="info-label">{t("Type")}</span>
                 <span className="info-value">
-                  {olympiad.type === "test" ? "Test" : "Essay"}
+                  {olympiad.type === "test" ? t("Test") : t("Essay")}
                 </span>
               </div>
               <div className="info-item">
-                <span className="info-label">Duration</span>
+                <span className="info-label">{t("Duration")}</span>
                 <span className="info-value">
-                  {olympiad?.duration ? Math.floor((Number(olympiad.duration) || 0) / 60) : 0} minutes
+                  {olympiad?.duration ? Math.floor((Number(olympiad.duration) || 0) / 60) : 0}{t(" minutes ")}
                 </span>
               </div>
               <div className="info-item">
-                <span className="info-label">Questions</span>
+                <span className="info-label">{t("Questions")}</span>
                 <span className="info-value">
-                  {Array.isArray(olympiad?.questions) ? olympiad.questions.length : 0}
+                  {t(Array.isArray(olympiad?.questions) ? olympiad.questions.length : 0)}
                 </span>
               </div>
             </div>
 
             <div className="time-info">
               <div className="time-item">
-                <span className="time-label">Start Time:</span>
+                <span className="time-label">{t("Start Time:")}</span>
                 <span className="time-value">
-                  {formatDate(olympiad.startTime)}
+                  {t(formatDate(olympiad.startTime))}
                 </span>
               </div>
               <div className="time-item">
-                <span className="time-label">End Time:</span>
+                <span className="time-label">{t("End Time:")}</span>
                 <span className="time-value">
-                  {formatDate(olympiad.endTime)}
+                  {t(formatDate(olympiad.endTime))}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Status Messages */}
-          {isUpcoming && (
-            <div className="status-message card status-warning">
+          {isUpcoming &&
+          <div className="status-message card status-warning">
               <div className="status-icon">⏰</div>
               <div className="status-content">
-                <h3>Olympiad Not Started Yet</h3>
-                <p>
-                  This olympiad will start in:{" "}
-                  <strong>{formatTime(timeUntilStart)}</strong>
+                <h3>{t("Olympiad Not Started Yet")}</h3>
+                <p>{t("This olympiad will start in:")}
+                {t(" ")}
+                  <strong>{t(formatTime(timeUntilStart))}</strong>
                 </p>
-                <p className="status-note">
-                  Please wait until the start time to begin.
-                </p>
+                <p className="status-note">{t("Please wait until the start time to begin. ")}
+
+              </p>
               </div>
             </div>
-          )}
+          }
 
-          {isEnded && (
-            <div className="status-message card status-error">
+          {isEnded &&
+          <div className="status-message card status-error">
               <div className="status-icon">🔒</div>
               <div className="status-content">
-                <h3>Olympiad Has Ended</h3>
-                <p>This olympiad is no longer available for participation.</p>
-                <Link to={`/olympiad/${id}/results`} className="button-primary">
-                  View Results
-                </Link>
+                <h3>{t("Olympiad Has Ended")}</h3>
+                <p>{t("This olympiad is no longer available for participation.")}</p>
+                <Link to={`/olympiad/${id}/results`} className="button-primary">{t("View Results ")}
+
+              </Link>
               </div>
             </div>
-          )}
+          }
 
-          {alreadySubmittedThisMonth && (
-            <div className="status-message card status-error">
+          {alreadySubmittedThisMonth &&
+          <div className="status-message card status-error">
               <div className="status-icon">📅</div>
               <div className="status-content">
-                <h3>Already Taken This Month</h3>
-                <p>
-                  You have already taken this olympiad this month. You can take it again next month.
-                </p>
-                {nextAvailableDate && (
-                  <p className="status-note">
-                    Next available date: <strong>{formatDate(nextAvailableDate.toISOString())}</strong>
+                <h3>{t("Already Taken This Month")}</h3>
+                <p>{t("You have already taken this olympiad this month. You can take it again next month. ")}
+
+              </p>
+                {nextAvailableDate &&
+              <p className="status-note">{t("Next available date: ")}
+                <strong>{t(formatDate(nextAvailableDate.toISOString()))}</strong>
                   </p>
-                )}
-                <Link to={`/olympiad/${id}/results`} className="button-primary">
-                  View Your Results
-                </Link>
+              }
+                <Link to={`/olympiad/${id}/results`} className="button-primary">{t("View Your Results ")}
+
+              </Link>
               </div>
             </div>
-          )}
+          }
 
           {/* Instructions */}
-          {isActive && (
-            <>
+          {isActive &&
+          <>
               <div className="instructions-section card">
-                <h2 className="section-title">Instructions</h2>
+                <h2 className="section-title">{t("Instructions")}</h2>
                 <div className="instructions-list">
                   <div className="instruction-item">
                     <span className="instruction-icon">📝</span>
                     <div className="instruction-content">
-                      <h4>Read Carefully</h4>
-                      <p>
-                        Read each question carefully before answering. Make sure
-                        you understand what is being asked.
-                      </p>
+                      <h4>{t("Read Carefully")}</h4>
+                      <p>{t("Read each question carefully before answering. Make sure you understand what is being asked. ")}
+
+
+                    </p>
                     </div>
                   </div>
 
                   <div className="instruction-item">
                     <span className="instruction-icon">⏱️</span>
                     <div className="instruction-content">
-                      <h4>Time Management</h4>
-                      <p>
-                        You have {olympiad?.duration ? Math.floor((Number(olympiad.duration) || 0) / 60) : 0} minutes to
-                        complete this olympiad. The timer will start when you
-                        click "Start Olympiad".
-                      </p>
+                      <h4>{t("Time Management")}</h4>
+                      <p>{t("You have ")}
+                      {olympiad?.duration ? Math.floor((Number(olympiad.duration) || 0) / 60) : 0}{t(" minutes to complete this olympiad. The timer will start when you click \"Start Olympiad\". ")}
+
+
+                    </p>
                     </div>
                   </div>
 
                   <div className="instruction-item">
                     <span className="instruction-icon">✅</span>
                     <div className="instruction-content">
-                      <h4>Submission</h4>
-                      <p>
-                        Once you submit your answers, you cannot change them.
-                        Make sure to review all answers before submitting.
-                      </p>
+                      <h4>{t("Submission")}</h4>
+                      <p>{t("Once you submit your answers, you cannot change them. Make sure to review all answers before submitting. ")}
+
+
+                    </p>
                     </div>
                   </div>
 
-                  {olympiad.type === "test" && (
-                    <div className="instruction-item">
+                  {olympiad.type === "test" &&
+                <div className="instruction-item">
                       <span className="instruction-icon">🔢</span>
                       <div className="instruction-content">
-                        <h4>Navigation</h4>
-                        <p>
-                          You can navigate between questions using the
-                          Previous/Next buttons. You can change your answers at
-                          any time before submission.
-                        </p>
+                        <h4>{t("Navigation")}</h4>
+                        <p>{t("You can navigate between questions using the Previous/Next buttons. You can change your answers at any time before submission. ")}
+
+
+
+                    </p>
                       </div>
                     </div>
-                  )}
+                }
 
-                  {olympiad.type === "essay" && (
-                    <div className="instruction-item">
+                  {olympiad.type === "essay" &&
+                <div className="instruction-item">
                       <span className="instruction-icon">✍️</span>
                       <div className="instruction-content">
-                        <h4>Essay Writing</h4>
-                        <p>
-                          Write your essay in the provided text editor. You can
-                          see the word and character count as you type.
-                        </p>
+                        <h4>{t("Essay Writing")}</h4>
+                        <p>{t("Write your essay in the provided text editor. You can see the word and character count as you type. ")}
+
+
+                    </p>
                       </div>
                     </div>
-                  )}
+                }
                 </div>
               </div>
 
               {/* Proctoring Notice */}
               <div className="proctoring-notice card">
-                <h2 className="section-title">Proctoring & Monitoring</h2>
+                <h2 className="section-title">{t("Proctoring & Monitoring")}</h2>
                 <div className="proctoring-content">
-                  <p className="proctoring-warning">
-                    ⚠️ This olympiad uses proctoring technology to ensure
-                    academic integrity.
-                  </p>
+                  <p className="proctoring-warning">{t("⚠️ This olympiad uses proctoring technology to ensure academic integrity. ")}
+
+
+                </p>
                   <ul className="proctoring-list">
-                    <li>✓ Your camera will be monitored during the exam</li>
-                    <li>{mobileCameraOnly ? '✓ Mobile mode: camera monitoring only; screen sharing is unavailable in this browser' : '✓ Your screen activity will be recorded'}</li>
-                    <li>✓ Periodic screenshots will be taken automatically</li>
-                    <li>✓ All monitoring data is securely stored</li>
+                    <li>{t("✓ Your camera will be monitored during the exam")}</li>
+                    <li>{t(mobileCameraOnly ? '✓ Mobile mode: camera monitoring only; screen sharing is unavailable in this browser' : '✓ Your screen activity will be recorded')}</li>
+                    <li>{t("✓ Periodic screenshots will be taken automatically")}</li>
+                    <li>{t("✓ All monitoring data is securely stored")}</li>
                   </ul>
-                  <p className="proctoring-note">
-                    By starting this olympiad, you consent to being monitored.
-                    Make sure you have a working camera and are in a quiet,
-                    well-lit environment.
-                  </p>
+                  <p className="proctoring-note">{t("By starting this olympiad, you consent to being monitored. Make sure you have a working camera and are in a quiet, well-lit environment. ")}
+
+
+
+                </p>
                 </div>
               </div>
 
               {/* Rules */}
               <div className="rules-section card">
-                <h2 className="section-title">Rules & Guidelines</h2>
+                <h2 className="section-title">{t("Rules & Guidelines")}</h2>
                 <ul className="rules-list">
-                  <li>Do not use any external resources, books, or notes</li>
-                  <li>Do not communicate with others during the exam</li>
-                  <li>Do not leave the exam page or open other tabs</li>
-                  <li>Ensure a stable internet connection</li>
-                  <li>Stay in front of your camera throughout the exam</li>
-                  <li>Do not use mobile phones or other devices</li>
+                  <li>{t("Do not use any external resources, books, or notes")}</li>
+                  <li>{t("Do not communicate with others during the exam")}</li>
+                  <li>{t("Do not leave the exam page or open other tabs")}</li>
+                  <li>{t("Ensure a stable internet connection")}</li>
+                  <li>{t("Stay in front of your camera throughout the exam")}</li>
+                  <li>{t("Do not use mobile phones or other devices")}</li>
                 </ul>
               </div>
 
@@ -660,58 +660,58 @@ const StartOlympiad = () => {
               <div className="consent-section card">
                 <label className="consent-checkbox">
                   <input
-                    type="checkbox"
-                    checked={consentGiven}
-                    onChange={(e) => setConsentGiven(e.target.checked)}
-                  />
-                  <span className="consent-text">
-                    I have read and understood all instructions, rules, and
-                    proctoring requirements. I agree to be monitored during this
-                    olympiad and will follow all guidelines.
-                  </span>
+                  type="checkbox"
+                  checked={consentGiven}
+                  onChange={(e) => setConsentGiven(e.target.checked)} />
+
+                  <span className="consent-text">{t("I have read and understood all instructions, rules, and proctoring requirements. I agree to be monitored during this olympiad and will follow all guidelines. ")}
+
+
+
+                </span>
                 </label>
-                {!consentGiven && (
-                  <p className="consent-hint">
-                    ⚠️ Please check the box above to enable the Start button
-                  </p>
-                )}
+                {!consentGiven &&
+              <p className="consent-hint">{t("⚠️ Please check the box above to enable the Start button ")}
+
+              </p>
+              }
               </div>
 
               {/* Action Buttons */}
               <div className="action-buttons">
-                <Link to="/dashboard" className="button-secondary">
-                  ← Back to Dashboard
-                </Link>
+                <Link to="/dashboard" className="button-secondary">{t("← Back to Dashboard ")}
+
+              </Link>
                 <button
-                  type="button"
-                  className="button-primary start-button"
-                  onClick={handleStart}
-                  disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}
-                  aria-disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}
-                >
-                  {starting
-                    ? "Starting..."
-                    : !consentGiven
-                    ? "Accept Terms to Start →"
-                    : user?.role === "student" ? `Start Olympiad · ${getEntryFee(olympiad)} coins →` : "Start Olympiad →"}
+                type="button"
+                className="button-primary start-button"
+                onClick={handleStart}
+                disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}
+                aria-disabled={!consentGiven || starting || !isActive || alreadySubmittedThisMonth}>
+
+                  {t(starting ?
+                "Starting..." :
+                !consentGiven ?
+                "Accept Terms to Start →" :
+                user?.role === "student" ? `Start Olympiad · ${getEntryFee(olympiad)} coins →` : "Start Olympiad →")}
                 </button>
               </div>
             </>
-          )}
+          }
         </div>
       </div>
 
-      {notification && (
-        <NotificationToast
-          message={notification.message}
-          type={notification.type}
-          action={notification.action}
-          duration={notification.duration}
-          onClose={() => setNotification(null)}
-        />
-      )}
-    </div>
-  );
+      {notification &&
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        action={notification.action}
+        duration={notification.duration}
+        onClose={() => setNotification(null)} />
+
+      }
+    </div>);
+
 };
 
 export default StartOlympiad;

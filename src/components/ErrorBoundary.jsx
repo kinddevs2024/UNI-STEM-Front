@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { t } from "../i18n/runtime";import { Component } from 'react';
 
 /**
  * Error boundary for critical pages (TestOlympiad, Leaderboard).
@@ -20,19 +20,19 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? (
-        <div className="error-boundary" style={{ padding: '2rem', textAlign: 'center' }}>
-          <h2>Something went wrong</h2>
-          <p>Please refresh the page or try again later.</p>
+      return this.props.fallback ??
+      <div className="error-boundary" style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>{t("Something went wrong")}</h2>
+          <p>{t("Please refresh the page or try again later.")}</p>
           <button
-            type="button"
-            onClick={() => this.setState({ hasError: false, error: null })}
-            style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
-          >
-            Try again
-          </button>
-        </div>
-      );
+          type="button"
+          onClick={() => this.setState({ hasError: false, error: null })}
+          style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>{t("Try again ")}
+
+
+        </button>
+        </div>;
+
     }
     return this.props.children;
   }

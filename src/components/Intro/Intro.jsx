@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Intro.css";
 
@@ -7,10 +7,10 @@ import "./Intro.css";
 const VIDEO_PATHS = {
   original: "/intro.mp4",
   hd: "/intro_720.mp4",
-  sd: "/intro_480.mp4",
+  sd: "/intro_480.mp4"
 };
 
-const Intro = ({ onComplete }) => {
+const Intro = ({ onComplete }) => {useLocale();
   const [videoSrc, setVideoSrc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,9 +23,9 @@ const Intro = ({ onComplete }) => {
       try {
         // Check if Network Information API is available
         const connection =
-          navigator.connection ||
-          navigator.mozConnection ||
-          navigator.webkitConnection;
+        navigator.connection ||
+        navigator.mozConnection ||
+        navigator.webkitConnection;
 
         let videoFile = VIDEO_PATHS.original; // Default to highest quality
 
@@ -35,16 +35,16 @@ const Intro = ({ onComplete }) => {
           const downlink = connection.downlink; // Mbps
 
           if (
-            effectiveType === "slow-2g" ||
-            effectiveType === "2g" ||
-            downlink < 1
-          ) {
+          effectiveType === "slow-2g" ||
+          effectiveType === "2g" ||
+          downlink < 1)
+          {
             // Very slow connection - use 480p
             videoFile = VIDEO_PATHS.sd;
           } else if (
-            effectiveType === "3g" ||
-            (downlink >= 1 && downlink < 3)
-          ) {
+          effectiveType === "3g" ||
+          downlink >= 1 && downlink < 3)
+          {
             // Medium connection - use 720p
             videoFile = VIDEO_PATHS.hd;
           } else {
@@ -127,27 +127,27 @@ const Intro = ({ onComplete }) => {
       <div className="intro-container">
         <div className="intro-loading">
           <div className="loading-spinner"></div>
-          <p>Loading intro video...</p>
+          <p>{t("Loading intro video...")}</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (error) {
     return (
       <div className="intro-container">
         <div className="intro-error">
-          <p>{error}</p>
+          <p>{t(error)}</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="intro-container">
       <div className="intro-overlay">
-        <button className="intro-skip-btn" onClick={handleSkip}>
-          Skip
+        <button className="intro-skip-btn" onClick={handleSkip}>{t("Skip ")}
+
         </button>
         <video
           ref={videoRef}
@@ -157,13 +157,13 @@ const Intro = ({ onComplete }) => {
           muted
           playsInline
           onEnded={handleVideoEnd}
-          onError={handleVideoError}
-        >
-          Your browser does not support the video tag.
+          onError={handleVideoError}>{t("Your browser does not support the video tag. ")}
+
+
         </video>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Intro;

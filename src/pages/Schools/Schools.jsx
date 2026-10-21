@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect } from "react";
 import { adminAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import NotificationToast from "../../components/NotificationToast";
@@ -6,7 +6,7 @@ import { formatDate } from "../../utils/helpers";
 import "./Schools.css";
 import "../AdminPanel/PanelRedesign.css";
 
-const Schools = () => {
+const Schools = () => {useLocale();
   const { user } = useAuth();
   const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,10 +28,10 @@ const Schools = () => {
       // Filter users with school-admin or school-teacher roles
       const schoolUsers = response.data.filter(
         (u) =>
-          u.role === "school-admin" ||
-          u.role === "school_admin" ||
-          u.role === "school-teacher" ||
-          u.role === "school_teacher"
+        u.role === "school-admin" ||
+        u.role === "school_admin" ||
+        u.role === "school-teacher" ||
+        u.role === "school_teacher"
       );
       setSchools(schoolUsers);
       setError(null);
@@ -40,7 +40,7 @@ const Schools = () => {
       setError("Failed to load schools");
       setNotification({
         type: "error",
-        message: "Failed to load schools. Please try again.",
+        message: "Failed to load schools. Please try again."
       });
     } finally {
       setLoading(false);
@@ -63,19 +63,19 @@ const Schools = () => {
 
   const filteredSchools = schools.filter((school) => {
     const matchesSearch =
-      school.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      school.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      school.schoolName?.toLowerCase().includes(searchTerm.toLowerCase());
+    school.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.schoolName?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
-      filterStatus === "all" ||
-      (filterStatus === "active" && !school.userBan) ||
-      (filterStatus === "banned" && school.userBan);
+    filterStatus === "all" ||
+    filterStatus === "active" && !school.userBan ||
+    filterStatus === "banned" && school.userBan;
 
     const matchesRole =
-      filterRole === "all" ||
-      (filterRole === "admin" && isSchoolAdmin(school.role)) ||
-      (filterRole === "teacher" && isSchoolTeacher(school.role));
+    filterRole === "all" ||
+    filterRole === "admin" && isSchoolAdmin(school.role) ||
+    filterRole === "teacher" && isSchoolTeacher(school.role);
 
     return matchesSearch && matchesStatus && matchesRole;
   });
@@ -89,7 +89,7 @@ const Schools = () => {
       // For now, we'll just show a notification
       setNotification({
         type: "info",
-        message: `Block/unblock functionality requires backend implementation`,
+        message: `Block/unblock functionality requires backend implementation`
       });
       // After backend is implemented, you would call:
       // await adminAPI.toggleUserBan(schoolId, !currentStatus);
@@ -97,7 +97,7 @@ const Schools = () => {
     } catch (err) {
       setNotification({
         type: "error",
-        message: "Failed to update school status",
+        message: "Failed to update school status"
       });
     }
   };
@@ -115,62 +115,62 @@ const Schools = () => {
 
     return (
       <div className="schools-group">
-        <h2 className="schools-group-title">{title}</h2>
+        <h2 className="schools-group-title">{t(title)}</h2>
         <div className="schools-table">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>School Name</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>{t("Name")}</th>
+                <th>{t("Email")}</th>
+                <th>{t("School Name")}</th>
+                <th>{t("Status")}</th>
+                <th>{t("Created")}</th>
+                <th>{t("Actions")}</th>
               </tr>
             </thead>
             <tbody>
-              {schoolsList.map((school) => (
-                <tr key={school._id}>
-                  <td>{school.name || "N/A"}</td>
-                  <td>{school.email || "N/A"}</td>
-                  <td>{school.schoolName || "N/A"}</td>
+              {schoolsList.map((school) =>
+              <tr key={school._id}>
+                  <td>{school.name || t("N/A")}</td>
+                  <td>{school.email || t("N/A")}</td>
+                  <td>{t(school.schoolName || "N/A")}</td>
                   <td>
                     <span
-                      className={`status-badge ${
-                        school.userBan ? "banned" : "active"
-                      }`}
-                    >
-                      {school.userBan ? "Banned" : "Active"}
+                    className={`status-badge ${
+                    school.userBan ? "banned" : "active"}`
+                    }>
+
+                      {t(school.userBan ? "Banned" : "Active")}
                     </span>
                   </td>
                   <td>
-                    {school.createdAt ? formatDate(school.createdAt) : "N/A"}
+                    {t(school.createdAt ? formatDate(school.createdAt) : "N/A")}
                   </td>
                   <td>
                     <div className="action-buttons">
                       <button
-                        className="button-secondary small"
-                        onClick={() => handleViewDetails(school)}
-                      >
-                        View Details
-                      </button>
+                      className="button-secondary small"
+                      onClick={() => handleViewDetails(school)}>{t("View Details ")}
+
+
+                    </button>
                       <button
-                        className="button-secondary small"
-                        onClick={() =>
-                          handleBlockToggle(school._id, school.userBan)
-                        }
-                      >
-                        {school.userBan ? "Unblock" : "Block"}
+                      className="button-secondary small"
+                      onClick={() =>
+                      handleBlockToggle(school._id, school.userBan)
+                      }>
+
+                        {t(school.userBan ? "Unblock" : "Block")}
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-      </div>
-    );
+      </div>);
+
   };
 
   if (loading) {
@@ -179,175 +179,175 @@ const Schools = () => {
         <div className="container">
           <div className="loading-spinner"></div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="schools-page brand-panel" data-brand-panel="schools">
       <div className="container">
         <div className="schools-header">
-          <h1 className="schools-title text-glow">Schools Management</h1>
+          <h1 className="schools-title text-glow">{t("Schools Management")}</h1>
           <div className="schools-header-actions">
             <input
               type="text"
-              placeholder="Search schools..."
+              placeholder={t("Search schools...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
+              className="search-input" />
+
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="role-filter"
-            >
-              <option value="all">All Roles</option>
-              <option value="admin">School Admin</option>
-              <option value="teacher">School Teacher</option>
+              className="role-filter">
+
+              <option value="all">{t("All Roles")}</option>
+              <option value="admin">{t("School Admin")}</option>
+              <option value="teacher">{t("School Teacher")}</option>
             </select>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="status-filter"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="banned">Banned</option>
+              className="status-filter">
+
+              <option value="all">{t("All Status")}</option>
+              <option value="active">{t("Active")}</option>
+              <option value="banned">{t("Banned")}</option>
             </select>
           </div>
         </div>
 
-        {error && (
-          <div className="error-message card">
-            <p>{error}</p>
-            <button className="button-secondary" onClick={fetchSchools}>
-              Retry
-            </button>
+        {error &&
+        <div className="error-message card">
+            <p>{t(error)}</p>
+            <button className="button-secondary" onClick={fetchSchools}>{t("Retry ")}
+
+          </button>
           </div>
-        )}
+        }
 
         <div className="schools-stats card">
           <div className="stat-item">
-            <span className="stat-label">Total Schools</span>
-            <span className="stat-value">{schools.length}</span>
+            <span className="stat-label">{t("Total Schools")}</span>
+            <span className="stat-value">{t(schools.length)}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">School Admins</span>
+            <span className="stat-label">{t("School Admins")}</span>
             <span className="stat-value">
-              {schools.filter((s) => isSchoolAdmin(s.role)).length}
+              {t(schools.filter((s) => isSchoolAdmin(s.role)).length)}
             </span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">School Teachers</span>
+            <span className="stat-label">{t("School Teachers")}</span>
             <span className="stat-value">
-              {schools.filter((s) => isSchoolTeacher(s.role)).length}
+              {t(schools.filter((s) => isSchoolTeacher(s.role)).length)}
             </span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Active</span>
+            <span className="stat-label">{t("Active")}</span>
             <span className="stat-value">
-              {schools.filter((s) => !s.userBan).length}
+              {t(schools.filter((s) => !s.userBan).length)}
             </span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Banned</span>
+            <span className="stat-label">{t("Banned")}</span>
             <span className="stat-value">
-              {schools.filter((s) => s.userBan).length}
+              {t(schools.filter((s) => s.userBan).length)}
             </span>
           </div>
         </div>
 
         <div className="schools-list">
-          {filteredSchools.length === 0 ? (
-            <div className="empty-state card">
-              <p>No schools found</p>
-            </div>
-          ) : (
-            <>
-              {renderTable(schoolAdmins, "School Admins")}
-              {renderTable(schoolTeachers, "School Teachers")}
+          {filteredSchools.length === 0 ?
+          <div className="empty-state card">
+              <p>{t("No schools found")}</p>
+            </div> :
+
+          <>
+              {t(renderTable(schoolAdmins, "School Admins"))}
+              {t(renderTable(schoolTeachers, "School Teachers"))}
             </>
-          )}
+          }
         </div>
       </div>
 
-      {selectedSchool && (
-        <div className="details-modal-overlay" onClick={closeDetails}>
+      {selectedSchool &&
+      <div className="details-modal-overlay" onClick={closeDetails}>
           <div
-            className="details-modal card"
-            onClick={(e) => e.stopPropagation()}
-          >
+          className="details-modal card"
+          onClick={(e) => e.stopPropagation()}>
+
             <div className="details-modal-header">
-              <h2>School Details</h2>
+              <h2>{t("School Details")}</h2>
               <button className="details-modal-close" onClick={closeDetails}>
                 ×
               </button>
             </div>
             <div className="details-modal-content">
               <div className="detail-row">
-                <span className="detail-label">Name:</span>
+                <span className="detail-label">{t("Name:")}</span>
                 <span className="detail-value">
-                  {selectedSchool.name || "N/A"}
+                  {selectedSchool.name || t("N/A")}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Email:</span>
+                <span className="detail-label">{t("Email:")}</span>
                 <span className="detail-value">
-                  {selectedSchool.email || "N/A"}
+                  {selectedSchool.email || t("N/A")}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">School Name:</span>
+                <span className="detail-label">{t("School Name:")}</span>
                 <span className="detail-value">
-                  {selectedSchool.schoolName || "N/A"}
+                  {t(selectedSchool.schoolName || "N/A")}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Role:</span>
+                <span className="detail-label">{t("Role:")}</span>
                 <span className="detail-value">
-                  {getRoleLabel(selectedSchool.role)}
+                  {t(getRoleLabel(selectedSchool.role))}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Status:</span>
+                <span className="detail-label">{t("Status:")}</span>
                 <span
-                  className={`status-badge ${
-                    selectedSchool.userBan ? "banned" : "active"
-                  }`}
-                >
-                  {selectedSchool.userBan ? "Banned" : "Active"}
+                className={`status-badge ${
+                selectedSchool.userBan ? "banned" : "active"}`
+                }>
+
+                  {t(selectedSchool.userBan ? "Banned" : "Active")}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Created:</span>
+                <span className="detail-label">{t("Created:")}</span>
                 <span className="detail-value">
-                  {selectedSchool.createdAt
-                    ? formatDate(selectedSchool.createdAt)
-                    : "N/A"}
+                  {t(selectedSchool.createdAt ?
+                formatDate(selectedSchool.createdAt) :
+                "N/A")}
                 </span>
               </div>
-              {selectedSchool.schoolId && (
-                <div className="detail-row">
-                  <span className="detail-label">School ID:</span>
+              {selectedSchool.schoolId &&
+            <div className="detail-row">
+                  <span className="detail-label">{t("School ID:")}</span>
                   <span className="detail-value">
-                    {selectedSchool.schoolId}
+                    {t(selectedSchool.schoolId)}
                   </span>
                 </div>
-              )}
+            }
             </div>
           </div>
         </div>
-      )}
+      }
 
-      {notification && (
-        <NotificationToast
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification(null)}
-        />
-      )}
-    </div>
-  );
+      {notification &&
+      <NotificationToast
+        type={notification.type}
+        message={notification.message}
+        onClose={() => setNotification(null)} />
+
+      }
+    </div>);
+
 };
 
 export default Schools;

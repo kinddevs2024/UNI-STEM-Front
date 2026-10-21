@@ -63,3 +63,9 @@
 .settings-page .theme-option { min-width:0; }
 .settings-page .theme-preview-split { background:linear-gradient(90deg,#171530 50%,#fbf9f3 50%); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 @media(max-width:520px) { .settings-page .theme-selector { gap:8px; } .settings-page .theme-option { padding:9px; } .settings-page .theme-preview-text { font-size:32px; } .settings-page .theme-name { font-size:11px; } }
+
+.site-language-options { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.site-language-options button { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border:1px solid var(--border);border-radius:16px;background:var(--bg-tertiary);color:var(--text-primary);font:inherit;cursor:pointer; }
+.site-language-options button.is-selected { border-color:#9274b5;box-shadow:0 0 0 1px #9274b5; }
+.site-language-options button:focus-visible { outline:3px solid #a88ccf80;outline-offset:3px; }
+@media(max-width:580px){.site-language-options{grid-template-columns:1fr;}}

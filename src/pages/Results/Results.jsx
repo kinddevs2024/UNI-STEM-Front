@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   olympiadAPI,
   adminAPI,
   resolterAPI,
   schoolTeacherAPI,
-  universityAPI,
-} from "../../services/api";
+  universityAPI } from
+"../../services/api";
 import { formatDate } from "../../utils/helpers";
 import { useAuth } from "../../context/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
@@ -28,7 +28,7 @@ async function getAdminResults(olympiadId = null) {
   return { data: { success: true, results: flattenResultGroups(groups) } };
 }
 
-const Results = () => {
+const Results = () => {useLocale();
   const { id } = useParams(); // olympiadId from URL (optional)
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -47,17 +47,17 @@ const Results = () => {
   const [editForm, setEditForm] = useState({
     totalScore: "",
     maxScore: "",
-    percentage: "",
+    percentage: ""
   });
 
   // Check if user is admin, owner, resolter, school teacher, or university (used throughout component)
   const isAdminOrOwner =
-    user?.role === USER_ROLES.ADMIN || user?.role === USER_ROLES.OWNER;
+  user?.role === USER_ROLES.ADMIN || user?.role === USER_ROLES.OWNER;
   const isResolter = user?.role === USER_ROLES.RESOLTER;
   const isSchoolTeacher = user?.role === USER_ROLES.SCHOOL_TEACHER;
   const isUniversity = user?.role === USER_ROLES.UNIVERSITY;
   const canViewAllResults =
-    isAdminOrOwner || isResolter || isSchoolTeacher || isUniversity;
+  isAdminOrOwner || isResolter || isSchoolTeacher || isUniversity;
 
   const fetchResults = useCallback(async () => {
     if (!id) {
@@ -93,10 +93,10 @@ const Results = () => {
           submissions = submissionsData;
         } else if (submissionsData && typeof submissionsData === "object") {
           submissions =
-            submissionsData.submissions ||
-            submissionsData.data ||
-            submissionsData.results ||
-            [];
+          submissionsData.submissions ||
+          submissionsData.data ||
+          submissionsData.results ||
+          [];
         }
 
         // Final safety check
@@ -116,13 +116,13 @@ const Results = () => {
         let userHasPendingSubmission = false;
         if (!canViewAllResults) {
           // Check if user has a submission that isn't checked yet
-            const userSubmission = (submissions || []).find((submission) => {
+          const userSubmission = (submissions || []).find((submission) => {
             const submissionUserId = submission.userId || submission.user?._id;
             return (
-              user?._id &&
-              (submissionUserId === user._id ||
-                submissionUserId === user._id.toString())
-            );
+              user?._id && (
+              submissionUserId === user._id ||
+              submissionUserId === user._id.toString()));
+
           });
 
           if (userSubmission && userSubmission.status !== "checked") {
@@ -131,10 +131,10 @@ const Results = () => {
 
           visibleSubmissions = (submissions || []).filter((submission) => {
             const isOwnResult =
-              submission.userId === user?._id ||
-              submission.user?._id === user?._id;
+            submission.userId === user?._id ||
+            submission.user?._id === user?._id;
             const isCheckedAndVisible =
-              submission.status === "checked" && submission.visible !== false;
+            submission.status === "checked" && submission.visible !== false;
             const isVisible = submission.visible !== false;
 
             return isOwnResult || isCheckedAndVisible || isVisible;
@@ -147,7 +147,7 @@ const Results = () => {
         let allResults = [];
         if (visibleSubmissions.length > 0) {
           try {
-            allResults = (visibleSubmissions || []).map(submission => normalizeResult(submission, olympiad));
+            allResults = (visibleSubmissions || []).map((submission) => normalizeResult(submission, olympiad));
           } catch (mapError) {
             console.error(
               "Error mapping submissions in fetchResults:",
@@ -177,16 +177,16 @@ const Results = () => {
         }
 
         // Find user result if they participated
-        const userResult = Array.isArray(allResults)
-          ? (allResults || []).find((r) => {
-              const resultUserId = r.user?._id || r.userId || r.user;
-              return (
-                user?._id &&
-                (resultUserId === user._id ||
-                  resultUserId === user._id.toString())
-              );
-            })
-          : null;
+        const userResult = Array.isArray(allResults) ?
+        (allResults || []).find((r) => {
+          const resultUserId = r.user?._id || r.userId || r.user;
+          return (
+            user?._id && (
+            resultUserId === user._id ||
+            resultUserId === user._id.toString()));
+
+        }) :
+        null;
 
         data = {
           success: true,
@@ -195,7 +195,7 @@ const Results = () => {
           totalParticipants: Array.isArray(allResults) ? allResults.length : 0,
           olympiadTitle: olympiad?.title || "",
           olympiadType: olympiad?.type || "",
-          allResults: Array.isArray(allResults) ? allResults : [], // Store all results for admin/owner view
+          allResults: Array.isArray(allResults) ? allResults : [] // Store all results for admin/owner view
         };
       } else {
         // For students: fetch only their result
@@ -220,29 +220,29 @@ const Results = () => {
               submissions = submissionsData;
             } else if (submissionsData && typeof submissionsData === "object") {
               submissions =
-                submissionsData.submissions || submissionsData.data || [];
+              submissionsData.submissions || submissionsData.data || [];
             }
 
             const userSubmission = (submissions || []).find((submission) => {
               const submissionUserId =
-                submission.userId || submission.user?._id;
+              submission.userId || submission.user?._id;
               return (
-                user?._id &&
-                (submissionUserId === user._id ||
-                  submissionUserId === user._id.toString())
-              );
+                user?._id && (
+                submissionUserId === user._id ||
+                submissionUserId === user._id.toString()));
+
             });
 
             if (userSubmission && userSubmission.status !== "checked") {
               setHasPendingSubmission(true);
             }
           } catch (err) {
-            // If we can't check submissions, just continue
-          }
-        }
-      }
 
-      // New API structure
+
+
+
+            // If we can't check submissions, just continue
+          }}} // New API structure
       if (data.success) {
         setUserResult(data.userResult || null);
         setTopFive(data.topFive || []);
@@ -281,8 +281,8 @@ const Results = () => {
           const foundUserResult = (sortedResults || []).find((r) => {
             const resultUserId = r.user?._id || r.userId || r.user;
             return (
-              resultUserId === user._id || resultUserId === user._id.toString()
-            );
+              resultUserId === user._id || resultUserId === user._id.toString());
+
           });
 
           if (foundUserResult) {
@@ -306,11 +306,11 @@ const Results = () => {
       // Check if error message indicates results are being processed
       const lowerErrorMessage = errorMessage.toLowerCase();
       if (
-        lowerErrorMessage.includes("working on") ||
-        lowerErrorMessage.includes("processing") ||
-        lowerErrorMessage.includes("coming") ||
-        lowerErrorMessage.includes("we are working")
-      ) {
+      lowerErrorMessage.includes("working on") ||
+      lowerErrorMessage.includes("processing") ||
+      lowerErrorMessage.includes("coming") ||
+      lowerErrorMessage.includes("we are working"))
+      {
         setHasPendingSubmission(true);
         setError(null); // Don't show as error, show as pending
       } else {
@@ -326,17 +326,17 @@ const Results = () => {
               submissions = submissionsData;
             } else if (submissionsData && typeof submissionsData === "object") {
               submissions =
-                submissionsData.submissions || submissionsData.data || [];
+              submissionsData.submissions || submissionsData.data || [];
             }
 
             const userSubmission = (submissions || []).find((submission) => {
               const submissionUserId =
-                submission.userId || submission.user?._id;
+              submission.userId || submission.user?._id;
               return (
-                user?._id &&
-                (submissionUserId === user._id ||
-                  submissionUserId === user._id.toString())
-              );
+                user?._id && (
+                submissionUserId === user._id ||
+                submissionUserId === user._id.toString()));
+
             });
 
             if (userSubmission && userSubmission.status !== "checked") {
@@ -389,16 +389,16 @@ const Results = () => {
         if (submissionsData && typeof submissionsData === "object") {
           // Check if it's the resolter API format with olympiadResults
           if (
-            submissionsData.olympiadResults &&
-            Array.isArray(submissionsData.olympiadResults)
-          ) {
+          submissionsData.olympiadResults &&
+          Array.isArray(submissionsData.olympiadResults))
+          {
             // Extract and flatten all results from all olympiads
             submissions = [];
             submissionsData.olympiadResults.forEach((olympiadGroup) => {
               if (
-                olympiadGroup.results &&
-                Array.isArray(olympiadGroup.results)
-              ) {
+              olympiadGroup.results &&
+              Array.isArray(olympiadGroup.results))
+              {
                 // Transform each result to include olympiad info
                 olympiadGroup.results.forEach((result) => {
                   submissions.push({
@@ -411,11 +411,11 @@ const Results = () => {
                     user: {
                       _id: result.userId,
                       name: result.userName,
-                      email: result.userEmail,
+                      email: result.userEmail
                     },
                     totalScore: result.score,
                     submittedAt: result.completedAt,
-                    completedAt: result.completedAt,
+                    completedAt: result.completedAt
                   });
                 });
               }
@@ -426,10 +426,10 @@ const Results = () => {
           } else {
             // Try to extract from other possible structures
             submissions =
-              submissionsData.submissions ||
-              submissionsData.data ||
-              submissionsData.results ||
-              [];
+            submissionsData.submissions ||
+            submissionsData.data ||
+            submissionsData.results ||
+            [];
           }
         } else if (Array.isArray(submissionsData)) {
           submissions = submissionsData;
@@ -453,7 +453,7 @@ const Results = () => {
         } else if (submissionsData && typeof submissionsData === "object") {
           // If it's an object, try to extract an array from it
           submissions =
-            submissionsData.submissions || submissionsData.data || [];
+          submissionsData.submissions || submissionsData.data || [];
         } else {
           submissions = [];
         }
@@ -471,18 +471,18 @@ const Results = () => {
       if (submissions.length > 0) {
         // Check if results already have olympiad info (from resolter API)
         const hasOlympiadInfo =
-          submissions?.[0]?.olympiad || submissions?.[0]?.olympiadTitle;
+        submissions?.[0]?.olympiad || submissions?.[0]?.olympiadTitle;
 
         if (hasOlympiadInfo) {
           // Results already have olympiad info, use them as-is
           resultsWithOlympiad = (submissions || []).map((submission) => ({
             ...submission,
             olympiadTitle:
-              submission.olympiadTitle ||
-              submission.olympiad?.title ||
-              "Unknown Olympiad",
+            submission.olympiadTitle ||
+            submission.olympiad?.title ||
+            "Unknown Olympiad",
             olympiadType:
-              submission.olympiadType || submission.olympiad?.type || "test",
+            submission.olympiadType || submission.olympiad?.type || "test"
           }));
         } else {
           // Need to fetch olympiads and match them
@@ -499,7 +499,7 @@ const Results = () => {
                 ...submission,
                 olympiad: olympiad,
                 olympiadTitle: olympiad?.title || "Unknown Olympiad",
-                olympiadType: olympiad?.type || "test",
+                olympiadType: olympiad?.type || "test"
               };
             });
           } catch (mapError) {
@@ -522,9 +522,9 @@ const Results = () => {
       if (!canViewAllResults) {
         visibleResults = (resultsWithOlympiad || []).filter((result) => {
           const isOwnResult =
-            result.userId === user?._id || result.user?._id === user?._id;
+          result.userId === user?._id || result.user?._id === user?._id;
           const isCheckedAndVisible =
-            result.status === "checked" && result.visible !== false;
+          result.status === "checked" && result.visible !== false;
           const isVisible = result.visible !== false;
 
           return isOwnResult || isCheckedAndVisible || isVisible;
@@ -540,7 +540,7 @@ const Results = () => {
         });
       }
 
-      setAllUserResults(visibleResults.map(result => normalizeResult(result)));
+      setAllUserResults(visibleResults.map((result) => normalizeResult(result)));
     } catch (error) {
       console.error("Error fetching all user results:", error);
       setError("Failed to fetch results. Please try again later.");
@@ -566,47 +566,47 @@ const Results = () => {
     return (
       <div className="results-loading">
         <div className="loading-spinner"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (error && !hasPendingSubmission) {
     // Check if error message indicates results are being processed
     const isPendingMessage =
-      error.toLowerCase().includes("working on") ||
-      error.toLowerCase().includes("processing") ||
-      error.toLowerCase().includes("coming");
+    error.toLowerCase().includes("working on") ||
+    error.toLowerCase().includes("processing") ||
+    error.toLowerCase().includes("coming");
 
     return (
       <div className="results-page page-container">
         <div>
           <div className="no-results card">
-            {isPendingMessage ? (
-              <>
-                <h1 className="pending-results-title">
-                  Your Results Are Being Checked
-                </h1>
-                <p className="pending-results-message">Please wait.</p>
-                <Link to="/dashboard" className="button-primary">
-                  Go to Dashboard
-                </Link>
-                <p className="pending-results-footer">
-                  We will notify you once your results are ready.
-                </p>
+            {isPendingMessage ?
+            <>
+                <h1 className="pending-results-title">{t("Your Results Are Being Checked ")}
+
+              </h1>
+                <p className="pending-results-message">{t("Please wait.")}</p>
+                <Link to="/dashboard" className="button-primary">{t("Go to Dashboard ")}
+
+              </Link>
+                <p className="pending-results-footer">{t("We will notify you once your results are ready. ")}
+
+              </p>
+              </> :
+
+            <>
+                <h2>{t("Error")}</h2>
+                <p>{t(error)}</p>
+                <Link to="/dashboard" className="button-primary">{t("Go to Dashboard ")}
+
+              </Link>
               </>
-            ) : (
-              <>
-                <h2>Error</h2>
-                <p>{error}</p>
-                <Link to="/dashboard" className="button-primary">
-                  Go to Dashboard
-                </Link>
-              </>
-            )}
+            }
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // If no olympiad ID, show all user results
@@ -616,105 +616,105 @@ const Results = () => {
         <div>
           <div className="results-header">
             <h1 className="results-title">
-              {canViewAllResults ? "All Results" : "All Your Results"}
+              {t(canViewAllResults ? "All Results" : "All Your Results")}
             </h1>
             <p className="results-subtitle">
-              {canViewAllResults
-                ? "View all olympiad results from all users"
-                : "View all your olympiad results"}
+              {t(canViewAllResults ?
+              "View all olympiad results from all users" :
+              "View all your olympiad results")}
             </p>
           </div>
 
-          {(allUserResults || []).length === 0 ? (
-            <>
+          {(allUserResults || []).length === 0 ?
+          <>
             <div className="all-results-list"><div id="tutorial-results-slot" className="tutorial-grid-slot" /></div>
             <div className="empty-state">
               <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
-              <h3>No results yet</h3>
+              <h3>{t("No results yet")}</h3>
               <p>
-                {canViewAllResults
-                  ? "No olympiad results found yet."
-                  : "Complete your first olympiad to see your score and place among participants here."}
+                {t(canViewAllResults ?
+                "No olympiad results found yet." :
+                "Complete your first olympiad to see your score and place among participants here.")}
               </p>
-              <Link to="/dashboard" className="button-primary">
-                Find an olympiad
+              <Link to="/dashboard" className="button-primary">{t("Find an olympiad ")}
+
               </Link>
             </div>
-            </>
-          ) : (
-            <div className="all-results-list">
+            </> :
+
+          <div className="all-results-list">
               <div id="tutorial-results-slot" className="tutorial-grid-slot" />
               {(allUserResults || []).map((resultItem, index) => {
-                const totalScore = Number(resultItem?.totalScore) || 0;
-                const totalPoints = Number(resultItem?.maxScore ?? resultItem?.totalPoints ?? resultItem?.olympiad?.totalPoints) || 0;
-                const percentage = totalPoints > 0
-                  ? Math.round((totalScore / totalPoints) * 100)
-                  : 0;
+              const totalScore = Number(resultItem?.totalScore) || 0;
+              const totalPoints = Number(resultItem?.maxScore ?? resultItem?.totalPoints ?? resultItem?.olympiad?.totalPoints) || 0;
+              const percentage = totalPoints > 0 ?
+              Math.round(totalScore / totalPoints * 100) :
+              0;
 
-                return (
-                  <div
-                    key={resultItem._id || index}
-                    className="result-item-card card"
-                    onClick={() =>
-                      navigate(`/olympiad/${resultItem.olympiadId}/results`)
-                    }
-                    style={{ cursor: "pointer" }}
-                  >
+              return (
+                <div
+                  key={resultItem._id || index}
+                  className="result-item-card card"
+                  onClick={() =>
+                  navigate(`/olympiad/${resultItem.olympiadId}/results`)
+                  }
+                  style={{ cursor: "pointer" }}>
+
                     <div className="result-item-header">
                       <h3 className="result-item-title">
-                        {resultItem.olympiadTitle}
+                        {t(resultItem.olympiadTitle)}
                       </h3>
                       <div className="result-item-badge">
-                        {resultItem.olympiadType}
+                        {t(resultItem.olympiadType)}
                       </div>
                     </div>
 
                     <div className="result-item-content">
                       <div className="result-item-score">
                         <span className="score-value">
-                          {totalScore}
+                          {t(totalScore)}
                         </span>
                         <span className="score-divider">/</span>
                         <span className="score-total">
-                          {totalPoints}
+                          {t(totalPoints)}
                         </span>
                         <span className="score-percentage">
-                          ({percentage}%)
+                          ({t(percentage)}%)
                         </span>
                       </div>
 
                       <div className="result-item-meta">
                         <div className="meta-item">
-                          <span className="meta-label">Rank:</span>
+                          <span className="meta-label">{t("Rank:")}</span>
                           <span className="meta-value">
-                            #{resultItem.rank || "N/A"}
+                            #{t(resultItem.rank || "N/A")}
                           </span>
                         </div>
                         <div className="meta-item">
-                          <span className="meta-label">Completed:</span>
+                          <span className="meta-label">{t("Completed:")}</span>
                           <span className="meta-value">
-                            {resultItem.submittedAt || resultItem.completedAt
-                              ? formatDate(
-                                  resultItem.submittedAt ||
-                                    resultItem.completedAt
-                                )
-                              : "N/A"}
+                            {t(resultItem.submittedAt || resultItem.completedAt ?
+                          formatDate(
+                            resultItem.submittedAt ||
+                            resultItem.completedAt
+                          ) :
+                          "N/A")}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="result-item-action">
-                      <span className="action-text">View results &amp; answers →</span>
+                      <span className="action-text">{t("View results & answers →")}</span>
                     </div>
-                  </div>
-                );
-              })}
+                  </div>);
+
+            })}
             </div>
-          )}
+          }
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // If olympiad ID is provided, show specific olympiad results
@@ -724,29 +724,29 @@ const Results = () => {
       <div className="results-page page-container">
         <div>
           <div className="empty-state">
-            {hasPendingSubmission ? (
-              <>
+            {hasPendingSubmission ?
+            <>
                 <div className="empty-icon">⏳</div>
-                <h3>Your Results Are Being Checked</h3>
-                <p>Please wait. We will notify you once your results are ready.</p>
-                <Link to="/dashboard" className="button-primary">
-                  Go to Dashboard
-                </Link>
-              </>
-            ) : (
-              <>
+                <h3>{t("Your Results Are Being Checked")}</h3>
+                <p>{t("Please wait. We will notify you once your results are ready.")}</p>
+                <Link to="/dashboard" className="button-primary">{t("Go to Dashboard ")}
+
+              </Link>
+              </> :
+
+            <>
                 <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
-                <h3>No results yet</h3>
-                <p>You haven't completed this olympiad yet.</p>
-                <Link to="/dashboard" className="button-primary">
-                  Go to Dashboard
-                </Link>
+                <h3>{t("No results yet")}</h3>
+                <p>{t("You haven't completed this olympiad yet.")}</p>
+                <Link to="/dashboard" className="button-primary">{t("Go to Dashboard ")}
+
+              </Link>
               </>
-            )}
+            }
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // For admins/owners/resolters with no results at all for this olympiad
@@ -756,22 +756,22 @@ const Results = () => {
         <div>
           <div className="empty-state">
             <div className="empty-icon"><img src="/images/empty-results-generated.webp" width="180" height="180" alt="" /></div>
-            <h3>No results yet</h3>
-            <p>No one has completed this olympiad yet.</p>
-            <Link to="/dashboard" className="button-primary">
-              Go to Dashboard
+            <h3>{t("No results yet")}</h3>
+            <p>{t("No one has completed this olympiad yet.")}</p>
+            <Link to="/dashboard" className="button-primary">{t("Go to Dashboard ")}
+
             </Link>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
-  const userScore = userResult ? (Number(userResult?.score) || Number(userResult?.totalScore) || 0) : 0;
-  const userTotalPoints = userResult ? (Number(userResult?.totalPoints) || 100) : 100;
-  const percentage = userResult
-    ? (userResult.percentage !== undefined ? Number(userResult.percentage) : (userTotalPoints > 0 ? Math.round((userScore / userTotalPoints) * 100) : 0))
-    : 0;
+  const userScore = userResult ? Number(userResult?.score) || Number(userResult?.totalScore) || 0 : 0;
+  const userTotalPoints = userResult ? Number(userResult?.totalPoints) || 100 : 100;
+  const percentage = userResult ?
+  userResult.percentage !== undefined ? Number(userResult.percentage) : userTotalPoints > 0 ? Math.round(userScore / userTotalPoints * 100) : 0 :
+  0;
 
   // Check if user is in top 3
   const userInTopThree = userResult && (Number(userResult?.rank) || 0) <= 3;
@@ -787,7 +787,7 @@ const Results = () => {
       setLoading(true);
       const updateData = {};
       if (editForm?.totalScore)
-        updateData.totalScore = Math.max(0, Number(editForm.totalScore) || 0);
+      updateData.totalScore = Math.max(0, Number(editForm.totalScore) || 0);
       if (editForm?.maxScore) {
         const maxScoreNum = Number(editForm.maxScore) || 0;
         if (maxScoreNum > 0) updateData.maxScore = maxScoreNum;
@@ -801,7 +801,7 @@ const Results = () => {
 
       setNotification({
         message: "Result updated successfully!",
-        type: "success",
+        type: "success"
       });
       setEditingResult(null);
       setEditForm({ totalScore: "", maxScore: "", percentage: "" });
@@ -815,7 +815,7 @@ const Results = () => {
     } catch (error) {
       setNotification({
         message: "Failed to update result. Please try again.",
-        type: "error",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -828,7 +828,7 @@ const Results = () => {
     setEditForm({
       totalScore: String(Number(result?.totalScore) || Number(result?.score) || 0),
       maxScore: String(Number(result?.totalPoints) || Number(result?.maxScore) || 100),
-      percentage: result?.percentage !== undefined ? String(Number(result.percentage) || 0) : "",
+      percentage: result?.percentage !== undefined ? String(Number(result.percentage) || 0) : ""
     });
   };
 
@@ -854,338 +854,338 @@ const Results = () => {
       <div className="container">
         <div className="results-header">
           <h1 className="results-title">
-            {canViewAllResults ? "All Results" : "Your Results"}
+            {t(canViewAllResults ? "All Results" : "Your Results")}
           </h1>
-          {olympiadTitle && (
-            <h2 className="results-subtitle">{olympiadTitle}</h2>
-          )}
+          {olympiadTitle &&
+          <h2 className="results-subtitle">{t(olympiadTitle)}</h2>
+          }
         </div>
 
         {/* Top 3 Winners Section */}
-        {topThree.length > 0 && (
-          <div className="top-three-section">
-            <h3 className="section-title">🏆 Top 3 Winners</h3>
+        {topThree.length > 0 &&
+        <div className="top-three-section">
+            <h3 className="section-title">{t("🏆 Top 3 Winners")}</h3>
             <div className="top-three-grid">
               {(topThree || []).map((topResult, index) => {
-                const isCurrentUser =
-                  topResult.userId === user._id ||
-                  topResult.user?._id === user._id;
-                const topScore = Number(topResult?.score) || Number(topResult?.totalScore) || 0;
-                const topTotalPoints = Number(topResult?.totalPoints) || 100;
-                const topPercentage = topResult?.percentage !== undefined
-                  ? Number(topResult.percentage)
-                  : (topTotalPoints > 0 ? Math.round((topScore / topTotalPoints) * 100) : 0);
+              const isCurrentUser =
+              topResult.userId === user._id ||
+              topResult.user?._id === user._id;
+              const topScore = Number(topResult?.score) || Number(topResult?.totalScore) || 0;
+              const topTotalPoints = Number(topResult?.totalPoints) || 100;
+              const topPercentage = topResult?.percentage !== undefined ?
+              Number(topResult.percentage) :
+              topTotalPoints > 0 ? Math.round(topScore / topTotalPoints * 100) : 0;
 
-                return (
-                  <div
-                    key={topResult.userId || topResult._id || index}
-                    className={`top-three-card card ${
-                      isCurrentUser ? "current-user" : ""
-                    }`}
-                  >
+              return (
+                <div
+                  key={topResult.userId || topResult._id || index}
+                  className={`top-three-card card ${
+                  isCurrentUser ? "current-user" : ""}`
+                  }>
+
                     <div className="top-three-rank">
-                      {topResult.position ||
-                        (topResult.rank === 1
-                          ? "🥇"
-                          : topResult.rank === 2
-                          ? "🥈"
-                          : "🥉")}
+                      {t(topResult.position || (
+                    topResult.rank === 1 ?
+                    "🥇" :
+                    topResult.rank === 2 ?
+                    "🥈" :
+                    "🥉"))}
                     </div>
                     <div className="top-three-info">
                       <div className="top-three-name">
-                        {isCurrentUser
-                          ? "You"
-                          : topResult.userName || topResult.user?.name || "Unknown participant"}
+                        {isCurrentUser ? t(
+                        "You") :
+                      topResult.userName || topResult.user?.name || t("Unknown participant")}
                       </div>
                       <div className="top-three-score">
-                        {topScore} / {topTotalPoints}
+                        {t(topScore)} / {t(topTotalPoints)}
                       </div>
                       <div className="top-three-percentage">
-                        {topPercentage}%
+                        {t(topPercentage)}%
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  </div>);
+
+            })}
             </div>
           </div>
-        )}
+        }
 
         {/* Show all results table for admins/owners/resolters */}
-        {canViewAllResults && (allResults || []).length > 0 && (
-          <div className="all-results-table-section">
-            <h3 className="section-title">
-              All Participants ({(allResults || []).length})
+        {canViewAllResults && (allResults || []).length > 0 &&
+        <div className="all-results-table-section">
+            <h3 className="section-title">{t("All Participants (")}
+            {t((allResults || []).length)})
             </h3>
             <div className="all-results-table card">
               <div
-                className={`table-header ${isResolter ? "has-actions" : ""}`}
-              >
-                <div className="table-cell rank-cell">Rank</div>
-                <div className="table-cell name-cell">Name</div>
-                <div className="table-cell email-cell">Email</div>
-                <div className="table-cell score-cell">Score</div>
-                <div className="table-cell time-cell">Completed</div>
-                {isResolter && (
-                  <div className="table-cell actions-cell">Actions</div>
-                )}
+              className={`table-header ${isResolter ? "has-actions" : ""}`}>
+
+                <div className="table-cell rank-cell">{t("Rank")}</div>
+                <div className="table-cell name-cell">{t("Name")}</div>
+                <div className="table-cell email-cell">{t("Email")}</div>
+                <div className="table-cell score-cell">{t("Score")}</div>
+                <div className="table-cell time-cell">{t("Completed")}</div>
+                {isResolter &&
+              <div className="table-cell actions-cell">{t("Actions")}</div>
+              }
               </div>
               <div className="table-body">
                 {(allResults || []).map((result, index) => {
-                  const resultScore = Number(result?.totalScore) || Number(result?.score) || 0;
-                  const resultTotalPoints = Number(result?.totalPoints) || 100;
-                  const resultPercentage = resultTotalPoints > 0
-                    ? Math.round((resultScore / resultTotalPoints) * 100)
-                    : 0;
-                  const isCurrentUser =
-                    user?._id &&
-                    (result.user?._id === user._id ||
-                      result.userId === user._id ||
-                      result.userId?.toString() === user._id.toString());
+                const resultScore = Number(result?.totalScore) || Number(result?.score) || 0;
+                const resultTotalPoints = Number(result?.totalPoints) || 100;
+                const resultPercentage = resultTotalPoints > 0 ?
+                Math.round(resultScore / resultTotalPoints * 100) :
+                0;
+                const isCurrentUser =
+                user?._id && (
+                result.user?._id === user._id ||
+                result.userId === user._id ||
+                result.userId?.toString() === user._id.toString());
 
-                  return (
-                    <div
-                      key={result._id || index}
-                      className={`table-row ${
-                        isCurrentUser ? "current-user-row" : ""
-                      } ${index < 3 ? "top-three" : ""} ${
-                        isResolter ? "has-actions" : ""
-                      }`}
-                    >
+                return (
+                  <div
+                    key={result._id || index}
+                    className={`table-row ${
+                    isCurrentUser ? "current-user-row" : ""} ${
+                    index < 3 ? "top-three" : ""} ${
+                    isResolter ? "has-actions" : ""}`
+                    }>
+
                       <div className="table-cell rank-cell">
                         <span className="rank-number">
-                          {index === 0
-                            ? "🥇"
-                            : index === 1
-                            ? "🥈"
-                            : index === 2
-                            ? "🥉"
-                            : `#${result.rank || index + 1}`}
+                          {t(index === 0 ?
+                        "🥇" :
+                        index === 1 ?
+                        "🥈" :
+                        index === 2 ?
+                        "🥉" :
+                        `#${result.rank || index + 1}`)}
                         </span>
                       </div>
                       <div className="table-cell name-cell">
-                        {isCurrentUser
-                          ? "You"
-                          : result.user?.name || "Anonymous"}
+                        {isCurrentUser ? t(
+                        "You") :
+                      result.user?.name || t("Anonymous")}
                       </div>
                       <div className="table-cell email-cell">
                         {result.user?.email || "-"}
                       </div>
                       <div className="table-cell score-cell">
-                        <span className="score-value">{resultScore}</span>
+                        <span className="score-value">{t(resultScore)}</span>
                         <span className="score-max">
-                          / {resultTotalPoints}
+                          / {t(resultTotalPoints)}
                         </span>
                         <span className="score-percentage">
-                          ({resultPercentage}%)
+                          ({t(resultPercentage)}%)
                         </span>
                       </div>
                       <div className="table-cell time-cell">
-                        {result.completedAt || result.submittedAt
-                          ? formatDate(result.completedAt || result.submittedAt)
-                          : "-"}
+                        {t(result.completedAt || result.submittedAt ?
+                      formatDate(result.completedAt || result.submittedAt) :
+                      "-")}
                       </div>
-                      {isResolter && (
-                        <div className="table-cell actions-cell">
+                      {isResolter &&
+                    <div className="table-cell actions-cell">
                           <button
-                            className="button-small button-primary"
-                            onClick={() => openEditModal(result)}
-                          >
-                            Edit
-                          </button>
+                        className="button-small button-primary"
+                        onClick={() => openEditModal(result)}>{t("Edit ")}
+
+
+                      </button>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    }
+                    </div>);
+
+              })}
               </div>
             </div>
           </div>
-        )}
+        }
 
         {/* Edit Result Modal for Resolters */}
-        {isResolter && editingResult && (
-          <div className="modal-overlay" onClick={closeEditModal}>
+        {isResolter && editingResult &&
+        <div className="modal-overlay" onClick={closeEditModal}>
             <div
-              className="modal-content card"
-              onClick={(e) => e.stopPropagation()}
-            >
+            className="modal-content card"
+            onClick={(e) => e.stopPropagation()}>
+
               <div className="modal-header">
-                <h3>Edit Result</h3>
-                <button className="modal-close" onClick={closeEditModal} aria-label="Close edit result">
+                <h3>{t("Edit Result")}</h3>
+                <button className="modal-close" onClick={closeEditModal} aria-label={t("Close edit result")}>
                   ×
                 </button>
               </div>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>User: {editingResult.user?.name || "Anonymous"}</label>
+                  <label>{t("User: ")}{editingResult.user?.name || t("Anonymous")}</label>
                 </div>
                 <div className="form-group">
-                  <label>Olympiad: {olympiadTitle || "Unknown"}</label>
+                  <label>{t("Olympiad: ")}{t(olympiadTitle || "Unknown")}</label>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Current Score:{" "}
-                    {Number(editingResult?.totalScore) || Number(editingResult?.score) || 0}
-                    {editingResult?.totalPoints &&
-                      ` / ${Number(editingResult.totalPoints) || 100}`}
-                    {editingResult?.percentage !== undefined &&
-                      ` (${Number(editingResult.percentage) || 0}%)`}
+                  <label>{t("Current Score:")}
+                  {t(" ")}
+                    {t(Number(editingResult?.totalScore) || Number(editingResult?.score) || 0)}
+                    {t(editingResult?.totalPoints &&
+                  ` / ${Number(editingResult.totalPoints) || 100}`)}
+                    {t(editingResult?.percentage !== undefined &&
+                  ` (${Number(editingResult.percentage) || 0}%)`)}
                   </label>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="edit-total-score">Total Score *</label>
+                  <label htmlFor="edit-total-score">{t("Total Score *")}</label>
                   <input
-                    type="number"
-                    id="edit-total-score"
-                    value={editForm.totalScore}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, totalScore: e.target.value })
-                    }
-                    placeholder="Enter total score"
-                    required
-                  />
+                  type="number"
+                  id="edit-total-score"
+                  value={editForm.totalScore}
+                  onChange={(e) =>
+                  setEditForm({ ...editForm, totalScore: e.target.value })
+                  }
+                  placeholder={t("Enter total score")}
+                  required />
+
                 </div>
                 <div className="form-group">
-                  <label htmlFor="edit-max-score">Max Score (optional)</label>
+                  <label htmlFor="edit-max-score">{t("Max Score (optional)")}</label>
                   <input
-                    type="number"
-                    id="edit-max-score"
-                    value={editForm.maxScore}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, maxScore: e.target.value })
-                    }
-                    placeholder="Enter max score"
-                  />
+                  type="number"
+                  id="edit-max-score"
+                  value={editForm.maxScore}
+                  onChange={(e) =>
+                  setEditForm({ ...editForm, maxScore: e.target.value })
+                  }
+                  placeholder={t("Enter max score")} />
+
                 </div>
                 <div className="form-group">
-                  <label htmlFor="edit-percentage">Percentage (optional)</label>
+                  <label htmlFor="edit-percentage">{t("Percentage (optional)")}</label>
                   <input
-                    type="number"
-                    id="edit-percentage"
-                    value={editForm.percentage}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, percentage: e.target.value })
-                    }
-                    placeholder="Enter percentage"
-                    min="0"
-                    max="100"
-                  />
+                  type="number"
+                  id="edit-percentage"
+                  value={editForm.percentage}
+                  onChange={(e) =>
+                  setEditForm({ ...editForm, percentage: e.target.value })
+                  }
+                  placeholder={t("Enter percentage")}
+                  min="0"
+                  max="100" />
+
                 </div>
               </div>
               <div className="modal-actions">
-                <button className="button-secondary" onClick={closeEditModal}>
-                  Cancel
-                </button>
+                <button className="button-secondary" onClick={closeEditModal}>{t("Cancel ")}
+
+              </button>
                 <button
-                  className="button-primary"
-                  onClick={() => handleEditResult(editingResult._id)}
-                >
-                  Save
-                </button>
+                className="button-primary"
+                onClick={() => handleEditResult(editingResult._id)}>{t("Save ")}
+
+
+              </button>
               </div>
             </div>
           </div>
-        )}
+        }
 
         {/* User's Latest Result - Large Section (only show if user participated) */}
-        {userResult && (
-          <div className="user-result-large card">
+        {userResult &&
+        <div className="user-result-large card">
             <div className="user-result-header">
-              <h3 className="user-result-title">Your Latest Result</h3>
+              <h3 className="user-result-title">{t("Your Latest Result")}</h3>
               <div className="user-rank-badge">
-                {userResult.position || getPositionDisplay()}
+                {t(userResult.position || getPositionDisplay())}
               </div>
             </div>
 
             <div className="user-result-content">
               <div className="user-result-main">
                 <div className="user-score-large">
-                  <div className="score-number">{userScore}</div>
+                  <div className="score-number">{t(userScore)}</div>
                   <div className="score-divider">/</div>
                   <div className="score-total">
-                    {userTotalPoints}
+                    {t(userTotalPoints)}
                   </div>
                 </div>
-                <div className="user-percentage-large">{percentage}%</div>
+                <div className="user-percentage-large">{t(percentage)}%</div>
               </div>
 
               <div className="user-result-details">
                 <div className="detail-item">
-                  <span className="detail-label">Rank</span>
+                  <span className="detail-label">{t("Rank")}</span>
                   <span className="detail-value">
-                    {userResult?.position || `#${Number(userResult?.rank) || 0}`}
+                    {t(userResult?.position || `#${Number(userResult?.rank) || 0}`)}
                   </span>
                 </div>
                 <div className="detail-item">
-                  <span className="detail-label">Completed</span>
+                  <span className="detail-label">{t("Completed")}</span>
                   <span className="detail-value">
-                    {userResult.submittedAt || userResult.completedAt
-                      ? formatDate(
-                          userResult.submittedAt || userResult.completedAt
-                        )
-                      : "N/A"}
+                    {t(userResult.submittedAt || userResult.completedAt ?
+                  formatDate(
+                    userResult.submittedAt || userResult.completedAt
+                  ) :
+                  "N/A")}
                   </span>
                 </div>
-                {(Number(totalParticipants) || 0) > 0 && (
-                  <div className="detail-item">
-                    <span className="detail-label">Total Participants</span>
-                    <span className="detail-value">{Number(totalParticipants) || 0}</span>
+                {(Number(totalParticipants) || 0) > 0 &&
+              <div className="detail-item">
+                    <span className="detail-label">{t("Total Participants")}</span>
+                    <span className="detail-value">{t(Number(totalParticipants) || 0)}</span>
                   </div>
-                )}
+              }
               </div>
             </div>
           </div>
-        )}
+        }
 
         {/* User's Position in List (if not in top 3) */}
-        {userResult && !userInTopThree && (Number(userResult?.rank) || 0) > 3 && (
-          <div className="user-position-section">
-            <h3 className="section-title">Your Position</h3>
+        {userResult && !userInTopThree && (Number(userResult?.rank) || 0) > 3 &&
+        <div className="user-position-section">
+            <h3 className="section-title">{t("Your Position")}</h3>
             <div className="user-position-card card highlighted">
               <div className="position-rank">
-                {userResult?.position || `#${Number(userResult?.rank) || 0}`}
+                {t(userResult?.position || `#${Number(userResult?.rank) || 0}`)}
               </div>
               <div className="position-info">
-                <div className="position-name">You</div>
+                <div className="position-name">{t("You")}</div>
                 <div className="position-score">
-                  {userScore} / {userTotalPoints} (
-                  {percentage}%)
+                  {t(userScore)} / {t(userTotalPoints)} (
+                  {t(percentage)}%)
                 </div>
-                <div className="position-time">
-                  Completed:{" "}
-                  {userResult.submittedAt || userResult.completedAt
-                    ? formatDate(
-                        userResult.submittedAt || userResult.completedAt
-                      )
-                    : "N/A"}
+                <div className="position-time">{t("Completed:")}
+                {t(" ")}
+                  {t(userResult.submittedAt || userResult.completedAt ?
+                formatDate(
+                  userResult.submittedAt || userResult.completedAt
+                ) :
+                "N/A")}
                 </div>
               </div>
             </div>
           </div>
-        )}
+        }
 
         {!canViewAllResults && <AnswerReview questions={userResult?.questionReview} />}
 
         <div className="results-actions">
-          <Link to={`/olympiad/${id}/leaderboard`} className="button-primary">
-            View Full Leaderboard
+          <Link to={`/olympiad/${id}/leaderboard`} className="button-primary">{t("View Full Leaderboard ")}
+
           </Link>
-          <Link to="/dashboard" className="button-secondary">
-            Back to Dashboard
+          <Link to="/dashboard" className="button-secondary">{t("Back to Dashboard ")}
+
           </Link>
         </div>
 
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Results;

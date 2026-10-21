@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { t, useLocale } from "../i18n/runtime";import { useEffect, useRef, useState } from 'react';
 import { olympiadAPI } from '../services/api';
 import { VIDEO_WIDTH, VIDEO_HEIGHT, API_BASE_URL, CAMERA_CAPTURE_INTERVAL } from '../utils/constants';
 import { generateVideoFilename, generateExitScreenshotFilename } from '../utils/helpers';
@@ -7,11 +7,11 @@ import { consumePendingProctoringStreams } from '../utils/proctoringSession';
 import './ProctoringMonitor.css';
 import ProctoringStatus from './ProctoringStatus';
 
-const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {
-  const [mobileCameraOnly] = useState(()=>usesMobileCameraMode() || localStorage.getItem(`olympiad_${olympiadId}_proctoringMode`)==='mobile_camera');
+const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatusChange, onProctoringStatusChange, onFaceStatusChange }) => {useLocale();
+  const [mobileCameraOnly] = useState(() => usesMobileCameraMode() || localStorage.getItem(`olympiad_${olympiadId}_proctoringMode`) === 'mobile_camera');
   const cameraVideoRef = useRef(null);
   const screenVideoRef = useRef(null);
-  
+
   const [cameraActive, setCameraActive] = useState(false);
   const [screenActive, setScreenActive] = useState(false);
   const [cameraError, setCameraError] = useState(null);
@@ -23,7 +23,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   const [uploadProgress, setUploadProgress] = useState({ camera: 0, screen: 0 });
   const [uploadStatus, setUploadStatus] = useState('');
   const [consentGiven, setConsentGiven] = useState(true);
-  
+
   const cameraStreamRef = useRef(null);
   const screenStreamRef = useRef(null);
   const cameraRecorderRef = useRef(null);
@@ -46,8 +46,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       setUploadStatus(`Uploading ${type} video...`);
 
       // Combine all chunks into a single blob
-      const mimeType = chunks[0]?.type || (type==='camera'?cameraRecorderRef.current?.mimeType:screenRecorderRef.current?.mimeType) || 'video/webm';
-      const videoBlob = new Blob(chunks, { type:mimeType });
+      const mimeType = chunks[0]?.type || (type === 'camera' ? cameraRecorderRef.current?.mimeType : screenRecorderRef.current?.mimeType) || 'video/webm';
+      const videoBlob = new Blob(chunks, { type: mimeType });
 
       // Create File object from blob
       // Generate filename: {userId}_{date}_{olympiad-name}_{type}.webm
@@ -57,8 +57,8 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         type,
         new Date()
       );
-      const recordingFilename = mimeType.includes('mp4') ? filename.replace(/\.webm$/,'.mp4') : filename;
-      const videoFile = new File([videoBlob], recordingFilename, { type:mimeType });
+      const recordingFilename = mimeType.includes('mp4') ? filename.replace(/\.webm$/, '.mp4') : filename;
+      const videoFile = new File([videoBlob], recordingFilename, { type: mimeType });
 
       // Create FormData
       const formData = new FormData();
@@ -68,7 +68,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Upload video with progress tracking
       await olympiadAPI.uploadVideo(formData, (progress) => {
-        setUploadProgress(prev => ({
+        setUploadProgress((prev) => ({
           ...prev,
           [type]: progress
         }));
@@ -116,7 +116,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
     } catch (error) {
       console.error('Error uploading videos:', error);
       setUploadStatus('Upload failed');
-      alert('Connection failed. Please try again.');
+      alert(t('Connection failed. Please try again.'));
     } finally {
       setTimeout(() => {
         setIsUploading(false);
@@ -203,9 +203,9 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         candidateStream = null;
         const friendlyMessage = getMediaAccessErrorMessage(error, { needsScreen: true });
         const isFatalUnsupported =
-          friendlyMessage.includes('secure context') ||
-          friendlyMessage.includes('not supported') ||
-          friendlyMessage.includes('unsupported');
+        friendlyMessage.includes('secure context') ||
+        friendlyMessage.includes('not supported') ||
+        friendlyMessage.includes('unsupported');
 
         if (isFatalUnsupported) {
           throw error;
@@ -221,18 +221,18 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
   const startCameraRecording = () => {
     try {
       cameraChunksRef.current = [];
-      cameraRecorderRef.current = createStreamRecorder(cameraStreamRef.current, chunk=>cameraChunksRef.current.push(chunk));
-      cameraRecorderRef.current.onerror = () => { setCameraError('Camera recording failed. Please check your camera.'); stopRecording(); };
+      cameraRecorderRef.current = createStreamRecorder(cameraStreamRef.current, (chunk) => cameraChunksRef.current.push(chunk));
+      cameraRecorderRef.current.onerror = () => {setCameraError('Camera recording failed. Please check your camera.');stopRecording();};
       return cameraRecorderRef.current.state === 'recording';
-    } catch(error) { setCameraError(error.message); return false; }
+    } catch (error) {setCameraError(error.message);return false;}
   };
   const startScreenRecording = () => {
     try {
       screenChunksRef.current = [];
-      screenRecorderRef.current = createStreamRecorder(screenStreamRef.current, chunk=>screenChunksRef.current.push(chunk));
-      screenRecorderRef.current.onerror = () => { setScreenError('Screen recording failed. Please check screen sharing.'); stopRecording(); };
+      screenRecorderRef.current = createStreamRecorder(screenStreamRef.current, (chunk) => screenChunksRef.current.push(chunk));
+      screenRecorderRef.current.onerror = () => {setScreenError('Screen recording failed. Please check screen sharing.');stopRecording();};
       return screenRecorderRef.current.state === 'recording';
-    } catch(error) { setScreenError(error.message); return false; }
+    } catch (error) {setScreenError(error.message);return false;}
   };
 
   // Helper function to convert data URL to blob
@@ -304,7 +304,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
           'Authorization': `Bearer ${token}`
         },
         keepalive: true
-      }).catch(error => {
+      }).catch((error) => {
         console.error('Error sending real-time capture:', error);
       });
 
@@ -347,14 +347,14 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Start camera
       try {
-        const cameraStream = pendingStreams.cameraStream || await requestCameraStream({
+        const cameraStream = pendingStreams.cameraStream || (await requestCameraStream({
           video: {
             facingMode: 'user',
             width: { ideal: VIDEO_WIDTH },
             height: { ideal: VIDEO_HEIGHT }
           },
           audio: false
-        });
+        }));
 
         cameraStreamRef.current = cameraStream;
 
@@ -362,7 +362,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
           cameraVideoRef.current.srcObject = cameraStream;
           setCameraActive(true);
           setCameraError(null);
-          cameraStream.getVideoTracks()[0]?.addEventListener('ended',()=>{setCameraActive(false);setCameraError('Camera stopped. Keep camera monitoring active.');stopRecording();});
+          cameraStream.getVideoTracks()[0]?.addEventListener('ended', () => {setCameraActive(false);setCameraError('Camera stopped. Keep camera monitoring active.');stopRecording();});
 
           if (onProctoringStatusChange) {
             onProctoringStatusChange({
@@ -380,54 +380,54 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Desktop screen capture remains mandatory.
       if (!mobileCameraOnly) {
-      try {
-        const screenResult = await requestEntireScreenStream(pendingStreams.screenStream || null);
-        const screenStream = screenResult.stream;
+        try {
+          const screenResult = await requestEntireScreenStream(pendingStreams.screenStream || null);
+          const screenStream = screenResult.stream;
 
-        const videoTrack = screenStream.getVideoTracks()[0];
-        if (!videoTrack) {
-          stopStreamTracks(screenStream);
-          throw new Error('No screen video track found.');
+          const videoTrack = screenStream.getVideoTracks()[0];
+          if (!videoTrack) {
+            stopStreamTracks(screenStream);
+            throw new Error('No screen video track found.');
+          }
+
+          screenStreamRef.current = screenStream;
+
+          if (screenVideoRef.current) {
+            screenVideoRef.current.srcObject = screenStream;
+          }
+
+          setScreenActive(true);
+          setScreenError(null);
+
+          const displaySurface = screenResult.displaySurface;
+
+          if (onProctoringStatusChange) {
+            onProctoringStatusChange({
+              frontCameraActive: Boolean(cameraStreamRef.current),
+              backCameraActive: false,
+              screenShareActive: true,
+              displaySurface
+            });
+          }
+
+          if (typeof videoTrack.addEventListener === 'function') {
+            videoTrack.addEventListener('ended', () => {
+              setScreenError('Screen sharing stopped');
+              setScreenActive(false);
+              stopRecording();
+              if (onRecordingStatusChange) {
+                onRecordingStatusChange(false);
+              }
+            });
+          }
+        } catch (err) {
+          setScreenError(getMediaAccessErrorMessage(err, { needsScreen: true }));
+          console.error('Screen error:', err);
         }
-
-        screenStreamRef.current = screenStream;
-
-        if (screenVideoRef.current) {
-          screenVideoRef.current.srcObject = screenStream;
-        }
-
-        setScreenActive(true);
-        setScreenError(null);
-
-        const displaySurface = screenResult.displaySurface;
-
-        if (onProctoringStatusChange) {
-          onProctoringStatusChange({
-            frontCameraActive: Boolean(cameraStreamRef.current),
-            backCameraActive: false,
-            screenShareActive: true,
-            displaySurface,
-          });
-        }
-
-        if (typeof videoTrack.addEventListener === 'function') {
-          videoTrack.addEventListener('ended', () => {
-            setScreenError('Screen sharing stopped');
-            setScreenActive(false);
-            stopRecording();
-            if (onRecordingStatusChange) {
-              onRecordingStatusChange(false);
-            }
-          });
-        }
-      } catch (err) {
-        setScreenError(getMediaAccessErrorMessage(err, { needsScreen: true }));
-        console.error('Screen error:', err);
-      }
       }
 
       // Wait for streams to initialize
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Start recording both videos - both must be active
       let cameraRecordingStarted = false;
@@ -469,7 +469,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
     try {
       await startMonitoring();
-      if (!cameraStreamRef.current || (!mobileCameraOnly && !screenStreamRef.current)) {
+      if (!cameraStreamRef.current || !mobileCameraOnly && !screenStreamRef.current) {
         monitoringStartedRef.current = false;
       }
     } catch (error) {
@@ -506,7 +506,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
       // Convert to data URL (synchronous)
       const dataURL = canvas.toDataURL('image/jpeg', 0.8);
-      
+
       // Convert data URL to blob synchronously
       const byteString = atob(dataURL.split(',')[1]);
       const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
@@ -516,7 +516,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         ia[i] = byteString.charCodeAt(i);
       }
       const blob = new Blob([ab], { type: mimeString });
-      
+
       // Generate filename: {olympiad-name}_{date}_{time}_exit-{type}.jpg
       const filename = generateExitScreenshotFilename(
         olympiadTitle || `Olympiad-${olympiadId}`,
@@ -540,12 +540,12 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
 
     try {
       // Capture last frames from both videos synchronously
-      const cameraFrame = cameraVideoRef.current
-        ? captureLastFrameSync(cameraVideoRef.current, 'camera')
-        : null;
-      const screenFrame = screenVideoRef.current
-        ? captureLastFrameSync(screenVideoRef.current, 'screen')
-        : null;
+      const cameraFrame = cameraVideoRef.current ?
+      captureLastFrameSync(cameraVideoRef.current, 'camera') :
+      null;
+      const screenFrame = screenVideoRef.current ?
+      captureLastFrameSync(screenVideoRef.current, 'screen') :
+      null;
 
       if (!cameraFrame && !screenFrame) {
         console.warn('No frames captured for exit screenshot');
@@ -556,7 +556,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       // Get user info from localStorage
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         console.warn('No auth token available for exit screenshot');
         exitScreenshotSentRef.current = false;
@@ -589,7 +589,7 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       // Use fetch with keepalive for reliable delivery during page unload
       // Backend will save to uploads/users/{userId}/ folder
       const url = `${API_BASE_URL}/olympiads/exit-screenshot`;
-      
+
       // Use fetch with keepalive flag - ensures request completes even if page unloads
       fetch(url, {
         method: 'POST',
@@ -674,15 +674,15 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       // Perform async cleanup
       (async () => {
         // Wait for uploads to complete
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         // Stop streams
         if (cameraStreamRef.current) {
-          cameraStreamRef.current.getTracks().forEach(track => track.stop());
+          cameraStreamRef.current.getTracks().forEach((track) => track.stop());
           cameraStreamRef.current = null;
         }
         if (screenStreamRef.current) {
-          screenStreamRef.current.getTracks().forEach(track => track.stop());
+          screenStreamRef.current.getTracks().forEach((track) => track.stop());
           screenStreamRef.current = null;
         }
       })();
@@ -706,14 +706,14 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
       }
 
       const faceMesh = new window.FaceMesh({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
       });
 
       faceMesh.setOptions({
         maxNumFaces: 1,
         refineLandmarks: true,
         minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
+        minTrackingConfidence: 0.5
       });
 
       faceMesh.onResults((results) => {
@@ -790,35 +790,35 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
     return (
       <div className="proctoring-consent">
         <div className="consent-card card">
-          <h3>Proctoring Consent</h3>
-          <p>This olympiad requires monitoring for integrity:</p>
+          <h3>{t("Proctoring Consent")}</h3>
+          <p>{t("This olympiad requires monitoring for integrity:")}</p>
           <ul>
-            <li>✓ Front camera will be recorded separately</li>
-            <li>✓ Screen activity will be recorded separately</li>
-            <li>✓ Both videos will be recorded at 720p resolution</li>
-            <li>✓ Videos will be uploaded automatically</li>
+            <li>{t("✓ Front camera will be recorded separately")}</li>
+            <li>{t("✓ Screen activity will be recorded separately")}</li>
+            <li>{t("✓ Both videos will be recorded at 720p resolution")}</li>
+            <li>{t("✓ Videos will be uploaded automatically")}</li>
           </ul>
-          <p className="consent-warning">
-            You must grant camera and screen sharing permissions to continue.
+          <p className="consent-warning">{t("You must grant camera and screen sharing permissions to continue. ")}
+
           </p>
           <p className="consent-warning" style={{ fontSize: '13px', marginTop: '10px' }}>
-            ⚠️ <strong>Important:</strong> When sharing your screen, select <strong>"Entire Screen"</strong> option, not a single window or tab. Full screen sharing is required.
+            ⚠️ <strong>{t("Important:")}</strong>{t(" When sharing your screen, select ")}<strong>{t("\"Entire Screen\"")}</strong>{t(" option, not a single window or tab. Full screen sharing is required. ")}
           </p>
-          <p className="consent-warning" style={{ fontSize: '13px', marginTop: '8px' }}>
-            ℹ️ On mobile devices, screen sharing may be unsupported. If no prompt appears, use a desktop browser (or Chrome/Edge on Android).
+          <p className="consent-warning" style={{ fontSize: '13px', marginTop: '8px' }}>{t("ℹ️ On mobile devices, screen sharing may be unsupported. If no prompt appears, use a desktop browser (or Chrome/Edge on Android). ")}
+
           </p>
-          <button 
+          <button
             className="button-primary"
             onClick={async () => {
               setConsentGiven(true);
               await beginMonitoring();
-            }}
-          >
-            I Agree & Continue
+            }}>{t("I Agree & Continue ")}
+
+
           </button>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const totalProgress = (uploadProgress.camera + uploadProgress.screen) / 2;
@@ -827,48 +827,48 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
     <div className="proctoring-monitor">
       <div className="monitor-camera">
         <div className="monitor-header">
-          <span className="monitor-title">Camera</span>
+          <span className="monitor-title">{t("Camera")}</span>
           {cameraActive && <div className="monitor-indicator" />}
         </div>
-        {cameraError ? (
-          <div className="monitor-error">
+        {cameraError ?
+        <div className="monitor-error">
             <div className="error-icon">📷</div>
-            <div className="error-text">{cameraError}</div>
-          </div>
-        ) : (
-          <div className="monitor-preview">
+            <div className="error-text">{t(cameraError)}</div>
+          </div> :
+
+        <div className="monitor-preview">
             <video
-              ref={cameraVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="monitor-video camera-video"
-            />
+            ref={cameraVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="monitor-video camera-video" />
+
           </div>
-        )}
+        }
       </div>
 
-      {mobileCameraOnly ? <div className="monitor-mobile-mode"><strong>Mobile mode</strong><p>Camera only. Screen sharing is not supported by this mobile browser.</p></div> : <div className="monitor-screen">
+      {mobileCameraOnly ? <div className="monitor-mobile-mode"><strong>{t("Mobile mode")}</strong><p>{t("Camera only. Screen sharing is not supported by this mobile browser.")}</p></div> : <div className="monitor-screen">
         <div className="monitor-header">
-          <span className="monitor-title">Screen</span>
+          <span className="monitor-title">{t("Screen")}</span>
           {screenActive && <div className="monitor-indicator" />}
         </div>
-        {screenError ? (
-          <div className="monitor-error">
+        {screenError ?
+        <div className="monitor-error">
             <div className="error-icon">🖥️</div>
-            <div className="error-text">{screenError}</div>
-          </div>
-        ) : (
-          <div className="monitor-preview">
+            <div className="error-text">{t(screenError)}</div>
+          </div> :
+
+        <div className="monitor-preview">
             <video
-              ref={screenVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="monitor-video screen-video"
-            />
+            ref={screenVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="monitor-video screen-video" />
+
           </div>
-        )}
+        }
       </div>
 
       }
@@ -876,22 +876,22 @@ const ProctoringMonitor = ({ olympiadId, userId, olympiadTitle, onRecordingStatu
         <div className="monitor-status-row">
           <ProctoringStatus mobileCameraOnly={mobileCameraOnly} isRecording={isRecording} cameraActive={cameraActive} screenActive={screenActive} cameraError={cameraError} screenError={screenError} />
 
-          {isUploading && (
-            <div className="monitor-upload-inline">
-              <span className="monitor-upload-label">{uploadStatus || 'Uploading'}</span>
-              <span className="monitor-upload-value">{Math.round(totalProgress)}%</span>
+          {isUploading &&
+          <div className="monitor-upload-inline">
+              <span className="monitor-upload-label">{t(uploadStatus || 'Uploading')}</span>
+              <span className="monitor-upload-value">{t(Math.round(totalProgress))}%</span>
               <div className="upload-progress-bar compact">
                 <div
-                  className="upload-progress-fill"
-                  style={{ width: `${Math.round(totalProgress)}%` }}
-                />
+                className="upload-progress-fill"
+                style={{ width: `${Math.round(totalProgress)}%` }} />
+
               </div>
             </div>
-          )}
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ProctoringMonitor;

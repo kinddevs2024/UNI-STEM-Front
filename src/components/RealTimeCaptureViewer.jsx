@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { getIntlLocale } from '../i18n/runtime';
+import { t, useLocale } from "../i18n/runtime";import { useState, useEffect, useRef } from 'react';
 import { schoolTeacherAPI } from '../services/api';
 import './RealTimeCaptureViewer.css';
 
-const RealTimeCaptureViewer = ({ student, onBack }) => {
+const RealTimeCaptureViewer = ({ student, onBack }) => {useLocale();
   const [cameraImage, setCameraImage] = useState(null);
   const [screenImage, setScreenImage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +13,7 @@ const RealTimeCaptureViewer = ({ student, onBack }) => {
 
   useEffect(() => {
     fetchCaptures();
-    
+
     // Set up auto-refresh every 1 second
     refreshIntervalRef.current = setInterval(() => {
       fetchCaptures();
@@ -31,9 +32,9 @@ const RealTimeCaptureViewer = ({ student, onBack }) => {
         student.userId || student.user?._id || student._id,
         student.olympiadId || student.olympiad?._id
       );
-      
+
       const data = response.data;
-      
+
       // Update images if available
       if (data.cameraImage) {
         setCameraImage(data.cameraImage);
@@ -41,7 +42,7 @@ const RealTimeCaptureViewer = ({ student, onBack }) => {
       if (data.screenImage) {
         setScreenImage(data.screenImage);
       }
-      
+
       setLastUpdate(new Date());
       setError(null);
       setLoading(false);
@@ -57,81 +58,80 @@ const RealTimeCaptureViewer = ({ student, onBack }) => {
   return (
     <div className="capture-viewer">
       <div className="viewer-header">
-        <button className="back-button" onClick={onBack}>
-          ← Back to Students
+        <button className="back-button" onClick={onBack}>{t("← Back to Students ")}
+
         </button>
         <div className="viewer-title">
-          <h2>Live Monitoring: {student.user?.name || student.name || 'Student'}</h2>
+          <h2>{t("Live Monitoring: ")}{student.user?.name || student.name || t('Student')}</h2>
           <p className="viewer-subtitle">
-            {student.olympiadTitle || student.olympiad?.title || 'Olympiad'}
-            {lastUpdate && (
-              <span className="last-update">
-                {' '}• Last update: {lastUpdate.toLocaleTimeString()}
+            {student.olympiadTitle || student.olympiad?.title || t('Olympiad')}
+            {lastUpdate &&
+            <span className="last-update">
+                {t(' ')}{t("• Last update: ")}{t(lastUpdate.toLocaleTimeString(getIntlLocale()))}
               </span>
-            )}
+            }
           </p>
         </div>
       </div>
 
-      {loading && !cameraImage && !screenImage ? (
-        <div className="capture-loading">
+      {loading && !cameraImage && !screenImage ?
+      <div className="capture-loading">
           <div className="loading-spinner"></div>
-          <p>Loading live captures...</p>
-        </div>
-      ) : error ? (
-        <div className="capture-error">
-          <p>{error}</p>
-        </div>
-      ) : (
-        <div className="capture-grid">
+          <p>{t("Loading live captures...")}</p>
+        </div> :
+      error ?
+      <div className="capture-error">
+          <p>{t(error)}</p>
+        </div> :
+
+      <div className="capture-grid">
           <div className="capture-panel card">
             <div className="capture-header">
-              <h3>📷 Camera Feed</h3>
-              <span className="capture-status active">Live</span>
+              <h3>{t("📷 Camera Feed")}</h3>
+              <span className="capture-status active">{t("Live")}</span>
             </div>
             <div className="capture-content">
-              {cameraImage ? (
-                <img
-                  src={cameraImage}
-                  alt="Camera feed"
-                  className="capture-image"
-                  onError={() => setCameraImage(null)}
-                />
-              ) : (
-                <div className="capture-placeholder">
+              {cameraImage ?
+            <img
+              src={cameraImage}
+              alt={t("Camera feed")}
+              className="capture-image"
+              onError={() => setCameraImage(null)} /> :
+
+
+            <div className="capture-placeholder">
                   <div className="placeholder-icon">📷</div>
-                  <p>No camera feed available</p>
+                  <p>{t("No camera feed available")}</p>
                 </div>
-              )}
+            }
             </div>
           </div>
 
           <div className="capture-panel card">
             <div className="capture-header">
-              <h3>🖥️ Screen Feed</h3>
-              <span className="capture-status active">Live</span>
+              <h3>{t("🖥️ Screen Feed")}</h3>
+              <span className="capture-status active">{t("Live")}</span>
             </div>
             <div className="capture-content">
-              {screenImage ? (
-                <img
-                  src={screenImage}
-                  alt="Screen feed"
-                  className="capture-image"
-                  onError={() => setScreenImage(null)}
-                />
-              ) : (
-                <div className="capture-placeholder">
+              {screenImage ?
+            <img
+              src={screenImage}
+              alt={t("Screen feed")}
+              className="capture-image"
+              onError={() => setScreenImage(null)} /> :
+
+
+            <div className="capture-placeholder">
                   <div className="placeholder-icon">🖥️</div>
-                  <p>No screen feed available</p>
+                  <p>{t("No screen feed available")}</p>
                 </div>
-              )}
+            }
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default RealTimeCaptureViewer;
-

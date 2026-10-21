@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { schoolTeacherAPI, olympiadAPI } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
@@ -7,7 +7,7 @@ import RealTimeCaptureViewer from '../../components/RealTimeCaptureViewer';
 import './SchoolTeacherPanel.css';
 import "../AdminPanel/PanelRedesign.css";
 
-const SchoolTeacherPanel = () => {
+const SchoolTeacherPanel = () => {useLocale();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -21,14 +21,14 @@ const SchoolTeacherPanel = () => {
 
   useEffect(() => {
     fetchData();
-    
+
     // Set up auto-refresh for monitoring mode
     if (viewMode === 'monitoring') {
       const interval = setInterval(() => {
         fetchActiveStudents();
       }, 5000); // Refresh every 5 seconds
       setRefreshInterval(interval);
-      
+
       return () => {
         if (interval) clearInterval(interval);
       };
@@ -51,11 +51,11 @@ const SchoolTeacherPanel = () => {
   const fetchData = async () => {
     try {
       const [olympiadsRes] = await Promise.all([
-        olympiadAPI.getAll(),
-      ]);
+      olympiadAPI.getAll()]
+      );
       const olympiadsData = olympiadsRes.data?.data || olympiadsRes.data || [];
       setOlympiads(Array.isArray(olympiadsData) ? olympiadsData : []);
-      
+
       if (viewMode === 'monitoring') {
         await fetchActiveStudents();
       } else {
@@ -74,7 +74,7 @@ const SchoolTeacherPanel = () => {
       setLoading(true);
       const response = await schoolTeacherAPI.getSchoolResults();
       const data = response.data;
-      
+
       if (Array.isArray(data)) {
         setResults(data);
       } else if (data.results) {
@@ -96,7 +96,7 @@ const SchoolTeacherPanel = () => {
       setLoading(true);
       const response = await schoolTeacherAPI.getSchoolResults(olympiadId);
       const data = response.data;
-      
+
       if (Array.isArray(data)) {
         setResults(data);
       } else if (data.results) {
@@ -117,7 +117,7 @@ const SchoolTeacherPanel = () => {
     try {
       const response = await schoolTeacherAPI.getActiveStudents();
       const data = response.data;
-      
+
       if (Array.isArray(data)) {
         setActiveStudents(data);
       } else if (data.students) {
@@ -144,17 +144,17 @@ const SchoolTeacherPanel = () => {
             <div className="loading-spinner"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="school-teacher-panel-page brand-panel" data-brand-panel="teacher">
       <div className="container">
         <div className="teacher-header">
-          <h1 className="teacher-title text-glow">School Teacher Panel</h1>
-          <p className="teacher-subtitle">
-            View results and monitor students from {user?.schoolName || 'your school'}
+          <h1 className="teacher-title text-glow">{t("School Teacher Panel")}</h1>
+          <p className="teacher-subtitle">{t("View results and monitor students from ")}
+            {user?.schoolName || t('your school')}
           </p>
         </div>
 
@@ -162,38 +162,38 @@ const SchoolTeacherPanel = () => {
         <div className="mode-toggle">
           <button
             className={`mode-button ${viewMode === 'results' ? 'active' : ''}`}
-            onClick={() => setViewMode('results')}
-          >
-            📊 Results
+            onClick={() => setViewMode('results')}>{t("📊 Results ")}
+
+
           </button>
           <button
             className={`mode-button ${viewMode === 'monitoring' ? 'active' : ''}`}
-            onClick={() => setViewMode('monitoring')}
-          >
-            📹 Real-Time Monitoring
+            onClick={() => setViewMode('monitoring')}>{t("📹 Real-Time Monitoring ")}
+
+
           </button>
         </div>
 
         {/* Results View */}
-        {viewMode === 'results' && (
-          <>
+        {viewMode === 'results' &&
+        <>
             {/* Filters */}
             <div className="teacher-filters">
               <div className="filter-group">
-                <label>Filter by Olympiad:</label>
+                <label>{t("Filter by Olympiad:")}</label>
                 <select
-                  value={selectedOlympiad || ''}
-                  onChange={(e) => {
-                    setSelectedOlympiad(e.target.value || null);
-                  }}
-                  className="filter-select"
-                >
-                  <option value="">All Olympiads</option>
-                  {olympiads.map((olympiad) => (
-                    <option key={olympiad._id} value={olympiad._id}>
+                value={selectedOlympiad || ''}
+                onChange={(e) => {
+                  setSelectedOlympiad(e.target.value || null);
+                }}
+                className="filter-select">
+
+                  <option value="">{t("All Olympiads")}</option>
+                  {olympiads.map((olympiad) =>
+                <option key={olympiad._id} value={olympiad._id}>
                       {olympiad.title}
                     </option>
-                  ))}
+                )}
                 </select>
               </div>
             </div>
@@ -202,152 +202,151 @@ const SchoolTeacherPanel = () => {
             <div className="teacher-results card">
               <div className="results-header">
                 <h2 className="results-title">
-                  {selectedOlympiad
-                    ? `Results for ${olympiads.find((o) => o._id === selectedOlympiad)?.title || 'Olympiad'}`
-                    : 'All School Results'}
+                  {t(selectedOlympiad ?
+                `Results for ${olympiads.find((o) => o._id === selectedOlympiad)?.title || 'Olympiad'}` :
+                'All School Results')}
                 </h2>
                 <button
-                  className="button-secondary"
-                  onClick={() => {
-                    setSelectedOlympiad(null);
-                    fetchAllResults();
-                  }}
-                >
-                  Clear Filter
-                </button>
+                className="button-secondary"
+                onClick={() => {
+                  setSelectedOlympiad(null);
+                  fetchAllResults();
+                }}>{t("Clear Filter ")}
+
+
+              </button>
               </div>
 
-              {results.length === 0 ? (
-                <div className="empty-results">
-                  <p>No results found for your school</p>
-                </div>
-              ) : (
-                <div className="results-table">
+              {results.length === 0 ?
+            <div className="empty-results">
+                  <p>{t("No results found for your school")}</p>
+                </div> :
+
+            <div className="results-table">
                   <div className="table-header">
-                    <div className="table-cell">Student</div>
-                    <div className="table-cell">Email</div>
-                    <div className="table-cell">Olympiad</div>
-                    <div className="table-cell">Score</div>
-                    <div className="table-cell">Status</div>
-                    <div className="table-cell">Submitted</div>
+                    <div className="table-cell">{t("Student")}</div>
+                    <div className="table-cell">{t("Email")}</div>
+                    <div className="table-cell">{t("Olympiad")}</div>
+                    <div className="table-cell">{t("Score")}</div>
+                    <div className="table-cell">{t("Status")}</div>
+                    <div className="table-cell">{t("Submitted")}</div>
                   </div>
                   <div className="table-body">
-                    {results.map((result, index) => (
-                      <div key={result._id || index} className="table-row">
+                    {results.map((result, index) =>
+                <div key={result._id || index} className="table-row">
                         <div className="table-cell">
-                          {result.user?.name || 'Anonymous'}
+                          {result.user?.name || t('Anonymous')}
                         </div>
                         <div className="table-cell">
                           {result.user?.email || '-'}
                         </div>
                         <div className="table-cell">
-                          {result.olympiadTitle || result.olympiad?.title || '-'}
+                          {t(result.olympiadTitle || result.olympiad?.title || '-')}
                         </div>
                         <div className="table-cell">
                           <span className="score-value">
-                            {result.totalScore || result.score || 0}
+                            {t(result.totalScore || result.score || 0)}
                           </span>
-                          {result.totalPoints && (
-                            <span className="score-max">
-                              {' '}/ {result.totalPoints}
+                          {result.totalPoints &&
+                    <span className="score-max">
+                              {t(' ')}/ {t(result.totalPoints)}
                             </span>
-                          )}
-                          {result.percentage !== undefined && (
-                            <span className="score-percentage">
-                              {' '}({result.percentage}%)
+                    }
+                          {result.percentage !== undefined &&
+                    <span className="score-percentage">
+                              {t(' ')}({t(result.percentage)}%)
                             </span>
-                          )}
+                    }
                         </div>
                         <div className="table-cell">
                           <span
-                            className={`status-badge ${
-                              result.gradedAt ? 'graded' : 'pending'
-                            }`}
-                          >
-                            {result.gradedAt ? 'Graded' : 'Pending'}
+                      className={`status-badge ${
+                      result.gradedAt ? 'graded' : 'pending'}`
+                      }>
+
+                            {t(result.gradedAt ? 'Graded' : 'Pending')}
                           </span>
                         </div>
                         <div className="table-cell">
-                          {result.submittedAt || result.completedAt
-                            ? formatDate(result.submittedAt || result.completedAt)
-                            : '-'}
+                          {t(result.submittedAt || result.completedAt ?
+                    formatDate(result.submittedAt || result.completedAt) :
+                    '-')}
                         </div>
                       </div>
-                    ))}
+                )}
                   </div>
                 </div>
-              )}
+            }
             </div>
           </>
-        )}
+        }
 
         {/* Real-Time Monitoring View */}
-        {viewMode === 'monitoring' && (
-          <div className="monitoring-view">
-            {selectedStudent ? (
-              <RealTimeCaptureViewer
-                student={selectedStudent}
-                onBack={() => setSelectedStudent(null)}
-              />
-            ) : (
-              <div className="active-students card">
+        {viewMode === 'monitoring' &&
+        <div className="monitoring-view">
+            {selectedStudent ?
+          <RealTimeCaptureViewer
+            student={selectedStudent}
+            onBack={() => setSelectedStudent(null)} /> :
+
+
+          <div className="active-students card">
                 <div className="students-header">
-                  <h2 className="students-title">Active Students</h2>
-                  <p className="students-subtitle">
-                    Students currently taking olympiads
-                  </p>
+                  <h2 className="students-title">{t("Active Students")}</h2>
+                  <p className="students-subtitle">{t("Students currently taking olympiads ")}
+
+              </p>
                 </div>
 
-                {activeStudents.length === 0 ? (
-                  <div className="empty-students">
-                    <p>No active students at the moment</p>
-                  </div>
-                ) : (
-                  <div className="students-grid">
-                    {activeStudents.map((student, index) => (
-                      <div
-                        key={student._id || student.userId || index}
-                        className="student-card"
-                        onClick={() => handleViewStudent(student)}
-                      >
+                {activeStudents.length === 0 ?
+            <div className="empty-students">
+                    <p>{t("No active students at the moment")}</p>
+                  </div> :
+
+            <div className="students-grid">
+                    {activeStudents.map((student, index) =>
+              <div
+                key={student._id || student.userId || index}
+                className="student-card"
+                onClick={() => handleViewStudent(student)}>
+
                         <div className="student-info">
                           <div className="student-name">
-                            {student.user?.name || student.name || 'Anonymous'}
+                            {student.user?.name || student.name || t('Anonymous')}
                           </div>
                           <div className="student-email">
                             {student.user?.email || student.email || '-'}
                           </div>
                           <div className="student-olympiad">
-                            {student.olympiadTitle || student.olympiad?.title || 'Unknown Olympiad'}
+                            {student.olympiadTitle || student.olympiad?.title || t('Unknown Olympiad')}
                           </div>
                           <div className="student-status">
-                            <span className="status-indicator active"></span>
-                            Active
-                          </div>
+                            <span className="status-indicator active"></span>{t("Active ")}
+
+                  </div>
                         </div>
                         <div className="student-action">
-                          <button className="button-primary">View Live</button>
+                          <button className="button-primary">{t("View Live")}</button>
                         </div>
                       </div>
-                    ))}
+              )}
                   </div>
-                )}
+            }
               </div>
-            )}
+          }
           </div>
-        )}
+        }
 
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default SchoolTeacherPanel;
-

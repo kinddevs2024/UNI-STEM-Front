@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/api";
@@ -7,7 +7,7 @@ import { getImageUrl } from "../../utils/helpers";
 import NotificationToast from "../../components/NotificationToast";
 import "./CompleteProfile.css";
 
-const CompleteProfile = () => {
+const CompleteProfile = () => {useLocale();
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -21,20 +21,20 @@ const CompleteProfile = () => {
     schoolId: "",
     dateBorn: "",
     gender: "",
-    userLogo: null,
+    userLogo: null
   });
 
   useEffect(() => {
     // If user already has complete profile, redirect to dashboard
     if (user) {
       const hasCompleteInfo =
-        user.name &&
-        user.tel &&
-        user.address &&
-        user.dateBorn &&
-        user.gender &&
-        (user.role !== USER_ROLES.STUDENT ||
-          (user.schoolName && user.schoolId));
+      user.name &&
+      user.tel &&
+      user.address &&
+      user.dateBorn &&
+      user.gender && (
+      user.role !== USER_ROLES.STUDENT ||
+      user.schoolName && user.schoolId);
 
       if (hasCompleteInfo) {
         navigate("/dashboard");
@@ -53,9 +53,9 @@ const CompleteProfile = () => {
 
       setFormData({
         name:
-          user.name ||
-          `${user.firstName || ""} ${user.secondName || ""}`.trim() ||
-          "",
+        user.name ||
+        `${user.firstName || ""} ${user.secondName || ""}`.trim() ||
+        "",
         tel: user.tel || "",
         phone: user.phone || null,
         address: user.address || "",
@@ -63,7 +63,7 @@ const CompleteProfile = () => {
         schoolId: user.schoolId || "",
         dateBorn: user.dateBorn ? formatDateForInput(user.dateBorn) : "",
         gender: user.gender || "",
-        userLogo: null,
+        userLogo: null
       });
     }
   }, [user, navigate]);
@@ -72,12 +72,12 @@ const CompleteProfile = () => {
     if (e.target.type === "file") {
       setFormData({
         ...formData,
-        [e.target.name]: e.target.files[0] || null,
+        [e.target.name]: e.target.files[0] || null
       });
     } else {
       setFormData({
         ...formData,
-        [e.target.name]: e.target.value,
+        [e.target.name]: e.target.value
       });
     }
   };
@@ -95,15 +95,15 @@ const CompleteProfile = () => {
         try {
           const logoResponse = await authAPI.uploadLogo(formData.userLogo);
           logoUrl =
-            logoResponse.data.logoUrl ||
-            logoResponse.data.url ||
-            logoResponse.data.userLogo;
+          logoResponse.data.logoUrl ||
+          logoResponse.data.url ||
+          logoResponse.data.userLogo;
         } catch (logoError) {
           setNotification({
             message:
-              logoError.response?.data?.message ||
-              "Failed to upload logo. Please try again.",
-            type: "error",
+            logoError.response?.data?.message ||
+            "Failed to upload logo. Please try again.",
+            type: "error"
           });
           setLoading(false);
           return;
@@ -114,7 +114,7 @@ const CompleteProfile = () => {
       // If no file upload, send as JSON (backend handles JSON better)
       // If file upload, use FormData
       let response;
-      
+
       if (!formData.userLogo) {
         // No file upload, send as JSON
         const jsonData = {
@@ -125,9 +125,9 @@ const CompleteProfile = () => {
           phone: formData.phone || null,
           address: formData.address || "",
           gender: formData.gender || "",
-          dateBorn: formData.dateBorn
-            ? new Date(formData.dateBorn + "T00:00:00").toISOString()
-            : "",
+          dateBorn: formData.dateBorn ?
+          new Date(formData.dateBorn + "T00:00:00").toISOString() :
+          ""
         };
 
         // Only append school fields if user is a student
@@ -151,14 +151,14 @@ const CompleteProfile = () => {
         updateData.append("tel", formData.tel || "");
         updateData.append("phone", formData.phone || null);
         updateData.append("address", formData.address || "");
-        
+
 
         // Date of birth - convert to ISO string if present
         if (formData.dateBorn) {
           // Ensure date is in correct format
-          const dateValue = formData.dateBorn.includes("T")
-            ? formData.dateBorn
-            : `${formData.dateBorn}T00:00:00`;
+          const dateValue = formData.dateBorn.includes("T") ?
+          formData.dateBorn :
+          `${formData.dateBorn}T00:00:00`;
           updateData.append("dateBorn", new Date(dateValue).toISOString());
         } else {
           updateData.append("dateBorn", "");
@@ -201,7 +201,7 @@ const CompleteProfile = () => {
 
       setNotification({
         message: "Profile completed successfully!",
-        type: "success",
+        type: "success"
       });
 
       setTimeout(() => {
@@ -211,13 +211,13 @@ const CompleteProfile = () => {
       console.error("Profile completion error:", error);
       console.error("Error response:", error.response?.data);
       const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to complete profile. Please check all required fields.";
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Failed to complete profile. Please check all required fields.";
       setNotification({
         message: errorMessage,
-        type: "error",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -232,64 +232,64 @@ const CompleteProfile = () => {
             <div className="loading-spinner"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="complete-profile-page">
       <div className="container">
         <div className="complete-profile-header">
-          <div><p className="go-account-eyebrow">A LITTLE ABOUT YOU</p>
-          <h1 className="complete-profile-title">
-            Complete Your <em>Profile</em>
+          <div><p className="go-account-eyebrow">{t("A LITTLE ABOUT YOU")}</p>
+          <h1 className="complete-profile-title">{t("Complete Your ")}
+              <em>{t("Profile")}</em>
           </h1>
-          <p className="complete-profile-subtitle">
-            Please provide the following information to continue
-          </p>
+          <p className="complete-profile-subtitle">{t("Please provide the following information to continue ")}
+
+            </p>
           </div>
           <img className="complete-profile-art" src="/images/student-girl.webp" alt="" aria-hidden="true" width="156" height="156" />
         </div>
 
         <form onSubmit={handleSubmit} className="complete-profile-form card">
           <div className="form-section">
-            <h3 className="section-title">Profile Picture</h3>
+            <h3 className="section-title">{t("Profile Picture")}</h3>
             <div className="form-group">
-              <label htmlFor="userLogo">Upload Profile Picture</label>
+              <label htmlFor="userLogo">{t("Upload Profile Picture")}</label>
               <input
                 type="file"
                 id="userLogo"
                 name="userLogo"
                 accept="image/*"
                 onChange={handleChange}
-                className="file-input"
-              />
-              {formData.userLogo && (
-                <div className="file-preview">
+                className="file-input" />
+
+              {formData.userLogo &&
+              <div className="file-preview">
                   <img
-                    src={URL.createObjectURL(formData.userLogo)}
-                    alt="Preview"
-                    className="preview-image"
-                  />
+                  src={URL.createObjectURL(formData.userLogo)}
+                  alt={t("Preview")}
+                  className="preview-image" />
+
                 </div>
-              )}
-              {!formData.userLogo && user.userLogo && (
-                <div className="file-preview">
+              }
+              {!formData.userLogo && user.userLogo &&
+              <div className="file-preview">
                   <img
-                    src={getImageUrl(user.userLogo)}
-                    alt="Current"
-                    className="preview-image"
-                  />
-                  <p className="preview-note">Current profile picture</p>
+                  src={getImageUrl(user.userLogo)}
+                  alt={t("Current")}
+                  className="preview-image" />
+
+                  <p className="preview-note">{t("Current profile picture")}</p>
                 </div>
-              )}
+              }
             </div>
           </div>
 
           <div className="form-section">
-            <h3 className="section-title">Personal Information</h3>
+            <h3 className="section-title">{t("Personal Information")}</h3>
             <div className="form-group">
-              <label htmlFor="name">Full Name</label>
+              <label htmlFor="name">{t("Full Name")}</label>
               <input
                 type="text"
                 id="name"
@@ -297,41 +297,41 @@ const CompleteProfile = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Enter your full name"
-              />
+                placeholder={t("Enter your full name")} />
+
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="dateBorn">Date of Birth</label>
+                <label htmlFor="dateBorn">{t("Date of Birth")}</label>
                 <input
                   type="date"
                   id="dateBorn"
                   name="dateBorn"
                   value={formData.dateBorn}
                   onChange={handleChange}
-                  required
-                />
+                  required />
+
               </div>
               <div className="form-group">
-                <label htmlFor="gender">Gender</label>
+                <label htmlFor="gender">{t("Gender")}</label>
                 <select
                   id="gender"
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
                   className="form-select"
-                  required
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
+                  required>
+
+                  <option value="">{t("Select gender")}</option>
+                  <option value="male">{t("Male")}</option>
+                  <option value="female">{t("Female")}</option>
+                  <option value="other">{t("Other")}</option>
+                  <option value="prefer-not-to-say">{t("Prefer not to say")}</option>
                 </select>
               </div>
             </div>
             <div className="form-group">
-              <label htmlFor="tel">Phone Number</label>
+              <label htmlFor="tel">{t("Phone Number")}</label>
               <input
                 type="tel"
                 id="tel"
@@ -339,72 +339,72 @@ const CompleteProfile = () => {
                 value={formData.tel}
                 onChange={handleChange}
                 required
-                placeholder="Enter your phone number"
-              />
+                placeholder={t("Enter your phone number")} />
+
             </div>
             <div className="form-group">
-              <label htmlFor="address">Address</label>
+              <label htmlFor="address">{t("Address")}</label>
               <textarea
                 id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
                 required
-                placeholder="Enter your address"
-                rows="3"
-              />
+                placeholder={t("Enter your address")}
+                rows="3" />
+
             </div>
           </div>
 
-          {user.role === USER_ROLES.STUDENT && (
-            <div className="form-section">
-              <h3 className="section-title">School Information</h3>
+          {user.role === USER_ROLES.STUDENT &&
+          <div className="form-section">
+              <h3 className="section-title">{t("School Information")}</h3>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="schoolName">School Name</label>
+                  <label htmlFor="schoolName">{t("School Name")}</label>
                   <input
-                    type="text"
-                    id="schoolName"
-                    name="schoolName"
-                    value={formData.schoolName}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your school name"
-                  />
+                  type="text"
+                  id="schoolName"
+                  name="schoolName"
+                  value={formData.schoolName}
+                  onChange={handleChange}
+                  required
+                  placeholder={t("Enter your school name")} />
+
                 </div>
                 <div className="form-group">
-                  <label htmlFor="schoolId">School ID</label>
+                  <label htmlFor="schoolId">{t("School ID")}</label>
                   <input
-                    type="text"
-                    id="schoolId"
-                    name="schoolId"
-                    value={formData.schoolId}
-                    onChange={handleChange}
-                    required
-                    placeholder="Enter your school ID"
-                  />
+                  type="text"
+                  id="schoolId"
+                  name="schoolId"
+                  value={formData.schoolId}
+                  onChange={handleChange}
+                  required
+                  placeholder={t("Enter your school ID")} />
+
                 </div>
               </div>
             </div>
-          )}
+          }
 
           <div className="form-actions">
             <button type="submit" className="button-primary" disabled={loading}>
-              {loading ? "Saving..." : "Complete Profile"}
+              {t(loading ? "Saving..." : "Complete Profile")}
             </button>
           </div>
         </form>
 
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default CompleteProfile;

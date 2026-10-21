@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
         setShowCookieConsent(!checkCookieConsent(user));
       }
 
-      return { success: true };
+      return { success: true, user: getUser() };
     } catch (error) {
       if (error.response?.status !== 401) {
         console.error("Login error:", error);
@@ -183,7 +183,7 @@ export const AuthProvider = ({ children }) => {
         setShowCookieConsent(!checkCookieConsent(user));
       }
 
-      return { success: true };
+      return { success: true, user: getUser() };
     } catch (error) {
       console.error("Registration error:", error);
       const errorMessage =

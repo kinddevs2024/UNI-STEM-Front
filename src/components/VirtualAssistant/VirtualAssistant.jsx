@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import "./VirtualAssistant.css";
 
-const VirtualAssistant = () => {
+const VirtualAssistant = () => {useLocale();
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -13,16 +13,16 @@ const VirtualAssistant = () => {
 
   // Predefined messages for kids
   const assistantMessages = [
-    "Hi! Welcome to Global Olympiads! 🌟",
-    "This is a fun place where you can test your knowledge!",
-    "You can compete in Math, Science, English, and more!",
-    "Click 'Get Started' to begin your adventure!",
-  ];
+  "Hi! Welcome to Global Olympiads! 🌟",
+  "This is a fun place where you can test your knowledge!",
+  "You can compete in Math, Science, English, and more!",
+  "Click 'Get Started' to begin your adventure!"];
+
 
   useEffect(() => {
     // Check if this is the first visit
     const hasVisited = localStorage.getItem("global-olympiad-visited");
-    
+
     if (!hasVisited) {
       // Show assistant after a short delay
       const timer = setTimeout(() => {
@@ -42,14 +42,14 @@ const VirtualAssistant = () => {
         {
           scale: 0,
           opacity: 0,
-          y: 50,
+          y: 50
         },
         {
           scale: 1,
           opacity: 1,
           y: 0,
           duration: 0.6,
-          ease: "back.out(1.7)",
+          ease: "back.out(1.7)"
         }
       );
 
@@ -76,14 +76,14 @@ const VirtualAssistant = () => {
               {
                 opacity: 0,
                 y: 20,
-                scale: 0.8,
+                scale: 0.8
               },
               {
                 opacity: 1,
                 y: 0,
                 scale: 1,
                 duration: 0.4,
-                ease: "power2.out",
+                ease: "power2.out"
               }
             );
           }
@@ -103,7 +103,7 @@ const VirtualAssistant = () => {
       opacity: 0.7,
       y: 20,
       duration: 0.3,
-      ease: "power2.in",
+      ease: "power2.in"
     });
   };
 
@@ -114,7 +114,7 @@ const VirtualAssistant = () => {
       opacity: 1,
       y: 0,
       duration: 0.4,
-      ease: "back.out(1.7)",
+      ease: "back.out(1.7)"
     });
   };
 
@@ -127,7 +127,7 @@ const VirtualAssistant = () => {
       ease: "power2.in",
       onComplete: () => {
         setIsVisible(false);
-      },
+      }
     });
   };
 
@@ -136,59 +136,57 @@ const VirtualAssistant = () => {
   return (
     <div
       className={`virtual-assistant ${isMinimized ? "minimized" : ""}`}
-      ref={bubbleRef}
-    >
-      {isMinimized ? (
-        <button
-          className="assistant-toggle"
-          onClick={handleExpand}
-          ref={buttonRef}
-          aria-label="Expand assistant"
-        >
+      ref={bubbleRef}>
+
+      {isMinimized ?
+      <button
+        className="assistant-toggle"
+        onClick={handleExpand}
+        ref={buttonRef}
+        aria-label={t("Expand assistant")}>
+
           <span className="assistant-icon">💬</span>
-        </button>
-      ) : (
-        <div className="assistant-bubble">
+        </button> :
+
+      <div className="assistant-bubble">
           <div className="assistant-header">
             <div className="assistant-avatar">🤖</div>
-            <h3 className="assistant-title">Your Helper</h3>
+            <h3 className="assistant-title">{t("Your Helper")}</h3>
             <div className="assistant-controls">
               <button
-                className="assistant-btn minimize"
-                onClick={handleMinimize}
-                aria-label="Minimize"
-              >
+              className="assistant-btn minimize"
+              onClick={handleMinimize}
+              aria-label={t("Minimize")}>
+
                 −
               </button>
               <button
-                className="assistant-btn close"
-                onClick={handleClose}
-                aria-label="Close"
-              >
+              className="assistant-btn close"
+              onClick={handleClose}
+              aria-label={t("Close")}>
+
                 ×
               </button>
             </div>
           </div>
           <div className="assistant-messages" ref={messagesRef}>
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`assistant-message ${
-                  index === messages.length - 1 ? "latest" : ""
-                }`}
-              >
+            {messages.map((message, index) =>
+          <div
+            key={index}
+            className={`assistant-message ${
+            index === messages.length - 1 ? "latest" : ""}`
+            }>
+
                 <div className="message-bubble">
-                  <p>{message}</p>
+                  <p>{t(message)}</p>
                 </div>
               </div>
-            ))}
+          )}
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default VirtualAssistant;
-
-

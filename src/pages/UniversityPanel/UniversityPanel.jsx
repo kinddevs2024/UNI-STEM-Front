@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useRef } from "react";
 import { universityAPI, olympiadAPI } from "../../services/api";
 import NotificationToast from "../../components/NotificationToast";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
@@ -10,8 +10,8 @@ import {
   loadCustomSubjects,
   mergeSubjects,
   normalizeSubject,
-  saveCustomSubjects,
-} from "../../utils/olympiadSubjects";
+  saveCustomSubjects } from
+"../../utils/olympiadSubjects";
 import "../AdminPanel/AdminPanel.css";
 import "../AdminPanel/PanelRedesign.css";
 import "./UniversityPanel.css";
@@ -19,7 +19,7 @@ import "./UniversityPanel.css";
 const CUSTOM_SUBJECTS_STORAGE_KEY = "universityCustomOlympiadSubjects";
 
 // Question Manager Component
-const QuestionManager = ({ olympiad, onClose }) => {
+const QuestionManager = ({ olympiad, onClose }) => {useLocale();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -28,7 +28,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
     isOpen: false,
     title: "",
     message: "",
-    confirmLabel: "Confirm",
+    confirmLabel: "Confirm"
   });
   const confirmResolverRef = useRef(null);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
@@ -39,7 +39,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
     correctAnswer: "",
     correctAnswers: [],
     allowMultipleCorrect: false,
-    points: 10,
+    points: 10
   });
 
   useEffect(() => {
@@ -56,7 +56,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
       setLoading(false);
     }
   };
-  
+
   const resetQuestionForm = () => {
     setQuestionForm({
       question: "",
@@ -65,7 +65,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
       correctAnswer: "",
       correctAnswers: [],
       allowMultipleCorrect: false,
-      points: 10,
+      points: 10
     });
   };
 
@@ -73,20 +73,20 @@ const QuestionManager = ({ olympiad, onClose }) => {
     e.preventDefault();
 
     const isEditing = Boolean(editingQuestionId);
-    const selectedCorrectAnswers = questionForm.allowMultipleCorrect
-      ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).filter((answer) =>
-          (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
-        )
-      : (typeof questionForm.correctAnswer === "string" ? [questionForm.correctAnswer] : []).filter((answer) =>
-          (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
-        );
+    const selectedCorrectAnswers = questionForm.allowMultipleCorrect ?
+    (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).filter((answer) =>
+    (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
+    ) :
+    (typeof questionForm.correctAnswer === "string" ? [questionForm.correctAnswer] : []).filter((answer) =>
+    (Array.isArray(questionForm.options) ? questionForm.options : []).includes(answer)
+    );
 
     try {
       if (olympiad.type === "test") {
         if (!questionForm.question) {
           setNotification({
             message: "Please fill all required fields",
-            type: "error",
+            type: "error"
           });
           return;
         }
@@ -96,7 +96,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         if (validOptions.length < 2) {
           setNotification({
             message: "Please provide at least 2 options",
-            type: "error",
+            type: "error"
           });
           return;
         }
@@ -104,7 +104,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         if (selectedCorrectAnswers.length === 0) {
           setNotification({
             message: "Please select at least one correct answer",
-            type: "error",
+            type: "error"
           });
           return;
         }
@@ -116,7 +116,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
           correctAnswer: selectedCorrectAnswers[0],
           correctAnswers: selectedCorrectAnswers,
           allowMultipleCorrect: Boolean(questionForm.allowMultipleCorrect),
-          points: Number(questionForm.points) || 10,
+          points: Number(questionForm.points) || 10
         };
 
         if (isEditing) {
@@ -125,14 +125,14 @@ const QuestionManager = ({ olympiad, onClose }) => {
           await universityAPI.addQuestion({
             olympiadId: olympiad._id,
             ...payload,
-            order: questions.length + 1,
+            order: questions.length + 1
           });
         }
       } else {
         if (!questionForm.question) {
           setNotification({
             message: "Please enter a question",
-            type: "error",
+            type: "error"
           });
           return;
         }
@@ -140,7 +140,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         const payload = {
           question: questionForm.question,
           type: "essay",
-          points: Number(questionForm.points) || 10,
+          points: Number(questionForm.points) || 10
         };
 
         if (isEditing) {
@@ -149,14 +149,14 @@ const QuestionManager = ({ olympiad, onClose }) => {
           await universityAPI.addQuestion({
             olympiadId: olympiad._id,
             ...payload,
-            order: questions.length + 1,
+            order: questions.length + 1
           });
         }
       }
 
       setNotification({
         message: isEditing ? "Question updated successfully" : "Question added successfully",
-        type: "success",
+        type: "success"
       });
       resetQuestionForm();
       setEditingQuestionId(null);
@@ -165,24 +165,24 @@ const QuestionManager = ({ olympiad, onClose }) => {
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to save question",
-        type: "error",
+        type: "error"
       });
     }
   };
 
   const handleEditQuestion = (question) => {
-    const normalizedOptions = Array.isArray(question?.options)
-      ? question.options
-      : [];
+    const normalizedOptions = Array.isArray(question?.options) ?
+    question.options :
+    [];
     const paddedOptions = [...normalizedOptions];
     while (paddedOptions.length < 4) {
       paddedOptions.push("");
     }
-    const derivedCorrectAnswers = Array.isArray(question?.correctAnswers) && question.correctAnswers.length > 0
-      ? question.correctAnswers.filter((answer) => normalizedOptions.includes(answer))
-      : question?.correctAnswer
-        ? [question.correctAnswer]
-        : [];
+    const derivedCorrectAnswers = Array.isArray(question?.correctAnswers) && question.correctAnswers.length > 0 ?
+    question.correctAnswers.filter((answer) => normalizedOptions.includes(answer)) :
+    question?.correctAnswer ?
+    [question.correctAnswer] :
+    [];
 
     setQuestionForm({
       question: question?.question || "",
@@ -191,7 +191,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
       correctAnswer: derivedCorrectAnswers[0] || "",
       correctAnswers: derivedCorrectAnswers,
       allowMultipleCorrect: Boolean(question?.allowMultipleCorrect || derivedCorrectAnswers.length > 1),
-      points: Number(question?.points) || 10,
+      points: Number(question?.points) || 10
     });
     setEditingQuestionId(question?._id || null);
     setShowAddForm(true);
@@ -208,7 +208,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
       isOpen: true,
       title,
       message,
-      confirmLabel,
+      confirmLabel
     });
 
     return new Promise((resolve) => {
@@ -236,7 +236,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
     const shouldDelete = await askForConfirmation({
       title: "Confirm Question Delete",
       message: "Delete this question?",
-      confirmLabel: "Delete",
+      confirmLabel: "Delete"
     });
     if (!shouldDelete) return;
     try {
@@ -246,7 +246,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to delete question",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -257,7 +257,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
       nextOptions[index] = value;
       const validOptionSet = new Set(nextOptions.filter((opt) => String(opt).trim() !== ""));
       const nextCorrectAnswers = (Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []).filter((answer) =>
-        validOptionSet.has(answer)
+      validOptionSet.has(answer)
       );
       const nextCorrectAnswer = validOptionSet.has(prev.correctAnswer) ? prev.correctAnswer : "";
 
@@ -265,7 +265,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
         ...prev,
         options: nextOptions,
         correctAnswers: nextCorrectAnswers,
-        correctAnswer: nextCorrectAnswer,
+        correctAnswer: nextCorrectAnswer
       };
     });
   };
@@ -273,7 +273,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
   const handleAddOption = () => {
     setQuestionForm((prev) => ({
       ...prev,
-      options: [...(Array.isArray(prev.options) ? prev.options : []), ""],
+      options: [...(Array.isArray(prev.options) ? prev.options : []), ""]
     }));
   };
 
@@ -283,18 +283,18 @@ const QuestionManager = ({ olympiad, onClose }) => {
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="loading-spinner"></div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content question-manager"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
+
         <div className="modal-header">
-          <h2>Manage Questions - {olympiad.title}</h2>
+          <h2>{t("Manage Questions - ")}{olympiad.title}</h2>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
@@ -302,7 +302,7 @@ const QuestionManager = ({ olympiad, onClose }) => {
 
         <div className="modal-body">
           <div className="questions-header">
-            <h3>Questions ({questions.length})</h3>
+            <h3>{t("Questions (")}{t(questions.length)})</h3>
             <button
               className="button-primary"
               onClick={() => {
@@ -311,255 +311,255 @@ const QuestionManager = ({ olympiad, onClose }) => {
                 } else {
                   setShowAddForm(true);
                 }
-              }}
-            >
-              {showAddForm ? "Cancel" : "+ Add Question"}
+              }}>
+
+              {t(showAddForm ? "Cancel" : "+ Add Question")}
             </button>
           </div>
 
-          {showAddForm && (
-            <form onSubmit={handleAddQuestion} className="question-form card">
+          {showAddForm &&
+          <form onSubmit={handleAddQuestion} className="question-form card">
               <div className="form-group">
-                <label>Question</label>
+                <label>{t("Question")}</label>
                 <textarea
-                  value={questionForm.question}
-                  onChange={(e) =>
-                    setQuestionForm({
-                      ...questionForm,
-                      question: e.target.value,
-                    })
-                  }
-                  placeholder="Enter your question..."
-                  rows="3"
-                  required
-                />
+                value={questionForm.question}
+                onChange={(e) =>
+                setQuestionForm({
+                  ...questionForm,
+                  question: e.target.value
+                })
+                }
+                placeholder={t("Enter your question...")}
+                rows="3"
+                required />
+
               </div>
 
-              {olympiad.type === "test" && (
-                <div className="form-group">
-                  <label>Options</label>
+              {olympiad.type === "test" &&
+            <div className="form-group">
+                  <label>{t("Options")}</label>
                   <div className="answer-mode-toggle-wrapper">
                     <label className="answer-mode-toggle">
                       <input
-                        className="answer-mode-toggle-input"
-                        type="checkbox"
-                        checked={Boolean(questionForm.allowMultipleCorrect)}
-                        onChange={(e) =>
-                          setQuestionForm((prev) => {
-                            const nextAllowMultiple = e.target.checked;
-                            const nextCorrectAnswers = nextAllowMultiple
-                              ? Array.from(
-                                  new Set([
-                                    ...(Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []),
-                                    ...(prev.correctAnswer ? [prev.correctAnswer] : []),
-                                  ].filter(Boolean))
-                                )
-                              : [
-                                  (Array.isArray(prev.correctAnswers) ? prev.correctAnswers[0] : null) ||
-                                    prev.correctAnswer ||
-                                    "",
-                                ].filter(Boolean);
+                    className="answer-mode-toggle-input"
+                    type="checkbox"
+                    checked={Boolean(questionForm.allowMultipleCorrect)}
+                    onChange={(e) =>
+                    setQuestionForm((prev) => {
+                      const nextAllowMultiple = e.target.checked;
+                      const nextCorrectAnswers = nextAllowMultiple ?
+                      Array.from(
+                        new Set([
+                        ...(Array.isArray(prev.correctAnswers) ? prev.correctAnswers : []),
+                        ...(prev.correctAnswer ? [prev.correctAnswer] : [])].
+                        filter(Boolean))
+                      ) :
+                      [
+                      (Array.isArray(prev.correctAnswers) ? prev.correctAnswers[0] : null) ||
+                      prev.correctAnswer ||
+                      ""].
+                      filter(Boolean);
 
-                            return {
-                              ...prev,
-                              allowMultipleCorrect: nextAllowMultiple,
-                              correctAnswers: nextAllowMultiple ? nextCorrectAnswers : nextCorrectAnswers.slice(0, 1),
-                              correctAnswer: nextCorrectAnswers[0] || "",
-                            };
-                          })
-                        }
-                      />
+                      return {
+                        ...prev,
+                        allowMultipleCorrect: nextAllowMultiple,
+                        correctAnswers: nextAllowMultiple ? nextCorrectAnswers : nextCorrectAnswers.slice(0, 1),
+                        correctAnswer: nextCorrectAnswers[0] || ""
+                      };
+                    })
+                    } />
+
                       <span className="answer-mode-toggle-slider" aria-hidden="true" />
-                      <span className="answer-mode-toggle-text">Allow multiple correct answers</span>
+                      <span className="answer-mode-toggle-text">{t("Allow multiple correct answers")}</span>
                     </label>
                   </div>
                   {(Array.isArray(questionForm.options) ? questionForm.options : []).map((option, index) => {
-                    const isSelected = questionForm.allowMultipleCorrect
-                      ? (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== ""
-                      : questionForm.correctAnswer === option && option.trim() !== "";
-                    return (
-                      <div
-                        key={index}
-                        className={`option-input-row ${isSelected ? "is-selected" : ""}`}
-                      >
+                const isSelected = questionForm.allowMultipleCorrect ?
+                (Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option) && option.trim() !== "" :
+                questionForm.correctAnswer === option && option.trim() !== "";
+                return (
+                  <div
+                    key={index}
+                    className={`option-input-row ${isSelected ? "is-selected" : ""}`}>
+
                       <span className="option-label">
-                        {String.fromCharCode(65 + index)}.
+                        {t(String.fromCharCode(65 + index))}.
                       </span>
                       <input
-                        type="text"
-                        value={option}
-                        onChange={(e) =>
-                          handleOptionChange(index, e.target.value)
-                        }
-                        placeholder={`Option ${String.fromCharCode(
-                          65 + index
-                        )}`}
-                        className="option-input"
-                      />
-                      <label className="option-select-control">
-                        {questionForm.allowMultipleCorrect ? (
-                          <input
-                            className="option-select-input"
-                            type="checkbox"
-                            value={option}
-                            checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
-                            onChange={(e) =>
-                              setQuestionForm((prev) => {
-                                const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
-                                const nextCorrectAnswers = e.target.checked
-                                  ? [...new Set([...current, option])]
-                                  : current.filter((answer) => answer !== option);
+                      type="text"
+                      value={option}
+                      onChange={(e) =>
+                      handleOptionChange(index, e.target.value)
+                      }
+                      placeholder={t(`Option ${String.fromCharCode(
+                        65 + index
+                      )}`)}
+                      className="option-input" />
 
-                                return {
-                                  ...prev,
-                                  correctAnswers: nextCorrectAnswers,
-                                  correctAnswer: nextCorrectAnswers[0] || "",
-                                };
-                              })
-                            }
-                            disabled={!option.trim()}
-                          />
-                        ) : (
-                          <input
-                            className="option-select-input"
-                            type="radio"
-                            name="correctAnswer"
-                            value={option}
-                            checked={questionForm.correctAnswer === option}
-                            onChange={(e) =>
-                              setQuestionForm({
-                                ...questionForm,
-                                correctAnswer: e.target.value,
-                                correctAnswers: [e.target.value],
-                              })
-                            }
-                            disabled={!option.trim()}
-                          />
-                        )}
+                      <label className="option-select-control">
+                        {questionForm.allowMultipleCorrect ?
+                      <input
+                        className="option-select-input"
+                        type="checkbox"
+                        value={option}
+                        checked={(Array.isArray(questionForm.correctAnswers) ? questionForm.correctAnswers : []).includes(option)}
+                        onChange={(e) =>
+                        setQuestionForm((prev) => {
+                          const current = Array.isArray(prev.correctAnswers) ? prev.correctAnswers : [];
+                          const nextCorrectAnswers = e.target.checked ?
+                          [...new Set([...current, option])] :
+                          current.filter((answer) => answer !== option);
+
+                          return {
+                            ...prev,
+                            correctAnswers: nextCorrectAnswers,
+                            correctAnswer: nextCorrectAnswers[0] || ""
+                          };
+                        })
+                        }
+                        disabled={!option.trim()} /> :
+
+
+                      <input
+                        className="option-select-input"
+                        type="radio"
+                        name="correctAnswer"
+                        value={option}
+                        checked={questionForm.correctAnswer === option}
+                        onChange={(e) =>
+                        setQuestionForm({
+                          ...questionForm,
+                          correctAnswer: e.target.value,
+                          correctAnswers: [e.target.value]
+                        })
+                        }
+                        disabled={!option.trim()} />
+
+                      }
                         <span
-                          className={`option-select-indicator ${questionForm.allowMultipleCorrect ? "is-checkbox" : "is-radio"} ${isSelected ? "is-selected" : ""}`}
-                          aria-hidden="true"
-                        >
-                          {questionForm.allowMultipleCorrect && isSelected ? "✓" : ""}
+                        className={`option-select-indicator ${questionForm.allowMultipleCorrect ? "is-checkbox" : "is-radio"} ${isSelected ? "is-selected" : ""}`}
+                        aria-hidden="true">
+
+                          {t(questionForm.allowMultipleCorrect && isSelected ? "✓" : "")}
                         </span>
-                        <span className="option-select-text">Correct</span>
+                        <span className="option-select-text">{t("Correct")}</span>
                       </label>
-                    </div>
-                    );
-                  })}
+                    </div>);
+
+              })}
                   <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={handleAddOption}
-                  >
-                    + Add Option
-                  </button>
+                type="button"
+                className="button-secondary"
+                onClick={handleAddOption}>{t("+ Add Option ")}
+
+
+              </button>
                 </div>
-              )}
+            }
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Points</label>
+                  <label>{t("Points")}</label>
                   <input
-                    type="number"
-                    value={questionForm.points}
-                    onChange={(e) =>
-                      setQuestionForm({
-                        ...questionForm,
-                        points: Number(e.target.value) || 10,
-                      })
-                    }
-                    min="1"
-                    required
-                  />
+                  type="number"
+                  value={questionForm.points}
+                  onChange={(e) =>
+                  setQuestionForm({
+                    ...questionForm,
+                    points: Number(e.target.value) || 10
+                  })
+                  }
+                  min="1"
+                  required />
+
                 </div>
               </div>
 
               <button type="submit" className="button-primary">
-                {editingQuestionId ? "Update Question" : "Add Question"}
+                {t(editingQuestionId ? "Update Question" : "Add Question")}
               </button>
             </form>
-          )}
+          }
 
           <div className="questions-list">
-            {questions.length === 0 ? (
-              <div className="empty-state">
-                <p>No questions yet. Add your first question!</p>
-              </div>
-            ) : (
-              (Array.isArray(questions) ? questions : []).map((q, index) => (
-                <div key={q._id || index} className="question-item card">
+            {questions.length === 0 ?
+            <div className="empty-state">
+                <p>{t("No questions yet. Add your first question!")}</p>
+              </div> :
+
+            (Array.isArray(questions) ? questions : []).map((q, index) =>
+            <div key={q._id || index} className="question-item card">
                   <div className="question-header">
-                    <span className="question-number">Q{index + 1}</span>
-                    <span className="question-points">{Number(q.points) || 0} pts</span>
+                    <span className="question-number">{t("Q")}{t(index + 1)}</span>
+                    <span className="question-points">{t(Number(q.points) || 0)}{t(" pts")}</span>
                   </div>
                   <p className="question-text">{q.question}</p>
-                  {q.type === "multiple-choice" && q.options && (
-                    <div className="question-options">
-                      {(Array.isArray(q.options) ? q.options : []).map((opt, optIndex) => (
-                        (() => {
-                          const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0
-                            ? q.correctAnswers
-                            : q.correctAnswer
-                              ? [q.correctAnswer]
-                              : [];
-                          const isCorrect = correctList.includes(opt);
-                          return (
-                        <div
-                          key={optIndex}
-                          className={`option ${isCorrect ? "correct" : ""}`}
-                        >
-                          {String.fromCharCode(65 + optIndex)}. {opt}
-                        </div>
-                          );
-                        })()
-                      ))}
+                  {q.type === "multiple-choice" && q.options &&
+              <div className="question-options">
+                      {(Array.isArray(q.options) ? q.options : []).map((opt, optIndex) =>
+                (() => {
+                  const correctList = Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0 ?
+                  q.correctAnswers :
+                  q.correctAnswer ?
+                  [q.correctAnswer] :
+                  [];
+                  const isCorrect = correctList.includes(opt);
+                  return (
+                    <div
+                      key={optIndex}
+                      className={`option ${isCorrect ? "correct" : ""}`}>
+
+                          {t(String.fromCharCode(65 + optIndex))}. {t(opt)}
+                        </div>);
+
+                })()
+                )}
                     </div>
-                  )}
+              }
                   <div className="form-actions align-end">
                     <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={() => handleEditQuestion(q)}
-                    >
-                      Edit
-                    </button>
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => handleEditQuestion(q)}>{t("Edit ")}
+
+
+                </button>
                     <button
-                      type="button"
-                      className="button-danger"
-                      onClick={() => handleDeleteQuestion(q?._id)}
-                    >
-                      Delete
-                    </button>
+                  type="button"
+                  className="button-danger"
+                  onClick={() => handleDeleteQuestion(q?._id)}>{t("Delete ")}
+
+
+                </button>
                   </div>
                 </div>
-              ))
-            )}
+            )
+            }
           </div>
         </div>
 
-        {notification && (
-          <NotificationToast
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
+        {notification &&
+        <NotificationToast
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)} />
+
+        }
 
         <ConfirmDialog
           isOpen={confirmDialog.isOpen}
-          title={confirmDialog.title}
+          title={t(confirmDialog.title)}
           message={confirmDialog.message}
           confirmLabel={confirmDialog.confirmLabel}
           onConfirm={handleConfirmApprove}
-          onCancel={handleConfirmCancel}
-        />
+          onCancel={handleConfirmCancel} />
+
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-const UniversityPanel = () => {
+const UniversityPanel = () => {useLocale();
   const [olympiads, setOlympiads] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedOlympiad, setSelectedOlympiad] = useState(null);
@@ -582,7 +582,7 @@ const UniversityPanel = () => {
     duration: 60, // in minutes - will convert to seconds
     status: "draft", // draft, published, unpublished
     olympiadLogo: null, // Logo file
-    universityName: "", // University name
+    universityName: "" // University name
   });
 
   const [statusFilter, setStatusFilter] = useState("all"); // all, published, unpublished, draft
@@ -592,11 +592,11 @@ const UniversityPanel = () => {
     isOpen: false,
     title: "",
     message: "",
-    confirmLabel: "Confirm",
+    confirmLabel: "Confirm"
   });
   const confirmResolverRef = useRef(null);
   const [customSubjects, setCustomSubjects] = useState(() =>
-    loadCustomSubjects(CUSTOM_SUBJECTS_STORAGE_KEY)
+  loadCustomSubjects(CUSTOM_SUBJECTS_STORAGE_KEY)
   );
   const [showAddSubjectInput, setShowAddSubjectInput] = useState(false);
   const [newSubjectInput, setNewSubjectInput] = useState("");
@@ -635,7 +635,7 @@ const UniversityPanel = () => {
       isOpen: true,
       title,
       message,
-      confirmLabel,
+      confirmLabel
     });
 
     return new Promise((resolve) => {
@@ -668,7 +668,7 @@ const UniversityPanel = () => {
     if (!normalizedSubject) {
       setNotification({
         message: "Please enter a valid subject name",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -681,7 +681,7 @@ const UniversityPanel = () => {
     setShowAddSubjectInput(false);
     setNotification({
       message: `Subject "${normalizedSubject}" added`,
-      type: "success",
+      type: "success"
     });
   };
 
@@ -693,7 +693,7 @@ const UniversityPanel = () => {
     if (!formData.title || !formData.title.trim()) {
       setNotification({
         message: "Please provide a title for the olympiad",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -701,7 +701,7 @@ const UniversityPanel = () => {
     if (!formData.type) {
       setNotification({
         message: "Please select an olympiad type",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -709,7 +709,7 @@ const UniversityPanel = () => {
     if (!formData.subject) {
       setNotification({
         message: "Please select a subject",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -717,7 +717,7 @@ const UniversityPanel = () => {
     if (!formData.universityName || !formData.universityName.trim()) {
       setNotification({
         message: "Please provide a university name",
-        type: "error",
+        type: "error"
       });
       return;
     }
@@ -740,7 +740,7 @@ const UniversityPanel = () => {
         endTime: formatDateTime(formData.endTime),
         duration: (Number(formData.duration) || 60) * 60, // Convert minutes to seconds
         status: formData.status,
-        universityName: formData.universityName,
+        universityName: formData.universityName
       };
 
       // Create olympiad first
@@ -748,17 +748,17 @@ const UniversityPanel = () => {
 
       // Try multiple possible response structures
       const newOlympiadId =
-        response.data?._id ||
-        response.data?.olympiad?._id ||
-        response.data?.id ||
-        response.data?.olympiad?.id;
+      response.data?._id ||
+      response.data?.olympiad?._id ||
+      response.data?.id ||
+      response.data?.olympiad?.id;
 
       if (!newOlympiadId) {
         console.error("No olympiad ID in response:", response.data);
         setNotification({
           message:
-            "Olympiad created but ID not received. Please refresh and try again.",
-          type: "error",
+          "Olympiad created but ID not received. Please refresh and try again.",
+          type: "error"
         });
         setLoading(false);
         return;
@@ -775,7 +775,7 @@ const UniversityPanel = () => {
           // Logo should now be associated with the olympiad via backend
           setNotification({
             message: "Olympiad created and logo uploaded successfully!",
-            type: "success",
+            type: "success"
           });
         } catch (logoError) {
           console.error(
@@ -786,17 +786,17 @@ const UniversityPanel = () => {
           // Olympiad was created successfully, user can upload logo later
           setNotification({
             message:
-              "Olympiad created successfully, but logo upload failed. You can update the logo later. " +
-              (logoError.response?.data?.message ||
-                logoError.response?.data?.error ||
-                ""),
-            type: "warning",
+            "Olympiad created successfully, but logo upload failed. You can update the logo later. " + (
+            logoError.response?.data?.message ||
+            logoError.response?.data?.error ||
+            ""),
+            type: "warning"
           });
         }
       } else {
         setNotification({
           message: "Olympiad created! Now add questions.",
-          type: "success",
+          type: "success"
         });
       }
 
@@ -806,7 +806,7 @@ const UniversityPanel = () => {
       console.error("Error creating olympiad:", error);
       setNotification({
         message: error.response?.data?.message || "Failed to create olympiad",
-        type: "error",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -820,7 +820,7 @@ const UniversityPanel = () => {
       if (!createdOlympiadId) {
         setNotification({
           message: "Please create the olympiad first before adding questions",
-          type: "error",
+          type: "error"
         });
         return;
       }
@@ -828,19 +828,19 @@ const UniversityPanel = () => {
       const questionPayload = {
         olympiadId: createdOlympiadId,
         ...questionData,
-        order: questions.length + 1,
+        order: questions.length + 1
       };
 
       const response = await universityAPI.addQuestion(questionPayload);
       setQuestions([...questions, response.data]);
       setNotification({
         message: "Question added successfully!",
-        type: "success",
+        type: "success"
       });
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to add question",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -850,15 +850,15 @@ const UniversityPanel = () => {
       const response = await universityAPI.updateQuestion(questionId, questionData);
       const updatedQuestion = response.data;
       setQuestions((prev) =>
-        (Array.isArray(prev) ? prev : []).map((q) =>
-          q?._id === questionId ? { ...q, ...updatedQuestion } : q
-        )
+      (Array.isArray(prev) ? prev : []).map((q) =>
+      q?._id === questionId ? { ...q, ...updatedQuestion } : q
+      )
       );
       setNotification({ message: "Question updated", type: "success" });
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to update question",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -867,19 +867,19 @@ const UniversityPanel = () => {
     const shouldDelete = await askForConfirmation({
       title: "Confirm Question Delete",
       message: "Delete this question?",
-      confirmLabel: "Delete",
+      confirmLabel: "Delete"
     });
     if (!shouldDelete) return;
     try {
       await universityAPI.deleteQuestion(questionId);
       setQuestions((prev) =>
-        (Array.isArray(prev) ? prev : []).filter((q) => q?._id !== questionId)
+      (Array.isArray(prev) ? prev : []).filter((q) => q?._id !== questionId)
       );
       setNotification({ message: "Question deleted", type: "success" });
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to delete question",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -900,12 +900,12 @@ const UniversityPanel = () => {
       duration: 60,
       status: "draft",
       olympiadLogo: null,
-      universityName: "",
+      universityName: ""
     });
     fetchOlympiads();
     setNotification({
       message: "Olympiad created successfully with questions!",
-      type: "success",
+      type: "success"
     });
   };
 
@@ -926,7 +926,7 @@ const UniversityPanel = () => {
       duration: 60,
       status: "draft",
       olympiadLogo: null,
-      universityName: "",
+      universityName: ""
     });
   };
 
@@ -964,7 +964,7 @@ const UniversityPanel = () => {
         duration: Math.floor((Number(data?.duration) || 3600) / 60),
         status: data?.status || "draft",
         olympiadLogo: null,
-        universityName: data?.universityName || "",
+        universityName: data?.universityName || ""
       });
 
       setEditingOlympiad(olympiad._id);
@@ -976,8 +976,8 @@ const UniversityPanel = () => {
       const olympiadData = normalizeOlympiadData(response?.data);
 
       const hasValidData =
-        olympiadData &&
-        (olympiadData._id || olympiadData.id || olympiadData.title);
+      olympiadData && (
+      olympiadData._id || olympiadData.id || olympiadData.title);
 
       if (hasValidData) {
         setFormData(buildFormData(olympiadData));
@@ -1007,7 +1007,7 @@ const UniversityPanel = () => {
         endTime: formatDateTime(formData.endTime),
         duration: formData.duration * 60,
         status: formData.status,
-        universityName: formData.universityName,
+        universityName: formData.universityName
       };
 
       // Keep existing logo URL if no new logo is selected
@@ -1031,7 +1031,7 @@ const UniversityPanel = () => {
 
           setNotification({
             message: "Olympiad updated and logo uploaded successfully",
-            type: "success",
+            type: "success"
           });
         } catch (logoError) {
           console.error(
@@ -1042,17 +1042,17 @@ const UniversityPanel = () => {
           // Olympiad was updated successfully, user can upload logo later
           setNotification({
             message:
-              "Olympiad updated successfully, but logo upload failed. You can try uploading the logo again. " +
-              (logoError.response?.data?.message ||
-                logoError.response?.data?.error ||
-                ""),
-            type: "warning",
+            "Olympiad updated successfully, but logo upload failed. You can try uploading the logo again. " + (
+            logoError.response?.data?.message ||
+            logoError.response?.data?.error ||
+            ""),
+            type: "warning"
           });
         }
       } else {
         setNotification({
           message: "Olympiad updated successfully",
-          type: "success",
+          type: "success"
         });
       }
       setEditingOlympiad(null);
@@ -1067,14 +1067,14 @@ const UniversityPanel = () => {
         duration: 60,
         status: "draft",
         olympiadLogo: null,
-        universityName: "",
+        universityName: ""
       });
       setCurrentStep(1);
       fetchOlympiads();
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to update olympiad",
-        type: "error",
+        type: "error"
       });
     } finally {
       setLoading(false);
@@ -1091,19 +1091,19 @@ const UniversityPanel = () => {
   const handleToggleStatus = async (olympiad) => {
     try {
       const newStatus =
-        olympiad.status === "published" ? "unpublished" : "published";
+      olympiad.status === "published" ? "unpublished" : "published";
       await universityAPI.updateOlympiad(olympiad._id, { status: newStatus });
       setNotification({
         message: `Olympiad ${
-          newStatus === "published" ? "published" : "unpublished"
-        } successfully`,
-        type: "success",
+        newStatus === "published" ? "published" : "unpublished"} successfully`,
+
+        type: "success"
       });
       fetchOlympiads();
     } catch (error) {
       setNotification({
         message: error.response?.data?.message || "Failed to update status",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -1114,7 +1114,7 @@ const UniversityPanel = () => {
     return (Array.isArray(olympiads) ? olympiads : []).filter((olympiad) => {
       if (statusFilter === "published") return olympiad.status === "published";
       if (statusFilter === "unpublished")
-        return olympiad.status === "unpublished";
+      return olympiad.status === "unpublished";
       if (statusFilter === "draft") return olympiad.status === "draft";
       return true;
     });
@@ -1125,21 +1125,21 @@ const UniversityPanel = () => {
     const statusMap = {
       published: { label: "Published", class: "status-published" },
       unpublished: { label: "Unpublished", class: "status-unpublished" },
-      draft: { label: "Draft", class: "status-draft" },
+      draft: { label: "Draft", class: "status-draft" }
     };
     const statusInfo = statusMap[status] || statusMap["draft"];
     return (
       <span className={`status-badge ${statusInfo.class}`}>
-        {statusInfo.label}
-      </span>
-    );
+        {t(statusInfo.label)}
+      </span>);
+
   };
 
   const handleDelete = async (id) => {
     const shouldDelete = await askForConfirmation({
       title: "Confirm Olympiad Delete",
       message: "Are you sure you want to delete this olympiad?",
-      confirmLabel: "Delete",
+      confirmLabel: "Delete"
     });
     if (!shouldDelete) return;
 
@@ -1147,13 +1147,13 @@ const UniversityPanel = () => {
       await universityAPI.deleteOlympiad(id);
       setNotification({
         message: "Olympiad deleted successfully",
-        type: "success",
+        type: "success"
       });
       fetchOlympiads();
     } catch (error) {
       setNotification({
         message: "Failed to delete olympiad",
-        type: "error",
+        type: "error"
       });
     }
   };
@@ -1162,463 +1162,463 @@ const UniversityPanel = () => {
     return (
       <div className="admin-loading brand-panel" data-brand-panel="university-panel">
         <div className="loading-spinner"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="admin-panel-page brand-panel" data-brand-panel="university-panel">
       <div className="container">
         <div className="admin-header">
-          <h1 className="admin-title text-glow">University Panel</h1>
+          <h1 className="admin-title text-glow">{t("University Panel")}</h1>
           <div className="admin-header-actions">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="status-filter"
-            >
-              <option value="all">All Status</option>
-              <option value="published">Published</option>
-              <option value="unpublished">Unpublished</option>
-              <option value="draft">Draft</option>
+              className="status-filter">
+
+              <option value="all">{t("All Status")}</option>
+              <option value="published">{t("Published")}</option>
+              <option value="unpublished">{t("Unpublished")}</option>
+              <option value="draft">{t("Draft")}</option>
             </select>
             <button
               className="button-primary header-create-button"
-              onClick={() => setShowCreateForm(!showCreateForm)}
-            >
-              {showCreateForm ? "Cancel" : "+ Create Olympiad"}
+              onClick={() => setShowCreateForm(!showCreateForm)}>
+
+              {t(showCreateForm ? "Cancel" : "+ Create Olympiad")}
             </button>
           </div>
         </div>
 
-        {showCreateForm && (
-          <div className="create-form card">
+        {showCreateForm &&
+        <div className="create-form card">
             {/* Step Indicator */}
             <div className="step-indicator">
               <div
-                className={`step ${currentStep >= 1 ? "active" : ""} ${
-                  currentStep > 1 ? "completed" : ""
-                }`}
-              >
+              className={`step ${currentStep >= 1 ? "active" : ""} ${
+              currentStep > 1 ? "completed" : ""}`
+              }>
+
                 <span className="step-number">1</span>
-                <span className="step-label">Choose Type</span>
+                <span className="step-label">{t("Choose Type")}</span>
               </div>
               <div
-                className={`step ${currentStep >= 2 ? "active" : ""} ${
-                  currentStep > 2 ? "completed" : ""
-                }`}
-              >
+              className={`step ${currentStep >= 2 ? "active" : ""} ${
+              currentStep > 2 ? "completed" : ""}`
+              }>
+
                 <span className="step-number">2</span>
-                <span className="step-label">Basic Info</span>
+                <span className="step-label">{t("Basic Info")}</span>
               </div>
               <div className={`step ${currentStep >= 3 ? "active" : ""}`}>
                 <span className="step-number">3</span>
-                <span className="step-label">Add Questions</span>
+                <span className="step-label">{t("Add Questions")}</span>
               </div>
             </div>
 
             {/* Step 1: Choose Type */}
-            {currentStep === 1 && (
-              <div className="step-content">
+            {currentStep === 1 &&
+          <div className="step-content">
                 <h2>
-                  {editingOlympiad
-                    ? "Step 1: Olympiad Type"
-                    : "Step 1: Choose Olympiad Type"}
+                  {t(editingOlympiad ?
+              "Step 1: Olympiad Type" :
+              "Step 1: Choose Olympiad Type")}
                 </h2>
                 <p className="step-description">
-                  {editingOlympiad
-                    ? `Current type: ${
-                        formData.type || "Not set"
-                      }. Select a different type to change it.`
-                    : "Select the type of olympiad you want to create"}
+                  {t(editingOlympiad ?
+              `Current type: ${
+              formData.type || "Not set"}. Select a different type to change it.` :
+
+              "Select the type of olympiad you want to create")}
                 </p>
 
                 <div className="type-selection">
                   <button
-                    type="button"
-                    className={`type-card ${
-                      formData.type === "test" ? "selected" : ""
-                    }`}
-                    onClick={() => {
-                      setFormData({ ...formData, type: "test" });
-                      if (!editingOlympiad) {
-                        setCurrentStep(2);
-                      }
-                    }}
-                  >
+                type="button"
+                className={`type-card ${
+                formData.type === "test" ? "selected" : ""}`
+                }
+                onClick={() => {
+                  setFormData({ ...formData, type: "test" });
+                  if (!editingOlympiad) {
+                    setCurrentStep(2);
+                  }
+                }}>
+
                     <div className="type-icon">📝</div>
-                    <h3>Test</h3>
-                    <p>Multiple choice questions with automatic grading</p>
+                    <h3>{t("Test")}</h3>
+                    <p>{t("Multiple choice questions with automatic grading")}</p>
                   </button>
 
                   <button
-                    type="button"
-                    className={`type-card ${
-                      formData.type === "essay" ? "selected" : ""
-                    }`}
-                    onClick={() => {
-                      setFormData({ ...formData, type: "essay" });
-                      if (!editingOlympiad) {
-                        setCurrentStep(2);
-                      }
-                    }}
-                  >
+                type="button"
+                className={`type-card ${
+                formData.type === "essay" ? "selected" : ""}`
+                }
+                onClick={() => {
+                  setFormData({ ...formData, type: "essay" });
+                  if (!editingOlympiad) {
+                    setCurrentStep(2);
+                  }
+                }}>
+
                     <div className="type-icon">✍️</div>
-                    <h3>Essay</h3>
-                    <p>Essay questions requiring manual evaluation</p>
+                    <h3>{t("Essay")}</h3>
+                    <p>{t("Essay questions requiring manual evaluation")}</p>
                   </button>
 
                   <button
-                    type="button"
-                    className={`type-card ${
-                      formData.type === "mixed" ? "selected" : ""
-                    }`}
-                    onClick={() => {
-                      setFormData({ ...formData, type: "mixed" });
-                      if (!editingOlympiad) {
-                        setCurrentStep(2);
-                      }
-                    }}
-                  >
+                type="button"
+                className={`type-card ${
+                formData.type === "mixed" ? "selected" : ""}`
+                }
+                onClick={() => {
+                  setFormData({ ...formData, type: "mixed" });
+                  if (!editingOlympiad) {
+                    setCurrentStep(2);
+                  }
+                }}>
+
                     <div className="type-icon">📚</div>
-                    <h3>Mixed</h3>
-                    <p>Both test and essay questions in one olympiad</p>
+                    <h3>{t("Mixed")}</h3>
+                    <p>{t("Both test and essay questions in one olympiad")}</p>
                   </button>
                 </div>
 
                 <div className="form-actions">
                   <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </button>
-                  {formData.type && (
-                    <button
-                      type="button"
-                      className="button-primary"
-                      onClick={() => setCurrentStep(2)}
-                    >
-                      Next →
-                    </button>
-                  )}
+                type="button"
+                className="button-secondary"
+                onClick={handleCancel}>{t("Cancel ")}
+
+
+              </button>
+                  {formData.type &&
+              <button
+                type="button"
+                className="button-primary"
+                onClick={() => setCurrentStep(2)}>{t("Next → ")}
+
+
+              </button>
+              }
                 </div>
               </div>
-            )}
+          }
 
             {/* Step 2: Basic Info */}
-            {currentStep === 2 && (
-              <div className="step-content">
+            {currentStep === 2 &&
+          <div className="step-content">
                 <h2>
-                  {editingOlympiad
-                    ? "Edit Olympiad"
-                    : "Step 2: Basic Information"}
+                  {t(editingOlympiad ?
+              "Edit Olympiad" :
+              "Step 2: Basic Information")}
                 </h2>
                 <p className="step-description">
-                  {editingOlympiad
-                    ? "Update the olympiad details"
-                    : "Fill in the olympiad details"}
+                  {t(editingOlympiad ?
+              "Update the olympiad details" :
+              "Fill in the olympiad details")}
                 </p>
 
                 <form
-                  onSubmit={
-                    editingOlympiad
-                      ? handleUpdateOlympiad
-                      : handleCreateOlympiad
-                  }
-                >
+              onSubmit={
+              editingOlympiad ?
+              handleUpdateOlympiad :
+              handleCreateOlympiad
+              }>
+
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Title</label>
+                      <label>{t("Title")}</label>
                       <input
-                        type="text"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData({ ...formData, title: e.target.value })
-                        }
-                        placeholder="e.g., Math Olympiad 2025"
-                        required
-                      />
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                    }
+                    placeholder={t("e.g., Math Olympiad 2025")}
+                    required />
+
                     </div>
                     <div className="form-group">
-                      <label>Subject</label>
+                      <label>{t("Subject")}</label>
                       <div className="subject-management">
                         <select
-                          value={formData.subject}
-                          onChange={(e) => handleSubjectSelect(e.target.value)}
-                          required
-                        >
-                          {availableSubjects.map((subject) => (
-                            <option key={subject} value={subject}>
-                              {subject}
+                      value={formData.subject}
+                      onChange={(e) => handleSubjectSelect(e.target.value)}
+                      required>
+
+                          {availableSubjects.map((subject) =>
+                      <option key={subject} value={subject}>
+                              {t(subject)}
                             </option>
-                          ))}
+                      )}
                         </select>
                         <button
-                          type="button"
-                          className="button-secondary subject-add-toggle"
-                          onClick={() => setShowAddSubjectInput((prev) => !prev)}
-                        >
-                          {showAddSubjectInput ? "Cancel" : "+ Add new subject"}
+                      type="button"
+                      className="button-secondary subject-add-toggle"
+                      onClick={() => setShowAddSubjectInput((prev) => !prev)}>
+
+                          {t(showAddSubjectInput ? "Cancel" : "+ Add new subject")}
                         </button>
 
-                        {showAddSubjectInput && (
-                          <div className="subject-add-row">
+                        {showAddSubjectInput &&
+                    <div className="subject-add-row">
                             <input
-                              type="text"
-                              value={newSubjectInput}
-                              onChange={(e) => setNewSubjectInput(e.target.value)}
-                              placeholder="e.g., Psychology"
-                              maxLength={60}
-                            />
+                        type="text"
+                        value={newSubjectInput}
+                        onChange={(e) => setNewSubjectInput(e.target.value)}
+                        placeholder={t("e.g., Psychology")}
+                        maxLength={60} />
+
                             <button
-                              type="button"
-                              className="button-primary"
-                              onClick={handleAddSubject}
-                            >
-                              Add
-                            </button>
+                        type="button"
+                        className="button-primary"
+                        onClick={handleAddSubject}>{t("Add ")}
+
+
+                      </button>
                           </div>
-                        )}
+                    }
                       </div>
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group is-full">
-                      <label>Description</label>
+                      <label>{t("Description")}</label>
                       <textarea
-                        value={formData.description}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
-                        placeholder="Enter olympiad description..."
-                        rows="3"
-                        required
-                      />
+                    value={formData.description}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      description: e.target.value
+                    })
+                    }
+                    placeholder={t("Enter olympiad description...")}
+                    rows="3"
+                    required />
+
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group is-full">
-                      <label>University Name</label>
+                      <label>{t("University Name")}</label>
                       <input
-                        type="text"
-                        value={formData.universityName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            universityName: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., Harvard University"
-                        required
-                      />
+                    type="text"
+                    value={formData.universityName}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      universityName: e.target.value
+                    })
+                    }
+                    placeholder={t("e.g., Harvard University")}
+                    required />
+
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group is-full">
-                      <label>Olympiad Logo</label>
+                      <label>{t("Olympiad Logo")}</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            olympiadLogo: e.target.files[0] || null,
-                          })
-                        }
-                        className="file-input"
-                      />
-                      {formData.olympiadLogo && (
-                        <div
-                          className="file-preview panel-preview"
-                        >
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      olympiadLogo: e.target.files[0] || null
+                    })
+                    }
+                    className="file-input" />
+
+                      {formData.olympiadLogo &&
+                  <div
+                    className="file-preview panel-preview">
+
                           <img
-                            src={URL.createObjectURL(formData.olympiadLogo)}
-                            alt="Logo preview"
-                            className="panel-preview-image"
-                          />
+                      src={URL.createObjectURL(formData.olympiadLogo)}
+                      alt={t("Logo preview")}
+                      className="panel-preview-image" />
+
                         </div>
-                      )}
+                  }
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Duration (minutes)</label>
+                      <label>{t("Duration (minutes)")}</label>
                       <input
-                        type="number"
-                        value={formData.duration}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            duration: Number(e.target.value) || 60,
-                          })
-                        }
-                        required
-                        min="1"
-                        placeholder="60"
-                      />
-                      <small className="panel-field-hint">
-                        Will be converted to seconds ({(Number(formData.duration) || 60) * 60}s)
-                      </small>
+                    type="number"
+                    value={formData.duration}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      duration: Number(e.target.value) || 60
+                    })
+                    }
+                    required
+                    min="1"
+                    placeholder={t("60")} />
+
+                      <small className="panel-field-hint">{t("Will be converted to seconds (")}
+                    {t((Number(formData.duration) || 60) * 60)}{t("s) ")}
+                  </small>
                     </div>
                     <div className="form-group">
-                      <label>Status</label>
+                      <label>{t("Status")}</label>
                       <select
-                        value={formData.status}
-                        onChange={(e) =>
-                          setFormData({ ...formData, status: e.target.value })
-                        }
-                        required
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="published">Published (Visible)</option>
-                        <option value="unpublished">
-                          Unpublished (Unvisible)
-                        </option>
+                    value={formData.status}
+                    onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                    }
+                    required>
+
+                        <option value="draft">{t("Draft")}</option>
+                        <option value="published">{t("Published (Visible)")}</option>
+                        <option value="unpublished">{t("Unpublished (Unvisible) ")}
+
+                    </option>
                       </select>
                     </div>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Start Time</label>
+                      <label>{t("Start Time")}</label>
                       <input
-                        type="datetime-local"
-                        value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
-                        required
-                      />
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      startTime: e.target.value
+                    })
+                    }
+                    required />
+
                     </div>
                     <div className="form-group">
-                      <label>End Time</label>
+                      <label>{t("End Time")}</label>
                       <input
-                        type="datetime-local"
-                        value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endTime: e.target.value })
-                        }
-                        required
-                      />
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) =>
+                    setFormData({ ...formData, endTime: e.target.value })
+                    }
+                    required />
+
                     </div>
                   </div>
 
                   <div className="form-actions">
                     <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={() => setCurrentStep(1)}
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      type="button"
-                      className="button-secondary"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </button>
-                    {editingOlympiad ? (
-                      <>
-                        <button
-                          type="button"
-                          className="button-secondary"
-                          onClick={async () => {
-                            // Save current changes before navigating
-                            const formatDateTime = (dateTimeLocal) => {
-                              if (!dateTimeLocal) return "";
-                              return new Date(dateTimeLocal).toISOString();
-                            };
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => setCurrentStep(1)}>{t("← Back ")}
 
-                            try {
-                              const olympiadData = {
-                                title: formData.title,
-                                description: formData.description,
-                                type: formData.type,
-                                subject: formData.subject,
-                                startTime: formatDateTime(formData.startTime),
-                                endTime: formatDateTime(formData.endTime),
-                                duration: formData.duration * 60,
-                                status: formData.status,
-                                universityName: formData.universityName,
-                              };
-                              await universityAPI.updateOlympiad(
-                                editingOlympiad,
-                                olympiadData
-                              );
-                              // Load questions for step 3
-                              const questionsResponse =
-                                await universityAPI.getQuestions(
-                                  editingOlympiad
-                                );
-                              setQuestions(questionsResponse.data || []);
-                              setCreatedOlympiadId(editingOlympiad);
-                              setCurrentStep(3);
-                            } catch (error) {
-                              setNotification({
-                                message:
-                                  error.response?.data?.message ||
-                                  "Failed to save changes",
-                                type: "error",
-                              });
-                            }
-                          }}
-                        >
-                          Next: Questions →
-                        </button>
-                        <button type="submit" className="button-primary">
-                          Update Olympiad
-                        </button>
+
+                </button>
+                    <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={handleCancel}>{t("Cancel ")}
+
+
+                </button>
+                    {editingOlympiad ?
+                <>
+                        <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={async () => {
+                      // Save current changes before navigating
+                      const formatDateTime = (dateTimeLocal) => {
+                        if (!dateTimeLocal) return "";
+                        return new Date(dateTimeLocal).toISOString();
+                      };
+
+                      try {
+                        const olympiadData = {
+                          title: formData.title,
+                          description: formData.description,
+                          type: formData.type,
+                          subject: formData.subject,
+                          startTime: formatDateTime(formData.startTime),
+                          endTime: formatDateTime(formData.endTime),
+                          duration: formData.duration * 60,
+                          status: formData.status,
+                          universityName: formData.universityName
+                        };
+                        await universityAPI.updateOlympiad(
+                          editingOlympiad,
+                          olympiadData
+                        );
+                        // Load questions for step 3
+                        const questionsResponse =
+                        await universityAPI.getQuestions(
+                          editingOlympiad
+                        );
+                        setQuestions(questionsResponse.data || []);
+                        setCreatedOlympiadId(editingOlympiad);
+                        setCurrentStep(3);
+                      } catch (error) {
+                        setNotification({
+                          message:
+                          error.response?.data?.message ||
+                          "Failed to save changes",
+                          type: "error"
+                        });
+                      }
+                    }}>{t("Next: Questions → ")}
+
+
+                  </button>
+                        <button type="submit" className="button-primary">{t("Update Olympiad ")}
+
+                  </button>
+                      </> :
+
+                <>
+                        <button type="submit" className="button-primary">{t("Create & Add Questions ")}
+
+                  </button>
                       </>
-                    ) : (
-                      <>
-                        <button type="submit" className="button-primary">
-                          Create & Add Questions
-                        </button>
-                      </>
-                    )}
+                }
                   </div>
                 </form>
               </div>
-            )}
+          }
 
             {/* Step 3: Add Questions */}
-            {currentStep === 3 && (
-              <QuestionFormStep
-                olympiadId={createdOlympiadId}
-                olympiadType={formData.type}
-                questions={questions}
-                onAddQuestion={handleAddQuestion}
-                onUpdateQuestion={handleUpdateQuestion}
-                onDeleteQuestion={handleDeleteQuestion}
-                onFinish={handleFinish}
-                onBack={() => setCurrentStep(2)}
-              />
-            )}
+            {currentStep === 3 &&
+          <QuestionFormStep
+            olympiadId={createdOlympiadId}
+            olympiadType={formData.type}
+            questions={questions}
+            onAddQuestion={handleAddQuestion}
+            onUpdateQuestion={handleUpdateQuestion}
+            onDeleteQuestion={handleDeleteQuestion}
+            onFinish={handleFinish}
+            onBack={() => setCurrentStep(2)} />
+
+          }
           </div>
-        )}
+        }
 
         <div className="admin-olympiads">
           {(Array.isArray(getFilteredOlympiads()) ? getFilteredOlympiads() : []).map((olympiad) => {
             // Get logo URL - handle both relative and absolute URLs
             // Check multiple possible field names for logo
             const logoField =
-              olympiad.olympiadLogo ||
-              olympiad.logo ||
-              olympiad.photo ||
-              olympiad.image;
+            olympiad.olympiadLogo ||
+            olympiad.logo ||
+            olympiad.photo ||
+            olympiad.image;
 
             const getLogoUrl = (logo) => {
               if (!logo) return null;
@@ -1632,11 +1632,11 @@ const UniversityPanel = () => {
               }
               // Otherwise, prepend /api if in dev mode, or construct full URL
               const API_BASE_URL =
-                import.meta.env.VITE_API_URL ||
-                "/api";
-              return logo.startsWith("/")
-                ? `${API_BASE_URL}${logo}`
-                : `${API_BASE_URL}/${logo}`;
+              import.meta.env.VITE_API_URL ||
+              "/api";
+              return logo.startsWith("/") ?
+              `${API_BASE_URL}${logo}` :
+              `${API_BASE_URL}/${logo}`;
             };
 
             const logoUrl = getLogoUrl(logoField);
@@ -1645,47 +1645,47 @@ const UniversityPanel = () => {
               <div key={olympiad._id} className="admin-olympiad-card card">
                 <div className="olympiad-card-header">
                   <div className="olympiad-logo-container">
-                    {logoUrl ? (
-                      <img
-                        src={logoUrl}
-                        alt={`${olympiad.title} logo`}
-                        className="olympiad-logo"
-                        onError={(e) => {
-                          // Show placeholder if image fails to load
-                          e.target.style.display = "none";
-                          const container = e.target.parentElement;
-                          if (
-                            container &&
-                            !container.querySelector(".logo-placeholder")
-                          ) {
-                            const placeholder = document.createElement("div");
-                            placeholder.className = "logo-placeholder";
-                            placeholder.textContent = "📋";
-                            container.appendChild(placeholder);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="logo-placeholder">📋</div>
-                    )}
+                    {logoUrl ?
+                    <img
+                      src={logoUrl}
+                      alt={t(`${olympiad.title} logo`)}
+                      className="olympiad-logo"
+                      onError={(e) => {
+                        // Show placeholder if image fails to load
+                        e.target.style.display = "none";
+                        const container = e.target.parentElement;
+                        if (
+                        container &&
+                        !container.querySelector(".logo-placeholder"))
+                        {
+                          const placeholder = document.createElement("div");
+                          placeholder.className = "logo-placeholder";
+                          placeholder.textContent = "📋";
+                          container.appendChild(placeholder);
+                        }
+                      }} /> :
+
+
+                    <div className="logo-placeholder">📋</div>
+                    }
                   </div>
                   <div className="olympiad-info">
                     <div className="olympiad-title-row">
                       <h3>{olympiad.title}</h3>
-                      {getStatusBadge(olympiad.status || "draft")}
+                      {t(getStatusBadge(olympiad.status || "draft"))}
                     </div>
                     <div className="olympiad-meta">
-                      <span>{olympiad.subject}</span>
+                      <span>{t(olympiad.subject)}</span>
                       <span>•</span>
-                      <span>{olympiad.type}</span>
-                      {olympiad.universityName && (
-                        <>
+                      <span>{t(olympiad.type)}</span>
+                      {olympiad.universityName &&
+                      <>
                           <span>•</span>
                           <span>{olympiad.universityName}</span>
                         </>
-                      )}
+                      }
                       <span>•</span>
-                      <span>{formatDate(olympiad.startTime)}</span>
+                      <span>{t(formatDate(olympiad.startTime))}</span>
                     </div>
                   </div>
                 </div>
@@ -1694,69 +1694,68 @@ const UniversityPanel = () => {
                     className="button-secondary"
                     onClick={() => handleToggleStatus(olympiad)}
                     title={
-                      olympiad.status === "published"
-                        ? "Make Unvisible"
-                        : "Make Visible"
-                    }
-                  >
-                    {olympiad.status === "published" ? "🔒 Hide" : "👁️ Show"}
+                    olympiad.status === "published" ? t(
+                      "Make Unvisible") : t(
+                      "Make Visible")
+                    }>
+
+                    {olympiad.status === "published" ? t("🔒 Hide") : t("👁️ Show")}
                   </button>
                   <button
                     className="button-secondary"
-                    onClick={() => handleEdit(olympiad)}
-                  >
-                    Edit
+                    onClick={() => handleEdit(olympiad)}>{t("Edit ")}
+
+
                   </button>
                   <button
                     className="button-secondary"
-                    onClick={() => handleManageQuestions(olympiad)}
-                  >
-                    Questions
+                    onClick={() => handleManageQuestions(olympiad)}>{t("Questions ")}
+
+
                   </button>
                   <button
                     className="button-danger"
-                    onClick={() => handleDelete(olympiad._id)}
-                  >
-                    Delete
+                    onClick={() => handleDelete(olympiad._id)}>{t("Delete ")}
+
+
                   </button>
                 </div>
-              </div>
-            );
+              </div>);
+
           })}
         </div>
       </div>
 
       {/* Question Manager Modal */}
-      {showQuestionManager && selectedOlympiad && (
-        <QuestionManager
-          olympiad={selectedOlympiad}
-          onClose={() => {
-            setShowQuestionManager(false);
-            setSelectedOlympiad(null);
-            fetchOlympiads();
-          }}
-        />
-      )}
+      {showQuestionManager && selectedOlympiad &&
+      <QuestionManager
+        olympiad={selectedOlympiad}
+        onClose={() => {
+          setShowQuestionManager(false);
+          setSelectedOlympiad(null);
+          fetchOlympiads();
+        }} />
 
-      {notification && (
-        <NotificationToast
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
+      }
+
+      {notification &&
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification(null)} />
+
+      }
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
-        title={confirmDialog.title}
+        title={t(confirmDialog.title)}
         message={confirmDialog.message}
         confirmLabel={confirmDialog.confirmLabel}
         onConfirm={handleConfirmApprove}
-        onCancel={handleConfirmCancel}
-      />
-    </div>
-  );
+        onCancel={handleConfirmCancel} />
+
+    </div>);
+
 };
 
 export default UniversityPanel;
-

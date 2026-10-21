@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { t, useLocale } from "../i18n/runtime";import { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { olympiadAPI } from '../services/api';
 import { getSavedAnswers, deleteSavedAnswers } from '../utils/indexeddb';
@@ -6,11 +6,11 @@ import './AttemptRecovery.css';
 
 /**
  * AttemptRecovery Component
- * 
+ *
  * Detects disconnected session, shows warning, attempts to reconnect,
  * and syncs locally stored answers on reconnect.
  */
-const AttemptRecovery = ({ olympiadId, attemptId, onReconnected, onSyncComplete }) => {
+const AttemptRecovery = ({ olympiadId, attemptId, onReconnected, onSyncComplete }) => {useLocale();
   const [disconnected, setDisconnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState('');
@@ -77,7 +77,7 @@ const AttemptRecovery = ({ olympiadId, attemptId, onReconnected, onSyncComplete 
         // Clear saved answers after successful sync
         await deleteSavedAnswers(olympiadId);
         setSyncStatus('Answers synced successfully');
-        
+
         if (onSyncComplete) {
           onSyncComplete();
         }
@@ -103,43 +103,43 @@ const AttemptRecovery = ({ olympiadId, attemptId, onReconnected, onSyncComplete 
   return (
     <div className="attempt-recovery-overlay">
       <div className="attempt-recovery-card">
-        {disconnected && (
-          <>
+        {disconnected &&
+        <>
             <div className="recovery-icon">⚠️</div>
-            <h2>Connection Lost</h2>
-            <p className="recovery-message">
-              Your connection to the server has been lost.
-            </p>
-            <p className="recovery-warning">
-              ⚠️ <strong>Timer is still running!</strong> The olympiad continues on the server.
-            </p>
-            <p className="recovery-instruction">
-              Please check your internet connection. Your answers are being saved locally.
-            </p>
-          </>
-        )}
+            <h2>{t("Connection Lost")}</h2>
+            <p className="recovery-message">{t("Your connection to the server has been lost. ")}
 
-        {syncing && (
-          <>
+          </p>
+            <p className="recovery-warning">
+              ⚠️ <strong>{t("Timer is still running!")}</strong>{t(" The olympiad continues on the server. ")}
+          </p>
+            <p className="recovery-instruction">{t("Please check your internet connection. Your answers are being saved locally. ")}
+
+          </p>
+          </>
+        }
+
+        {syncing &&
+        <>
             <div className="recovery-icon">🔄</div>
-            <h2>Syncing Answers</h2>
-            <p className="recovery-message">{syncStatus}</p>
+            <h2>{t("Syncing Answers")}</h2>
+            <p className="recovery-message">{t(syncStatus)}</p>
             <div className="recovery-spinner"></div>
           </>
-        )}
+        }
 
-        {connected && !syncing && disconnected && (
-          <button 
-            className="recovery-button" 
-            onClick={syncAnswers}
-            disabled={syncing}
-          >
-            Sync Answers Now
-          </button>
-        )}
+        {connected && !syncing && disconnected &&
+        <button
+          className="recovery-button"
+          onClick={syncAnswers}
+          disabled={syncing}>{t("Sync Answers Now ")}
+
+
+        </button>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default AttemptRecovery;

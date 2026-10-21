@@ -1,1 +1,5 @@
- 
+{
+  "Похоже, сайт открыт через эмулятор.": "The website appears to be running in an emulator.",
+  "Пожалуйста, откройте сайт на вашем реальном устройстве или на компьютере, используя ваш личный браузер.": "Please open the website in your own browser on a real device or computer.",
+  "Для продолжения работы закройте эмулятор и перезайдите на сайт.": "Close the emulator and reopen the website to continue."
+}

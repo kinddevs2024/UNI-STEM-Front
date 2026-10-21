@@ -1,23 +1,23 @@
-// Console security warning
+import { t, useLocale } from "./i18n/runtime"; // Console security warning
 if (typeof console !== 'undefined') {
   console.warn(
     '%cОстановитесь!',
     'font-size: 24px; font-weight: bold; color: red;'
-  ) // eslint-disable-line no-console   
+  ); // eslint-disable-line no-console
 
-  
+
   console.warn(
     '%cЭта функция браузера предназначена для разработчиков. Если кто-то предложил вам скопировать и вставить что-то здесь, чтобы включить какую-либо функцию в глобальном олимпиаде или взломать чей-то аккаунт, это мошенники. Выполнив эти действия, вы предоставите им доступ к своему аккаунту аккаунт.',
     'font-size: 14px; color: red; line-height: 1.5;'
-  )
+  );
 }
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  useLocation,
-} from "react-router-dom";
+  useLocation } from
+"react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
@@ -25,7 +25,7 @@ import OlympiadEntryGate from "./components/OlympiadEntryGate";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import GoogleOneTap from "./components/GoogleOneTap";
-import { getAuthDestination, needsGradeSelection } from "./utils/authDestination";
+import { getAuthDestination, needsOnboarding } from "./utils/authDestination";
 import Navbar from "./components/Navbar";
 import DashboardWelcome from "./components/DashboardWelcome";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -68,24 +68,24 @@ import "@fontsource/cormorant-garamond/600-italic.css";
 import "./styles/brand-system.css";
 import "./styles/dark-theme.css";
 
-const AppRoutes = () => {
+const AppRoutes = () => {useLocale();
   const { isAuthenticated, user, loading } = useAuth();
 
   return (
     <Routes>
       <Route
         path="/"
-        element={loading ? (
-          <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }} role="status" aria-label="Loading account">
+        element={loading ?
+        <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }} role="status" aria-label={t("Loading account")}>
             <div className="loading-spinner" />
-          </div>
-        ) : isAuthenticated ? <Navigate to={getAuthDestination(user)} replace /> : <Home />}
-      />
+          </div> :
+        isAuthenticated ? <Navigate to={getAuthDestination(user)} replace /> : <Home />} />
+
 
       <Route
         path="/auth"
-        element={loading ? <div style={{minHeight:"100svh",display:"grid",placeItems:"center"}} role="status" aria-label="Loading account"><div className="loading-spinner" /></div> : isAuthenticated && !needsGradeSelection(user) ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />}
-      />
+        element={loading ? <div style={{ minHeight: "100svh", display: "grid", placeItems: "center" }} role="status" aria-label={t("Loading account")}><div className="loading-spinner" /></div> : isAuthenticated && !needsOnboarding(user) ? <Navigate to={getAuthDestination(user)} replace /> : <Auth />} />
+
 
       <Route path="/olympiad/:id/entry" element={<ProtectedRoute requiredRole={USER_ROLES.STUDENT}><OlympiadEntryGate /></ProtectedRoute>} />
 
@@ -95,243 +95,243 @@ const AppRoutes = () => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/olympiad/:id/start"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <StartOlympiad />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/olympiad/:id"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <ErrorBoundary>
               <TestOlympiad />
             </ErrorBoundary>
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/olympiad/:id/essay"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <EssayOlympiad />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/olympiad/:id/leaderboard"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <ErrorBoundary>
               <Leaderboard />
             </ErrorBoundary>
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/olympiad/:id/results"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <Results />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/results"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <Results />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route path="/ticket" element={<TicketAccess />} />
-      <Route path="/admin/recordings" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminRecordings /></ProtectedRoute>} />
-      <Route path="/admin/tickets" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminTickets /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN,USER_ROLES.OWNER]}><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/recordings" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}><AdminRecordings /></ProtectedRoute>} />
+      <Route path="/admin/tickets" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}><AdminTickets /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}><AdminUsers /></ProtectedRoute>} />
       <Route
         path="/admin"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.ADMIN}>
+        <ProtectedRoute requiredRole={USER_ROLES.ADMIN}>
             <AdminPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/universities"
         element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}>
+        <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}>
             <Universities />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/schools"
         element={
-          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}>
+        <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.OWNER]}>
             <Schools />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/owner"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.OWNER}>
+        <ProtectedRoute requiredRole={USER_ROLES.OWNER}>
             <OwnerPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/resolter"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.RESOLTER}>
+        <ProtectedRoute requiredRole={USER_ROLES.RESOLTER}>
             <ResolterPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/school-teacher"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.SCHOOL_TEACHER}>
+        <ProtectedRoute requiredRole={USER_ROLES.SCHOOL_TEACHER}>
             <SchoolTeacherPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/checker"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.CHECKER}>
+        <ProtectedRoute requiredRole={USER_ROLES.CHECKER}>
             <CheckerPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/university"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.UNIVERSITY}>
+        <ProtectedRoute requiredRole={USER_ROLES.UNIVERSITY}>
             <UniversityDashboard />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/university-panel"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.UNIVERSITY}>
+        <ProtectedRoute requiredRole={USER_ROLES.UNIVERSITY}>
             <UniversityPanel />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/profile"
         element={
-          <ProtectedRoute
-            allowedRoles={[
-              USER_ROLES.STUDENT,
-              USER_ROLES.ADMIN,
-              USER_ROLES.OWNER,
-              USER_ROLES.UNIVERSITY,
-              USER_ROLES.SCHOOL_ADMIN,
-              USER_ROLES.SCHOOL_TEACHER,
-              USER_ROLES.CHECKER,
-            ]}
-          >
+        <ProtectedRoute
+          allowedRoles={[
+          USER_ROLES.STUDENT,
+          USER_ROLES.ADMIN,
+          USER_ROLES.OWNER,
+          USER_ROLES.UNIVERSITY,
+          USER_ROLES.SCHOOL_ADMIN,
+          USER_ROLES.SCHOOL_TEACHER,
+          USER_ROLES.CHECKER]
+          }>
+
             <Profile />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/profile/edit"
         element={
-          <ProtectedRoute
-            allowedRoles={[
-              USER_ROLES.STUDENT,
-              USER_ROLES.ADMIN,
-              USER_ROLES.OWNER,
-              USER_ROLES.UNIVERSITY,
-              USER_ROLES.SCHOOL_ADMIN,
-              USER_ROLES.SCHOOL_TEACHER,
-              USER_ROLES.CHECKER,
-            ]}
-          >
+        <ProtectedRoute
+          allowedRoles={[
+          USER_ROLES.STUDENT,
+          USER_ROLES.ADMIN,
+          USER_ROLES.OWNER,
+          USER_ROLES.UNIVERSITY,
+          USER_ROLES.SCHOOL_ADMIN,
+          USER_ROLES.SCHOOL_TEACHER,
+          USER_ROLES.CHECKER]
+          }>
+
             <ProfileEdit />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/complete-profile"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <Navigate to="/dashboard" replace />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/settings"
         element={
-          <ProtectedRoute>
+        <ProtectedRoute>
             <Settings />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route
         path="/buy-coins"
         element={
-          <ProtectedRoute requiredRole={USER_ROLES.STUDENT}>
+        <ProtectedRoute requiredRole={USER_ROLES.STUDENT}>
             <BuyCoins />
           </ProtectedRoute>
-        }
-      />
+        } />
+
 
       <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
-  );
+    </Routes>);
+
 };
 
-function RouteScene() {
+function RouteScene() {useLocale();
   const { pathname } = useLocation();
   return <div key={pathname} className="route-scene"><AppRoutes /></div>;
 }
 
-function App() {
+function App() {useLocale();
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <TranslationProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <TranslationProvider>
           <ThemeProvider>
             <SocketProvider>
               <Router
                 future={{
                   v7_startTransition: true,
-                  v7_relativeSplatPath: true,
-                }}
-              >
+                  v7_relativeSplatPath: true
+                }}>
+
                 <ScrollToTop />
                 <GoogleOneTap />
                 <CookieConsentWrapper />
@@ -345,24 +345,24 @@ function App() {
               </Router>
             </SocketProvider>
           </ThemeProvider>
-        </AuthProvider>
-      </TranslationProvider>
-    </GoogleOAuthProvider>
-  );
+        </TranslationProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>);
+
 }
 
 // Separate component to handle cookie consent modal
-const CookieConsentWrapper = () => {
+const CookieConsentWrapper = () => {useLocale();
   const { showCookieConsent, handleCookieConsent, user } = useAuth();
 
-  if (!showCookieConsent || needsGradeSelection(user)) return null;
+  if (!showCookieConsent || needsOnboarding(user)) return null;
 
   return (
     <CookieConsentModal
       onAccept={handleCookieConsent}
-      onReject={() => handleCookieConsent(false)}
-    />
-  );
+      onReject={() => handleCookieConsent(false)} />);
+
+
 };
 
 export default App;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { t, useLocale } from "../../i18n/runtime";import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { olympiadAPI } from '../../services/api';
 import { useSocket } from '../../context/SocketContext';
@@ -16,12 +16,12 @@ import { getTimeRemaining, getTimeRemainingFromDuration } from '../../utils/help
 import { generateDeviceFingerprint } from '../../utils/device-fingerprint';
 import './TestOlympiad.css';
 
-const TestOlympiad = () => {
+const TestOlympiad = () => {useLocale();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { emit } = useSocket();
-  
+
   const [olympiad, setOlympiad] = useState(null);
   const [questions, setQuestions] = useState([]);
 
@@ -40,7 +40,7 @@ const TestOlympiad = () => {
     isOpen: false,
     title: '',
     message: '',
-    confirmLabel: 'Confirm',
+    confirmLabel: 'Confirm'
   });
   const draftSaveTimeoutRef = useRef(null);
   const confirmResolverRef = useRef(null);
@@ -50,7 +50,7 @@ const TestOlympiad = () => {
 
   // Load attempt session
   const { attempt, loading: attemptLoading, error: attemptError, isActive, isExpired, isCompleted } = useAttemptSession(id);
-  
+
   const { answers, setAnswers, clearAnswers } = useDurableAnswers(id, user?._id, attempt?._id);
 
   // Set attempt ID when loaded
@@ -86,7 +86,7 @@ const TestOlympiad = () => {
 
   useEffect(() => {
     fetchOlympiad();
-    
+
     // Get attempt ID from localStorage if available
     const storedAttemptId = localStorage.getItem(`olympiad_${id}_attemptId`);
     if (storedAttemptId) {
@@ -112,14 +112,14 @@ const TestOlympiad = () => {
       }
     }
 
-    generateDeviceFingerprint()
-      .then(fp => {
-        setDeviceFingerprint(fp);
-        localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
-      })
-      .catch(err => {
-        console.error('Error generating device fingerprint:', err);
-      });
+    generateDeviceFingerprint().
+    then((fp) => {
+      setDeviceFingerprint(fp);
+      localStorage.setItem(`olympiad_${id}_deviceFingerprint`, JSON.stringify(fp));
+    }).
+    catch((err) => {
+      console.error('Error generating device fingerprint:', err);
+    });
   }, [id]);
 
   // Load current question from server if missing or missing nonce
@@ -129,9 +129,9 @@ const TestOlympiad = () => {
       if (!attemptId || questions.length === 0) return;
 
       const authoritativeIndex =
-        typeof attempt.currentQuestionIndex === 'number'
-          ? attempt.currentQuestionIndex
-          : currentQuestionIndex;
+      typeof attempt.currentQuestionIndex === 'number' ?
+      attempt.currentQuestionIndex :
+      currentQuestionIndex;
 
       if (authoritativeIndex > currentQuestionIndex) {
         setCurrentQuestionIndex(authoritativeIndex);
@@ -143,7 +143,7 @@ const TestOlympiad = () => {
           const response = await olympiadAPI.getQuestion(id, authoritativeIndex);
           if (response.data.success && response.data.question) {
             const fetchedQuestion = response.data.question;
-            setQuestions(prev => {
+            setQuestions((prev) => {
               const next = [...prev];
               const targetIndex = response.data.questionIndex ?? authoritativeIndex;
               next[targetIndex] = {
@@ -177,23 +177,23 @@ const TestOlympiad = () => {
       // Check if user has gone through start page (optional check)
       const started = localStorage.getItem(`olympiad_${id}_started`);
       if (!started && olympiadData.status === 'published') {
+
+
+
+
+
+
+
+
+
         // Optional: redirect to start page if not started
         // Uncomment if you want to force users to go through start page
         // navigate(`/olympiad/${id}/start`);
-      }
-      
-      // Calculate remaining time based on duration from start time
-      const startTime = localStorage.getItem(`olympiad_${id}_startTime`);
-      const duration = olympiadData.duration || 3600; // Default to 60 minutes (3600 seconds)
-      
-      if (startTime && duration) {
-        // Use duration-based timer (countdown from when user started)
-        const remaining = getTimeRemainingFromDuration(duration, startTime);
-        setTimeRemaining(remaining);
-      } else {
-        // Fallback to endTime-based timer if no start time recorded
-        const remaining = getTimeRemaining(olympiadData.endTime);
-        setTimeRemaining(remaining);
+      } // Calculate remaining time based on duration from start time
+      const startTime = localStorage.getItem(`olympiad_${id}_startTime`);const duration = olympiadData.duration || 3600; // Default to 60 minutes (3600 seconds)
+      if (startTime && duration) {// Use duration-based timer (countdown from when user started)
+        const remaining = getTimeRemainingFromDuration(duration, startTime);setTimeRemaining(remaining);} else {// Fallback to endTime-based timer if no start time recorded
+        const remaining = getTimeRemaining(olympiadData.endTime);setTimeRemaining(remaining);
       }
     } catch (error) {
       setNotification({ message: 'Failed to load olympiad', type: 'error' });
@@ -205,7 +205,7 @@ const TestOlympiad = () => {
 
   const handleAnswerChange = (questionId, answer) => {
     // Update local state
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
       [questionId]: answer
     }));
@@ -242,7 +242,7 @@ const TestOlympiad = () => {
             if (nonceResponse.data.success && nonceResponse.data.question?.nonce) {
               nonce = nonceResponse.data.question.nonce;
               const fetchedQuestion = nonceResponse.data.question;
-              setQuestions(prev => {
+              setQuestions((prev) => {
                 const next = [...prev];
                 next[currentQuestionIndex] = {
                   ...(next[currentQuestionIndex] || {}),
@@ -286,9 +286,9 @@ const TestOlympiad = () => {
           const code = responseData?.code;
 
           if (
-            (code === 'INVALID_QUESTION_INDEX' || code === 'INVALID_QUESTION_ACCESS') &&
-            typeof serverIndex === 'number'
-          ) {
+          (code === 'INVALID_QUESTION_INDEX' || code === 'INVALID_QUESTION_ACCESS') &&
+          typeof serverIndex === 'number')
+          {
             setCurrentQuestionIndex(serverIndex);
             try {
               await olympiadAPI.getQuestion(id, serverIndex);
@@ -306,15 +306,15 @@ const TestOlympiad = () => {
       }
 
       // Move to next question if not last
-      const nextIndex = typeof nextIndexOverride === 'number'
-        ? nextIndexOverride
-        : currentQuestionIndex + 1;
+      const nextIndex = typeof nextIndexOverride === 'number' ?
+      nextIndexOverride :
+      currentQuestionIndex + 1;
 
       if (nextIndex < questions.length) {
         try {
-          const resolvedIndex = typeof nextIndexOverride === 'number'
-            ? nextIndexOverride
-            : nextIndex;
+          const resolvedIndex = typeof nextIndexOverride === 'number' ?
+          nextIndexOverride :
+          nextIndex;
           setCurrentQuestionIndex(resolvedIndex);
           const response = await olympiadAPI.getQuestion(id, nextIndex);
 
@@ -325,8 +325,8 @@ const TestOlympiad = () => {
             }
 
             // Add question to questions array if not already there
-            if (response.data.question && !questions.find(q => q._id === response.data.question._id)) {
-              setQuestions(prev => [...prev, response.data.question]);
+            if (response.data.question && !questions.find((q) => q._id === response.data.question._id)) {
+              setQuestions((prev) => [...prev, response.data.question]);
             }
           }
         } catch (error) {
@@ -357,7 +357,7 @@ const TestOlympiad = () => {
       isOpen: true,
       title,
       message,
-      confirmLabel,
+      confirmLabel
     });
 
     return new Promise((resolve) => {
@@ -386,7 +386,7 @@ const TestOlympiad = () => {
       const shouldSubmit = await askForConfirmation({
         title: 'Confirm Submission',
         message: 'Are you sure you want to submit? You cannot change answers after submission.',
-        confirmLabel: 'Submit',
+        confirmLabel: 'Submit'
       });
       if (!shouldSubmit) return;
     }
@@ -414,7 +414,7 @@ const TestOlympiad = () => {
         message: response?.message || 'Submission failed. Your answers are still saved on this device. Please try again.',
         type: 'error',
         duration: existingSubmission ? null : 6000,
-        action: existingSubmission ? { label: 'View saved result →', to: `/olympiad/${id}/results` } : undefined,
+        action: existingSubmission ? { label: 'View saved result →', to: `/olympiad/${id}/results` } : undefined
       });
     } finally {
       setSubmitting(false);
@@ -429,22 +429,22 @@ const TestOlympiad = () => {
     return (
       <div className="olympiad-loading">
         <div className="loading-spinner"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (submitted) {
     return (
       <div className="olympiad-submitted">
         <div className="submitted-card card">
-          <h2>✓ Submitted Successfully</h2>
-          <p>Your answers have been submitted.</p>
-          <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/results`)}>
-            View Results
+          <h2>{t("✓ Submitted Successfully")}</h2>
+          <p>{t("Your answers have been submitted.")}</p>
+          <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/results`)}>{t("View Results ")}
+
           </button>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const answeredCount = Object.values(answers).filter((value) => hasAnswerValue(value)).length;
@@ -457,15 +457,15 @@ const TestOlympiad = () => {
       <div className="test-olympiad-page">
         <div className="olympiad-container">
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-            <h2>No Questions Available</h2>
-            <p>This olympiad doesn't have any questions yet.</p>
-            <button className="button-primary" onClick={() => navigate('/dashboard')}>
-              Back to Dashboard
+            <h2>{t("No Questions Available")}</h2>
+            <p>{t("This olympiad doesn't have any questions yet.")}</p>
+            <button className="button-primary" onClick={() => navigate('/dashboard')}>{t("Back to Dashboard ")}
+
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // Check attempt status
@@ -473,8 +473,8 @@ const TestOlympiad = () => {
     return (
       <div className="olympiad-loading">
         <div className="loading-spinner"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (attemptError || !attempt) {
@@ -482,15 +482,15 @@ const TestOlympiad = () => {
       <div className="test-olympiad-page">
         <div className="olympiad-container">
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-            <h2>No Active Attempt</h2>
-            <p>{attemptError || 'Please start the olympiad first.'}</p>
-            <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/start`)}>
-              Go to Start Page
+            <h2>{t("No Active Attempt")}</h2>
+            <p>{t(attemptError || 'Please start the olympiad first.')}</p>
+            <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/start`)}>{t("Go to Start Page ")}
+
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (isExpired || isCompleted) {
@@ -498,150 +498,149 @@ const TestOlympiad = () => {
       <div className="test-olympiad-page">
         <div className="olympiad-container">
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-            <h2>{isExpired ? 'Time Expired' : 'Attempt Completed'}</h2>
-            <p>This attempt has {isExpired ? 'expired' : 'been completed'}.</p>
-            <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/results`)}>
-              View Results
+            <h2>{t(isExpired ? 'Time Expired' : 'Attempt Completed')}</h2>
+            <p>{t("This attempt has ")}{t(isExpired ? 'expired' : 'been completed')}.</p>
+            <button className="button-primary" onClick={() => navigate(`/olympiad/${id}/results`)}>{t("View Results ")}
+
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="test-olympiad-page">
-      <ProctoringMonitor 
-        olympiadId={id} 
+      <ProctoringMonitor
+        olympiadId={id}
         userId={user?._id}
         olympiadTitle={olympiad?.title}
         onRecordingStatusChange={setIsRecording}
         onFaceStatusChange={({ detected, ready }) => {
           setFaceDetected(detected);
           setFaceCheckReady(ready);
-        }}
-      />
-      
+        }} />
+
+
       <div className="olympiad-container">
         {/* Blocking overlay when not recording */}
-        {!isRecording && (
-          <div className="recording-block-overlay">
+        {!isRecording &&
+        <div className="recording-block-overlay">
             <div className="blocking-message card">
-              <h2>⏸️ Recording Not Active</h2>
-              <p>Please wait for monitoring to start.</p>
-              <p className="blocking-hint">
-                You cannot answer questions until recording is active.
-              </p>
+              <h2>{t("⏸️ Recording Not Active")}</h2>
+              <p>{t("Please wait for monitoring to start.")}</p>
+              <p className="blocking-hint">{t("You cannot answer questions until recording is active. ")}
+
+            </p>
             </div>
           </div>
-        )}
-        {isRecording && !faceAllowed && (
-          <div className="recording-block-overlay">
+        }
+        {isRecording && !faceAllowed &&
+        <div className="recording-block-overlay">
             <div className="blocking-message card">
-              <h2>⚠️ Face Not Detected</h2>
-              <p>Please keep your face visible in the camera.</p>
-              <p className="blocking-hint">
-                The olympiad will resume once your face is detected.
-              </p>
+              <h2>{t("⚠️ Face Not Detected")}</h2>
+              <p>{t("Please keep your face visible in the camera.")}</p>
+              <p className="blocking-hint">{t("The olympiad will resume once your face is detected. ")}
+
+            </p>
             </div>
           </div>
-        )}
+        }
         <div className="olympiad-header">
           <h1 className="olympiad-title">{olympiad?.title}</h1>
-          <Timer 
-            initialSeconds={timeRemaining} 
+          <Timer
+            initialSeconds={timeRemaining}
             onExpire={handleTimeExpire}
             className="olympiad-timer"
-            formatted={timerFormatted}
-          />
+            formatted={timerFormatted} />
+
         </div>
 
         <div className="olympiad-progress">
           <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-            />
+            <div
+              className="progress-fill"
+              style={{ width: `${(currentQuestionIndex + 1) / questions.length * 100}%` }} />
+
           </div>
-          <div className="progress-text">
-            Question {currentQuestionIndex + 1} of {questions.length} 
-            ({answeredCount} answered)
-            {savingDraft && <span className="exam-saving-status">💾 Saving...</span>}
+          <div className="progress-text">{t("Question ")}
+            {t(currentQuestionIndex + 1)}{t(" of ")}{t(questions.length)}
+            ({t(answeredCount)}{t(" answered) ")}
+            {savingDraft && <span className="exam-saving-status">{t("💾 Saving...")}</span>}
           </div>
         </div>
 
         <div className="questions-navigation">
-          {questions.map((_, index) => (
-            <button
-              key={index}
-              className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${hasAnswerValue(answers[questions[index]._id]) ? 'answered' : ''}`}
-              onClick={() => setCurrentQuestionIndex(index)}
-              disabled={!canProceed || submitted}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
+          {questions.map((_, index) =>
+          <button
+            key={index}
+            className={`nav-button ${index === currentQuestionIndex ? 'active' : ''} ${hasAnswerValue(answers[questions[index]._id]) ? 'answered' : ''}`}
+            onClick={() => setCurrentQuestionIndex(index)}
+            disabled={!canProceed || submitted}>
 
-        {/* Question Card - This is where the question appears */}
-        {currentQuestion ? (
-          <QuestionCard
-            question={currentQuestion}
-            questionNumber={currentQuestionIndex + 1}
-            totalQuestions={questions.length}
-            selectedAnswer={answers[currentQuestion._id]}
-            onAnswerChange={handleAnswerChange}
-            disabled={!canProceed || submitted}
-          />
-        ) : (
-          <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-            <p>Question not found. Please try selecting a different question.</p>
-          </div>
-        )}
-
-        <div className="olympiad-actions">
-          {/* Forward-only navigation - no previous button */}
-          {currentQuestionIndex < questions.length - 1 ? (
-            <button 
-              className="button-primary" 
-              onClick={handleNext}
-              disabled={!canProceed || submitted || nextSubmitting}
-            >
-              Next →
-            </button>
-          ) : (
-            <button 
-              className="button-primary" 
-              onClick={handleSubmit}
-              disabled={!canProceed || submitted || submitting}
-            >
-              Submit Answers
+              {t(index + 1)}
             </button>
           )}
         </div>
+
+        {/* Question Card - This is where the question appears */}
+        {currentQuestion ?
+        <QuestionCard
+          question={currentQuestion}
+          questionNumber={currentQuestionIndex + 1}
+          totalQuestions={questions.length}
+          selectedAnswer={answers[currentQuestion._id]}
+          onAnswerChange={handleAnswerChange}
+          disabled={!canProceed || submitted} /> :
+
+
+        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+            <p>{t("Question not found. Please try selecting a different question.")}</p>
+          </div>
+        }
+
+        <div className="olympiad-actions">
+          {/* Forward-only navigation - no previous button */}
+          {currentQuestionIndex < questions.length - 1 ?
+          <button
+            className="button-primary"
+            onClick={handleNext}
+            disabled={!canProceed || submitted || nextSubmitting}>{t("Next → ")}
+
+
+          </button> :
+
+          <button
+            className="button-primary"
+            onClick={handleSubmit}
+            disabled={!canProceed || submitted || submitting}>{t("Submit Answers ")}
+
+
+          </button>
+          }
+        </div>
       </div>
 
-      {notification && (
-        <NotificationToast
-          message={notification.message}
-          type={notification.type}
-          action={notification.action}
-          duration={notification.duration}
-          onClose={() => setNotification(null)}
-        />
-      )}
+      {notification &&
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        action={notification.action}
+        duration={notification.duration}
+        onClose={() => setNotification(null)} />
+
+      }
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
-        title={confirmDialog.title}
+        title={t(confirmDialog.title)}
         message={confirmDialog.message}
         confirmLabel={confirmDialog.confirmLabel}
         onConfirm={handleConfirmApprove}
-        onCancel={handleConfirmCancel}
-      />
-    </div>
-  );
+        onCancel={handleConfirmCancel} />
+
+    </div>);
+
 };
 
 export default TestOlympiad;
-
