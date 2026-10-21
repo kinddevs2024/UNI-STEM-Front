@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { googleLogout } from "@react-oauth/google";
 import { authAPI } from "../services/api";
+import {hasCookieDecision, readDeviceCookieConsent, writeDeviceCookieConsent, COOKIE_CONSENT_STORAGE_KEY} from '../utils/cookieConsent';
 import {
   getToken,
   setToken,
@@ -30,11 +31,17 @@ export const AuthProvider = ({ children }) => {
     catch { return false; }
   });
 
-  // Check cookie consent status from user object
-  const checkCookieConsent = (userData) => {
-    // If user.cookies is null, show modal
-    return [true, false, 'true', 'false'].includes(userData?.cookies);
-  };
+  const checkCookieConsent = hasCookieDecision;
+
+  useEffect(() => {
+    const update = event => {
+      if (event.key === COOKIE_CONSENT_STORAGE_KEY && readDeviceCookieConsent() !== null) {
+        setShowCookieConsent(false);
+      }
+    };
+    window.addEventListener('storage', update);
+    return () => window.removeEventListener('storage', update);
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -322,18 +329,31 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated, user?._id, user?.role]);
 
   const handleCookieConsent = async (consent) => {
-    const response = await authAPI.updateCookieConsent({consent});
-    const saved = response.data?.cookies;
-    if (response.data?.success !== true || saved !== String(consent)) {
-      throw new Error("Your cookie preference was not saved. Please try again.");
+    if (typeof consent !== 'boolean') throw new Error('Invalid cookie choice');
+    const actorId = user?._id;
+    const apply = () => {
+      setUserState(current => {
+        if (!current || current._id !== actorId) return current;
+        const updated = {...current, cookies:String(consent)};
+        try {setUser(updated);} catch { /* Device storage may be restricted. */ }
+        return updated;
+      });
+      setShowCookieConsent(false);
+    };
+    const syncAccount = async () => {
+      const response = await authAPI.updateCookieConsent({consent});
+      if (response.data?.success !== true || response.data?.cookies !== String(consent)) {
+        throw new Error("Your cookie preference was not saved. Please try again.");
+      }
+    };
+    if (writeDeviceCookieConsent(consent)) {
+      apply();
+      // Device persistence works even when the account endpoint is unavailable.
+      void syncAccount().catch(() => {});
+    } else {
+      await syncAccount();
+      apply();
     }
-    setUserState(current => {
-      if (!current) return current;
-      const updated = {...current, cookies:saved};
-      setUser(updated);
-      return updated;
-    });
-    setShowCookieConsent(false);
   };
 
   const value = {
