@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   // Check cookie consent status from user object
   const checkCookieConsent = (userData) => {
     // If user.cookies is null, show modal
-    return userData?.cookies !== null && userData?.cookies !== undefined;
+    return [true, false, 'true', 'false'].includes(userData?.cookies);
   };
 
   useEffect(() => {
@@ -56,9 +56,7 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
 
           // Check if user has given cookie consent (cookies field is null)
-          if (!checkCookieConsent(userData)) {
-            setShowCookieConsent(true);
-          }
+          setShowCookieConsent(!checkCookieConsent(userData));
         } catch (error) {
           removeToken();
           removeUser();
@@ -96,9 +94,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
 
         // Check if user has given cookie consent (cookies field is null)
-        if (!checkCookieConsent(userData)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(userData));
       } catch (meError) {
         console.error("Error fetching user data after login:", meError);
         // Fallback to user data from login response if /me fails
@@ -110,9 +106,7 @@ export const AuthProvider = ({ children }) => {
         setUserState(user);
         setIsAuthenticated(true);
 
-        if (!checkCookieConsent(user)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(user));
       }
 
       return { success: true };
@@ -174,9 +168,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
 
         // Check if user has given cookie consent (cookies field is null)
-        if (!checkCookieConsent(userDataFromMe)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(userDataFromMe));
       } catch (meError) {
         console.error("Error fetching user data after registration:", meError);
         // Fallback to user data from register response if /me fails
@@ -188,9 +180,7 @@ export const AuthProvider = ({ children }) => {
         setUserState(user);
         setIsAuthenticated(true);
 
-        if (!checkCookieConsent(user)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(user));
       }
 
       return { success: true };
@@ -233,9 +223,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
 
         // Check if user has given cookie consent (cookies field is null)
-        if (!checkCookieConsent(userData)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(userData));
 
         return { success: true, user: userData };
       } catch (meError) {
@@ -249,9 +237,7 @@ export const AuthProvider = ({ children }) => {
         setUserState(user);
         setIsAuthenticated(true);
 
-        if (!checkCookieConsent(user)) {
-          setShowCookieConsent(true);
-        }
+        setShowCookieConsent(!checkCookieConsent(user));
 
         return { success: true, user };
       }
@@ -271,6 +257,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    setShowCookieConsent(false);
     googleLogout();
     setOneTapSignedOut(true);
     try { sessionStorage.setItem('googleOneTapSignedOut', '1'); } catch { /* Storage may be unavailable. */ }
@@ -299,9 +286,7 @@ export const AuthProvider = ({ children }) => {
       setUser(normalizedUser);
       setIsAuthenticated(true);
 
-      if (!checkCookieConsent(normalizedUser)) {
-        setShowCookieConsent(true);
-      }
+      setShowCookieConsent(!checkCookieConsent(normalizedUser));
     }
   };
 
@@ -337,45 +322,18 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated, user?._id, user?.role]);
 
   const handleCookieConsent = async (consent) => {
-    try {
-      // Send consent to backend
-      await authAPI.updateCookieConsent({
-        consent,
-      });
-
-      // Fetch updated user data with devices and cookies from /me endpoint
-      try {
-        const meResponse = await authAPI.getMe();
-        const userData = meResponse.data;
-
-        // Ensure devices array exists
-        if (!userData.devices) {
-          userData.devices = [];
-        }
-
-        setUserState(userData);
-        setUser(userData);
-      } catch (meError) {
-        console.error(
-          "Error fetching user data after cookie consent:",
-          meError
-        );
-        // Fallback: update user object with new cookies value
-        const updatedUser = { ...user, cookies: consent };
-        setUserState(updatedUser);
-        setUser(updatedUser);
-      }
-
-      // Hide the modal
-      setShowCookieConsent(false);
-    } catch (error) {
-      console.error("Error updating cookie consent:", error);
-      // Still update user object and hide modal even if backend call fails
-      const updatedUser = { ...user, cookies: consent };
-      setUserState(updatedUser);
-      setUser(updatedUser);
-      setShowCookieConsent(false);
+    const response = await authAPI.updateCookieConsent({consent});
+    const saved = response.data?.cookies;
+    if (response.data?.success !== true || saved !== String(consent)) {
+      throw new Error("Your cookie preference was not saved. Please try again.");
     }
+    setUserState(current => {
+      if (!current) return current;
+      const updated = {...current, cookies:saved};
+      setUser(updated);
+      return updated;
+    });
+    setShowCookieConsent(false);
   };
 
   const value = {

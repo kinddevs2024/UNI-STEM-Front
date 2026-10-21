@@ -4,13 +4,17 @@ import "./CookieConsentModal.css";
 const CookieConsentModal = ({ onAccept, onReject }) => {
   const [showDetails, setShowDetails] = useState(false);
 
-  const handleAcceptAll = () => {
-    onAccept(true);
+  const [saving,setSaving] = useState(false);
+  const [error,setError] = useState("");
+  const save = async consent => {
+    if (saving) return;
+    setSaving(true); setError("");
+    try { await (consent ? onAccept(true) : (onReject ? onReject() : onAccept(false))); }
+    catch { setError("Could not save your choice. Please try again."); }
+    finally { setSaving(false); }
   };
-
-  const handleReject = () => {
-    onAccept(false);
-  };
+  const handleAcceptAll = () => save(true);
+  const handleReject = () => save(false);
 
   return (
     <div className="cookie-consent-overlay">
@@ -64,11 +68,12 @@ const CookieConsentModal = ({ onAccept, onReject }) => {
           </button>
         </div>
 
-        <div className="cookie-consent-footer">
-          <button className="button-secondary" onClick={handleReject}>
+        {error && <p role="alert" style={{padding:"0 24px",color:"#a23f49"}}>{error}</p>}
+        <div className="cookie-consent-footer" aria-busy={saving}>
+          <button className="button-secondary" disabled={saving} onClick={handleReject}>
             Reject All
           </button>
-          <button className="button-primary" onClick={handleAcceptAll}>
+          <button className="button-primary" disabled={saving} onClick={handleAcceptAll}>
             Accept All Cookies
           </button>
         </div>
